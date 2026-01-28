@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Inventario</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+  <style>
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Roboto', sans-serif;
+  background: linear-gradient(135deg, #e8f5e9, #b2dfdb);
+  min-height: 100vh;
+  padding-top: 80px;
+  overflow-x: hidden;
+}
+
+/* ===== MAIN SECTION ===== */
+.main-section {
+  padding: 40px 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.main-section h1 {
+  text-align: center;
+  font-size: 2.5em;
+  font-weight: 700;
+  color: #222;
+  margin-bottom: 16px;
+  letter-spacing: 1px;
+}
+
+.subtitle {
+  text-align: center;
+  font-size: 1.1em;
+  color: #555;
+  margin-bottom: 48px;
+}
+
+/* ===== CARDS GRID ===== */
+.inventory-options {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 32px;
+  margin-top: 40px;
+}
+
+/* ===== CARD ===== */
+.card {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(12px);
+  border-radius: 16px;
+  padding: 40px 28px;
+  text-align: center;
+  text-decoration: none;
+  color: #222;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(.23, 1.01, .32, 1);
+  position: relative;
+  overflow: hidden;
+  min-height: 200px;
+}
+
+.card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background: linear-gradient(90deg, #00cc66, #66ccff);
+  transform: scaleX(0);
+  transition: transform 0.3s;
+}
+
+.card:hover::before {
+  transform: scaleX(1);
+}
+
+.card:hover {
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+}
+
+/* ===== CARD ICON ===== */
+.card i {
+  font-size: 3.5em;
+  color: #00cc66;
+  margin-bottom: 20px;
+  transition: all 0.3s;
+}
+
+.card:hover i {
+  transform: scale(1.1);
+  color: #00dd77;
+}
+
+/* ===== CARD TITLE ===== */
+.card h3 {
+  font-size: 1.3em;
+  font-weight: 700;
+  margin: 0;
+  letter-spacing: 0.5px;
+  color: #333;
+}
+
+.card p {
+  font-size: 0.9em;
+  color: #666;
+  margin-top: 8px;
+  line-height: 1.4;
+}
+
+/* ===== CARD VARIANTS ===== */
+.card.crear { border-top: 3px solid #4caf50; }
+.card.editar { border-top: 3px solid #2196f3; }
+.card.eliminar { border-top: 3px solid #f44336; }
+.card.excel { border-top: 3px solid #ff9800; }
+.card.consultar { border-top: 3px solid #9c27b0; }
+
+.card.crear i { color: #4caf50; }
+.card.editar i { color: #2196f3; }
+.card.eliminar i { color: #f44336; }
+.card.excel i { color: #ff9800; }
+.card.consultar i { color: #9c27b0; }
+
+/* ===== STATS SECTION ===== */
+.stats-section {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+  margin-bottom: 48px;
+}
+
+.stat-card {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(12px);
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  transition: transform 0.2s;
+}
+
+.stat-card:hover {
+  transform: translateY(-4px);
+}
+
+.stat-card h4 {
+  margin: 0 0 8px 0;
+  color: #555;
+  font-size: 0.85em;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.stat-card span {
+  font-size: 1.8em;
+  font-weight: 700;
+  color: #00cc66;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+  .main-section h1 {
+    font-size: 2em;
+  }
+  
+  .inventory-options {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  
+  .stats-section {
+    grid-template-columns: 1fr;
+  }
+  
+  .card {
+    min-height: 160px;
+    padding: 32px 20px;
+  }
+  
+  .card i {
+    font-size: 2.8em;
+  }
+}
+
+/* ===== ANIMATIONS ===== */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.card {
+  animation: fadeInUp 0.6s ease-out backwards;
+}
+
+.card:nth-child(1) { animation-delay: 0.1s; }
+.card:nth-child(2) { animation-delay: 0.2s; }
+.card:nth-child(3) { animation-delay: 0.3s; }
+.card:nth-child(4) { animation-delay: 0.4s; }
+.card:nth-child(5) { animation-delay: 0.5s; }
+
+.stat-card {
+  animation: fadeInUp 0.6s ease-out backwards;
+}
+
+.stat-card:nth-child(1) { animation-delay: 0.05s; }
+.stat-card:nth-child(2) { animation-delay: 0.1s; }
+.stat-card:nth-child(3) { animation-delay: 0.15s; }
+  </style>
+</head>
+<body>
+
+  <div id="header-container"></div>
+  
+  <section class="main-section">
+    <h1>Gestión de Inventario</h1>
+    <p class="subtitle">Administra tus productos de forma eficiente</p>
+    
+    <!-- Estadísticas Rápidas -->
+    <div class="stats-section">
+      <div class="stat-card">
+        <h4>Total Productos</h4>
+        <span id="totalProductos">0</span>
+      </div>
+      <div class="stat-card">
+        <h4>En Stock</h4>
+        <span id="enStock">0</span>
+      </div>
+      <div class="stat-card">
+        <h4>Sin Stock</h4>
+        <span id="sinStock" style="color: #f44336;">0</span>
+      </div>
+    </div>
+
+    <!-- Opciones de Inventario -->
+    <div class="inventory-options">
+      <a href="crear_producto.html" class="card crear">
+        <i class="fas fa-plus-circle"></i>
+        <h3>Crear Producto</h3>
+        <p>Agregar nuevos productos al inventario</p>
+      </a>
+      
+      <a href="editar_producto.html" class="card editar">
+        <i class="fas fa-edit"></i>
+        <h3>Editar Producto</h3>
+        <p>Modificar información de productos existentes</p>
+      </a>
+      
+      <a href="eliminar_producto.html" class="card eliminar">
+        <i class="fas fa-trash-alt"></i>
+        <h3>Eliminar Producto</h3>
+        <p>Remover productos del inventario</p>
+      </a>
+      
+      <a href="cargar_excel.html" class="card excel">
+        <i class="fas fa-file-excel"></i>
+        <h3>Cargar Excel</h3>
+        <p>Importar productos masivamente desde Excel</p>
+      </a>
+      
+      <a href="consultar_productos.html" class="card consultar">
+        <i class="fas fa-search"></i>
+        <h3>Consultar Productos</h3>
+        <p>Ver y buscar todos los productos</p>
+      </a>
+    </div>
+  </section>
+
+  <script>
+    // Cargar header global
+    document.addEventListener('DOMContentLoaded', function() {
+      fetch('header.html')
+        .then(r => r.text())
+        .then(html => {
+          document.getElementById('header-container').innerHTML = html;
+          // Ejecutar los scripts del header
+          const scripts = document.getElementById('header-container').querySelectorAll('script');
+          scripts.forEach(script => {
+            const newScript = document.createElement('script');
+            if (script.src) {
+              newScript.src = script.src;
+            } else {
+              newScript.textContent = script.textContent;
+            }
+            document.body.appendChild(newScript);
+          });
+        });
+      
+      // Cargar estadísticas
+      cargarEstadisticas();
+    });
+
+    function cargarEstadisticas() {
+      fetch('http://localhost:5000/api/inventory/all')
+        .then(r => r.json())
+        .then(productos => {
+          const total = productos.length;
+          const sinStock = productos.filter(p => p.cantidad === 0).length;
+          const enStock = total - sinStock;
+          
+          document.getElementById('totalProductos').textContent = total;
+          document.getElementById('enStock').textContent = enStock;
+          document.getElementById('sinStock').textContent = sinStock;
+        })
+        .catch(err => {
+          console.error('Error al cargar estadísticas:', err);
+        });
+    }
+  </script>
+</body>
+</html>

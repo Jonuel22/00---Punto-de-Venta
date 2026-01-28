@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reportes</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+
+  <style>
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Roboto', sans-serif;
+  background: linear-gradient(135deg, #e8f5e9, #b2dfdb);
+  min-height: 100vh;
+  padding-top: 80px;
+  overflow-x: hidden;
+}
+
+/* ===== MAIN SECTION ===== */
+.main-section {
+  padding: 40px 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.main-section h1 {
+  text-align: center;
+  font-size: 2.5em;
+  font-weight: 700;
+  color: #222;
+  margin-bottom: 16px;
+  letter-spacing: 1px;
+}
+
+.subtitle {
+  text-align: center;
+  font-size: 1.1em;
+  color: #555;
+  margin-bottom: 48px;
+}
+
+/* ===== STATS SECTION ===== */
+.stats-section {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+  margin-bottom: 48px;
+}
+
+.stat-card {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(12px);
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  transition: transform 0.2s;
+}
+
+.stat-card:hover {
+  transform: translateY(-4px);
+}
+
+.stat-card h4 {
+  margin: 0 0 8px 0;
+  color: #555;
+  font-size: 0.85em;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.stat-card span {
+  font-size: 1.8em;
+  font-weight: 700;
+  color: #00cc66;
+}
+
+/* ===== CARDS GRID ===== */
+.reports-options {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 32px;
+  margin-top: 40px;
+}
+
+/* ===== CARD ===== */
+.card {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(12px);
+  border-radius: 16px;
+  padding: 40px 28px;
+  text-align: center;
+  text-decoration: none;
+  color: #222;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(.23, 1.01, .32, 1);
+  position: relative;
+  overflow: hidden;
+  min-height: 200px;
+}
+
+.card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background: linear-gradient(90deg, #00cc66, #66ccff);
+  transform: scaleX(0);
+  transition: transform 0.3s;
+}
+
+.card:hover::before {
+  transform: scaleX(1);
+}
+
+.card:hover {
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+}
+
+/* ===== CARD ICON ===== */
+.card i {
+  font-size: 3.5em;
+  color: #00cc66;
+  margin-bottom: 20px;
+  transition: all 0.3s;
+}
+
+.card:hover i {
+  transform: scale(1.1);
+  color: #00dd77;
+}
+
+/* ===== CARD TITLE ===== */
+.card h3 {
+  font-size: 1.3em;
+  font-weight: 700;
+  margin: 0;
+  letter-spacing: 0.5px;
+  color: #333;
+}
+
+.card p {
+  font-size: 0.9em;
+  color: #666;
+  margin-top: 8px;
+  line-height: 1.4;
+}
+
+/* ===== CARD VARIANTS ===== */
+.card.ventas-cajero { border-top: 3px solid #2196f3; }
+.card.reporte-ventas { border-top: 3px solid #4caf50; }
+.card.cuadre-caja { border-top: 3px solid #ff9800; }
+.card.cuentas-cobrar { border-top: 3px solid #9c27b0; }
+.card.productos-agotados { border-top: 3px solid #f44336; }
+
+.card.ventas-cajero i { color: #2196f3; }
+.card.reporte-ventas i { color: #4caf50; }
+.card.cuadre-caja i { color: #ff9800; }
+.card.cuentas-cobrar i { color: #9c27b0; }
+.card.productos-agotados i { color: #f44336; }
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+  .main-section h1 {
+    font-size: 2em;
+  }
+  
+  .reports-options {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  
+  .stats-section {
+    grid-template-columns: 1fr;
+  }
+  
+  .card {
+    min-height: 160px;
+    padding: 32px 20px;
+  }
+  
+  .card i {
+    font-size: 2.8em;
+  }
+}
+
+/* ===== ANIMATIONS ===== */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.card {
+  animation: fadeInUp 0.6s ease-out backwards;
+}
+
+.card:nth-child(1) { animation-delay: 0.1s; }
+.card:nth-child(2) { animation-delay: 0.2s; }
+.card:nth-child(3) { animation-delay: 0.3s; }
+.card:nth-child(4) { animation-delay: 0.4s; }
+.card:nth-child(5) { animation-delay: 0.5s; }
+
+.stat-card {
+  animation: fadeInUp 0.6s ease-out backwards;
+}
+
+.stat-card:nth-child(1) { animation-delay: 0.05s; }
+.stat-card:nth-child(2) { animation-delay: 0.1s; }
+.stat-card:nth-child(3) { animation-delay: 0.15s; }
+.stat-card:nth-child(4) { animation-delay: 0.2s; }
+  </style>
+</head>
+
+<body>
+
+  <div id="header-container"></div>
+
+  <section class="main-section">
+    <h1>Centro de Reportes</h1>
+    <p class="subtitle">Analiza el desempeño de tu negocio</p>
+
+    <!-- Estadísticas Rápidas -->
+    <div class="stats-section">
+      <div class="stat-card">
+        <h4>Ventas Hoy</h4>
+        <span id="ventasHoy">RD$ 0</span>
+      </div>
+      <div class="stat-card">
+        <h4>Ventas del Mes</h4>
+        <span id="ventasMes">RD$ 0</span>
+      </div>
+      <div class="stat-card">
+        <h4>Transacciones Hoy</h4>
+        <span id="transaccionesHoy">0</span>
+      </div>
+      <div class="stat-card">
+        <h4>Productos Agotados</h4>
+        <span id="productosAgotados" style="color: #f44336;">0</span>
+      </div>
+    </div>
+
+    <!-- Opciones de Reportes -->
+    <div class="reports-options">
+      <a href="ventas_cajero.html" class="card ventas-cajero">
+        <i class="fas fa-user-tie"></i>
+        <h3>Ventas por Cajero</h3>
+        <p>Detalle de ventas realizadas por cada cajero</p>
+      </a>
+
+      <a href="reporte_ventas.html" class="card reporte-ventas">
+        <i class="fas fa-chart-line"></i>
+        <h3>Reporte de Ventas</h3>
+        <p>Análisis completo de ventas por período</p>
+      </a>
+
+      <a href="cuadre_de_caja.html" class="card cuadre-caja">
+        <i class="fas fa-file-invoice-dollar"></i>
+        <h3>Cuadre de Caja</h3>
+        <p>Conciliación de efectivo y transacciones</p>
+      </a>
+
+      <a href="cuentas_por_cobrar.html" class="card cuentas-cobrar">
+        <i class="fas fa-hand-holding-usd"></i>
+        <h3>Cuentas por Cobrar</h3>
+        <p>Seguimiento de pagos pendientes</p>
+      </a>
+
+      <a href="productos_a_reabastecer.html" class="card productos-agotados">
+        <i class="fas fa-box-open"></i>
+        <h3>Productos Agotados</h3>
+        <p>Lista de productos que necesitan reabastecimiento</p>
+      </a>
+    </div>
+  </section>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      fetch('header.html')
+        .then(r => r.text())
+        .then(html => {
+          document.getElementById('header-container').innerHTML = html;
+          document.querySelectorAll('#header-container script').forEach(s => {
+            const ns = document.createElement('script');
+            s.src ? ns.src = s.src : ns.textContent = s.textContent;
+            document.body.appendChild(ns);
+          });
+        });
+      
+      // Cargar estadísticas
+      cargarEstadisticas();
+    });
+
+    function cargarEstadisticas() {
+      // Cargar ventas del día
+      fetch('http://localhost:5000/api/sales/kpi')
+        .then(r => r.json())
+        .then(data => {
+          const totalVentas = parseFloat(data.total || 0);
+          const transacciones = parseInt(data.transacciones || 0);
+          
+          document.getElementById('ventasHoy').textContent = 'RD$ ' + totalVentas.toLocaleString('es-DO', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+          });
+          document.getElementById('transaccionesHoy').textContent = transacciones;
+        })
+        .catch(err => console.error('Error al cargar KPIs:', err));
+
+      // Cargar ventas del mes
+      fetch('http://localhost:5000/api/sales/daily-month')
+        .then(r => r.json())
+        .then(data => {
+          const totalMes = data.reduce((sum, d) => sum + parseFloat(d.total), 0);
+          
+          document.getElementById('ventasMes').textContent = 'RD$ ' + totalMes.toLocaleString('es-DO', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+          });
+        })
+        .catch(err => console.error('Error al cargar ventas del mes:', err));
+
+      // Cargar productos agotados
+      fetch('http://localhost:5000/api/inventory/all')
+        .then(r => r.json())
+        .then(productos => {
+          const agotados = productos.filter(p => p.cantidad === 0).length;
+          document.getElementById('productosAgotados').textContent = agotados;
+        })
+        .catch(err => console.error('Error al cargar productos:', err));
+    }
+  </script>
+</body>
+</html>

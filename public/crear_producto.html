@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Crear Producto</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet"> <!-- Font Awesome -->
+  <style>
+/* ===== BASE ===== */
+body {
+  margin: 0;
+  font-family: 'Roboto', sans-serif;
+  padding-top: 80px;
+  background: linear-gradient(135deg, #a8edea 0%, #b2d0e0 100%);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ===== MAIN SECTION ===== */
+.main-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 40px 16px;
+  position: relative;
+  z-index: 1;
+}
+
+.main-section h1 {
+  margin-bottom: 24px;
+  color: #222;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+/* ===== FORM CARD (GLASS STYLE) ===== */
+form {
+  width: 100%;
+  max-width: 720px; /* ⬅️ más presencia */
+  background: rgba(255, 255, 255, 0.35);
+  backdrop-filter: blur(14px) saturate(180%);
+  -webkit-backdrop-filter: blur(14px) saturate(180%);
+  border: 3px solid #b2d0e0;
+  border-radius: 20px;
+  padding: 36px 32px; /* ⬅️ más aire interno */
+  box-shadow: 0 12px 36px rgba(31, 38, 135, 0.2),
+              0 4px 16px rgba(0, 0, 0, 0.12);
+}
+
+/* ===== LABELS ===== */
+label {
+  margin-top: 14px;
+  margin-bottom: 6px;
+  font-size: 1.1em;
+  font-weight: 600;
+  color: #333;
+}
+
+/* ===== INPUTS ===== */
+input,
+textarea {
+  width: 100%;
+  padding: 12px 0px;
+  border-radius: 10px;
+  border: 1.8px solid #c5ddeb;
+  font-size: 0.95em;
+  outline: none;
+  background: rgba(255,255,255,0.75);
+  transition: border 0.25s, box-shadow 0.25s;
+}
+
+textarea {
+  resize: vertical;
+  min-height: 90px;
+}
+
+input:focus,
+textarea:focus {
+  border-color: #00cc66;
+  box-shadow: 0 0 0 3px rgba(0, 204, 102, 0.15);
+}
+
+/* ===== ANIMATION ===== */
+@keyframes cardIn {
+  from {
+    opacity: 0;
+    transform: translateY(40px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* ===== BUBBLES (MISMO FONDO QUE INVENTARIO) ===== */
+.bubble {
+  position: absolute;
+  border-radius: 50%;
+  opacity: 0.13;
+  filter: blur(2px);
+  animation: floatBubble 12s infinite linear;
+  z-index: 0;
+}
+
+@keyframes floatBubble {
+  from {
+    transform: translateY(0) scale(1);
+  }
+  to {
+    transform: translateY(-120vh) scale(1.2);
+  }
+}
+/* ===== HEADER ===== */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 20px;
+  background-color: #333;
+  color: #fff;
+  position: fixed;
+  top: 0;
+  width: 100%;
+  z-index: 1000;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* ===== BUTTON ===== */
+.btn-crear-producto {
+  margin-top: 22px;
+  padding: 14px;
+  border-radius: 14px;
+  border: none;
+  font-size: 1em;
+  font-weight: 700;
+  color: #fff;
+  background: linear-gradient(90deg, #00cc66 0%, #66ccff 100%);
+  cursor: pointer;
+  box-shadow: 0 6px 18px rgba(0, 204, 102, 0.25);
+  transition: transform 0.25s, box-shadow 0.25s, opacity 0.25s;
+  width: 100%;
+}
+
+.btn-crear-producto:hover {
+  transform: translateY(-1px) scale(1.02);   /* más presencia */
+  background: linear-gradient(270deg, #00cc66 0%, #66ccff 100%); /* 🔄 cambio de lado */
+  box-shadow: 0 14px 36px rgba(0, 204, 102, 0.45);
+  opacity: 0.98;
+}
+
+  </style>
+</head>
+<body>
+
+  <div id="header-container" style="width:100%;position:fixed;top:0;left:0;z-index:1000 !important;"></div>
+
+  <section class="main-section">
+    <h1>Crear Producto</h1>
+    <form id="crearProductoForm">
+      <label for="nombre">Nombre:</label>
+      <input type="text" id="nombre" name="nombre" required>
+      
+      <label for="descripcion">Descripción:</label>
+      <textarea id="descripcion" name="descripcion" required></textarea>
+      
+      <label for="cantidad">Cantidad:</label>
+      <input type="number" id="cantidad" name="cantidad" required>
+      
+      <label for="precio">Precio:</label>
+      <input type="number" step="0.01" id="precio" name="precio" required>
+
+      <label for="codigo_barras">Codigo de Barras:</label>
+      <input type="text" id="codigo_barras" name="codigo_barras">
+      
+      <button type="submit" class="btn-crear-producto">
+  Crear Producto
+</button>
+
+    </form>
+  </section>
+
+      <script>
+    // Cargar header global
+    document.addEventListener('DOMContentLoaded', function() {
+      fetch('header.html')
+        .then(r => r.text())
+        .then(html => {
+          document.getElementById('header-container').innerHTML = html;
+          // Ejecutar los scripts del header
+          const scripts = document.getElementById('header-container').querySelectorAll('script');
+          scripts.forEach(script => {
+            const newScript = document.createElement('script');
+            if (script.src) {
+              newScript.src = script.src;
+            } else {
+              newScript.textContent = script.textContent;
+            }
+            document.body.appendChild(newScript);
+          });
+        });
+    });
+  </script>
+
+
+  <script src="js/scripts.js"></script> <!-- Enlace al archivo JS -->
+  <script>
+
+    document.getElementById('crearProductoForm').addEventListener('submit', function(event) {
+      event.preventDefault();
+      
+      const nombre = document.getElementById('nombre').value;
+      const descripcion = document.getElementById('descripcion').value;
+      const cantidad = document.getElementById('cantidad').value;
+      const precio = document.getElementById('precio').value;
+      const codigo_barras = document.getElementById('codigo_barras').value;
+      
+      fetch('http://localhost:5000/api/inventory/create', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          nombre: nombre,
+          descripcion: descripcion,
+          cantidad: cantidad,
+          precio: precio,
+          codigo_barras: codigo_barras
+        })
+      })
+      .then(response => response.json())
+      .then(data => {
+        alert(data.message);
+        window.location.href = 'inventario.html';
+      })
+      .catch(error => {
+        console.error('Error:', error);
+      });
+    });
+  </script>
+</body>
+</html>

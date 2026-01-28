@@ -1,0 +1,112 @@
+/* Asegura que el body y html ocupen el 100% de la altura de la ventana */
+html, body {
+    height: 100%;
+    margin: 0;
+    font-family: Arial, sans-serif;
+}
+
+/* Fondo degradado verde a azul claro */
+body {
+    background: linear-gradient(to bottom, #00cc66, #66ccff); /* Degradado de verde a azul claro */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    position: relative;
+}
+
+/* Logo en la parte superior */
+.logo {
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.logo img {
+    width: 250px;
+}
+
+/* Contenedor del formulario */
+.login-container {
+    background: white;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    width: 300px;
+    z-index: 1;
+}
+
+/* Estilo para los campos de entrada */
+.login-container input {
+    width: 100%;
+    padding: 12px;
+    margin: 10px 0;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 16px;
+    box-sizing: border-box; /* Asegura que los campos se ajusten al ancho del contenedor */
+}
+
+/* Contenedor para el campo de contraseña */
+.password-container {
+    position: relative; /* Para permitir posicionar el icono del ojo */
+    width: 100%;
+}
+
+/* Campo de entrada de contraseña con barra de desplazamiento */
+.password-container input {
+    padding-right: 40px; /* Dejar espacio para el icono del ojo */
+    overflow-x: auto; /* Agregar barra de desplazamiento horizontal si el texto es largo */
+    white-space: nowrap; /* Evitar que el texto se divida en varias líneas */
+}
+
+/* Icono de mostrar/ocultar contraseña */
+.password-container i {
+    font-size: 24px; /* Tamaño del icono */
+    cursor: pointer;
+    color: #007BFF; /* Color azul */
+    position: absolute; /* Posicionamos el icono en la esquina derecha */
+    right: 10px; /* Espaciado de 10px desde la derecha */
+    top: 50%;
+    transform: translateY(-50%); /* Centrar el icono verticalmente */
+}
+
+/* Botón de inicio de sesión con degradado */
+.login-container button {
+    width: 100%;
+    padding: 12px;
+    background: linear-gradient(to bottom, #00cc66, #66ccff); /* Degradado de verde a azul claro */
+    border: none;
+    color: white;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bold; /* Hacer las letras más fuertes */
+    text-transform: uppercase; /* Hacer las letras mayúsculas */
+}
+
+/* Hover para el botón */
+.login-container button:hover {
+    background: linear-gradient(to bottom, #007BFF, #66ccff); /* Degradado con color azul más oscuro */
+}
+
+/* Mensaje de error */
+.error-message {
+    color: red;
+    display: none;
+    font-size: 0.9em;
+    margin-top: 10px;
+}
+
+/* Footer anclado al fondo */
+.footer {
+    background-color: #b0b0b080;
+    padding: 5px 10px;
+    text-align: center;
+    font-size: 12px;
+    color: #333;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+}

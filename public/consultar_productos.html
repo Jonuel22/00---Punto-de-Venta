@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Consultar Productos</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+
+  <style>
+/* ===== BASE ===== */
+body {
+  margin: 0;
+  font-family: 'Roboto', sans-serif;
+  padding-top: 80px;
+  background: linear-gradient(135deg, #a8edea 0%, #b2d0e0 100%);
+  min-height: 100vh;
+}
+
+/* ===== MAIN ===== */
+.main-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 40px 16px;
+}
+
+.main-section h1 {
+  margin-bottom: 24px;
+  color: #222;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+/* ===== CARD ===== */
+.product-list {
+  width: 100%;
+  max-width: 1100px;
+  background: rgba(255,255,255,0.35);
+  backdrop-filter: blur(14px) saturate(180%);
+  border-radius: 20px;
+  padding: 30px;
+  box-shadow:
+    0 12px 36px rgba(31,38,135,0.2),
+    0 4px 16px rgba(0,0,0,0.12);
+}
+
+/* ===== SEARCH ===== */
+.search-box {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+  position: relative;
+}
+
+.search-box input {
+  flex: 1;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1.8px solid #c5ddeb;
+  background: rgba(255,255,255,0.85);
+  font-size: 1em;
+}
+
+.search-button {
+  padding: 12px 18px;
+  border-radius: 12px;
+  border: none;
+  font-weight: 700;
+  color: #fff;
+  background: linear-gradient(135deg, #00cc66, #66ccff);
+  cursor: pointer;
+  box-shadow: 0 6px 18px rgba(0,204,102,0.3);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.search-button:hover {
+  transform: translateY(-1px) scale(1.05);
+  box-shadow: 0 10px 28px rgba(0,204,102,0.45);
+}
+
+/* ===== SUGGESTIONS ===== */
+.suggestions {
+  position: absolute;
+  top: 54px;
+  width: 100%;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.15);
+  max-height: 220px;
+  overflow-y: auto;
+  z-index: 10;
+}
+
+.suggestion-item {
+  padding: 12px 14px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.suggestion-item:hover {
+  background: #eef6ff;
+}
+
+/* ===== TABLE ===== */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+th {
+  
+  background: #1976d2;
+  color: white;
+  padding: 14px;
+  font-size: 0.95em;
+}
+
+td {
+  padding: 12px;
+  background: rgba(255,255,255,0.9);
+  border-bottom: 1px solid #e0e0e0;
+}
+
+
+/* ===== HIGHLIGHT ===== */
+.highlight td {
+  background-color: #73c0f7;
+  transition: background-color 0.3s ease;
+}
+
+
+@keyframes pulse {
+  0% { background-color: #e3f2fd; }
+  50% { background-color: #ffffff; }
+  100% { background-color: #e3f2fd; }
+}
+  </style>
+</head>
+
+<body>
+
+  <div id="header-container"></div>
+
+  <section class="main-section">
+    <h1>Consultar Productos</h1>
+
+    <div class="product-list">
+
+      <div class="search-box">
+        <input type="text" id="searchProduct" placeholder="Buscar producto por ID o nombre...">
+        <button class="search-button" id="searchButton">
+          <i class="fas fa-search"></i>
+        </button>
+        <div class="suggestions" id="suggestions"></div>
+      </div>
+
+      <!-- Total de productos -->
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; padding: 12px; background: rgba(255,255,255,0.6); border-radius: 12px;">
+        <div style="font-size: 1.1em; font-weight: 600; color: #1976d2;">
+          <i class="fas fa-boxes" style="margin-right: 8px;"></i>
+          Total de Productos: <span id="totalProductos" style="color: #00cc66; font-size: 1.3em;">0</span>
+        </div>
+        <div style="font-size: 0.9em; color: #666;">
+          Mostrando <span id="productosVisibles" style="font-weight: 600;">0</span> productos
+        </div>
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Nombre</th>
+            <th>Descripción</th>
+            <th>Cantidad</th>
+            <th>Precio</th>
+            <th>Código de Barras</th>
+          </tr>
+        </thead>
+        <tbody id="productResults"></tbody>
+      </table>
+
+    </div>
+  </section>
+
+  <script src="js/scripts.js"></script>
+
+  <script>
+    // Header
+    document.addEventListener('DOMContentLoaded', () => {
+      fetch('header.html')
+        .then(r => r.text())
+        .then(html => document.getElementById('header-container').innerHTML = html);
+    });
+
+    let products = [];
+
+    // Cargar productos
+    fetch('http://localhost:5000/api/inventory/all')
+      .then(r => r.json())
+      .then(data => {
+        products = data;
+        renderTable(data);
+        updateCounters(data.length, data.length);
+      });
+
+    function updateCounters(total, visible) {
+      document.getElementById('totalProductos').textContent = total;
+      document.getElementById('productosVisibles').textContent = visible;
+    }
+
+    function renderTable(data) {
+      const tbody = document.getElementById('productResults');
+      tbody.innerHTML = '';
+      data.forEach(p => {
+        const tr = document.createElement('tr');
+        tr.className = 'product-item';
+        tr.id = `product-${p.id}`;
+        tr.innerHTML = `
+          <td>${p.id}</td>
+          <td>${p.nombre}</td>
+          <td>${p.descripcion}</td>
+          <td>${p.cantidad}</td>
+          <td>${p.precio}</td>
+          <td>${p.codigo_barras || ''}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // Suggestions
+    document.getElementById('searchProduct').addEventListener('input', function () {
+      const q = this.value.toLowerCase();
+      const sug = document.getElementById('suggestions');
+      sug.innerHTML = '';
+
+      if (!q) {
+        // Si no hay búsqueda, mostrar todos
+        renderTable(products);
+        updateCounters(products.length, products.length);
+        return;
+      }
+
+      // Filtrar productos
+      const filtered = products.filter(p => 
+        p.nombre.toLowerCase().includes(q) || 
+        p.id.toString().includes(q) ||
+        p.descripcion.toLowerCase().includes(q)
+      );
+
+      // Actualizar tabla con productos filtrados
+      renderTable(filtered);
+      updateCounters(products.length, filtered.length);
+
+      // Mostrar sugerencias
+      filtered.slice(0, 5).forEach(p => {
+        const div = document.createElement('div');
+        div.className = 'suggestion-item';
+        div.textContent = p.nombre;
+        div.onclick = () => {
+          searchProduct.value = p.nombre;
+          sug.innerHTML = '';
+          renderTable([p]);
+          updateCounters(products.length, 1);
+        };
+        sug.appendChild(div);
+      });
+    });
+
+    // Buscar y resaltar
+    document.getElementById('searchButton').addEventListener('click', () => {
+      const q = searchProduct.value.toLowerCase();
+      if (!q) {
+        renderTable(products);
+        updateCounters(products.length, products.length);
+        return;
+      }
+
+      const filtered = products.filter(p =>
+        p.nombre.toLowerCase().includes(q) ||
+        p.id.toString().includes(q) ||
+        p.descripcion.toLowerCase().includes(q)
+      );
+
+      renderTable(filtered);
+      updateCounters(products.length, filtered.length);
+
+      // Resaltar el primero
+      if (filtered.length > 0) {
+        setTimeout(() => {
+          const firstRow = document.querySelector('.product-item');
+          if (firstRow) {
+            firstRow.classList.add('highlight');
+            firstRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+        }, 100);
+      }
+    });
+
+    // Limpiar sugerencias al hacer clic fuera
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('.search-box')) {
+        document.getElementById('suggestions').innerHTML = '';
+      }
+    });
+  </script>
+
+</body>
+</html>

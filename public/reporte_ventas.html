@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reporte de Ventas</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.1/jspdf.plugin.autotable.min.js"></script>
+    <style>
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Roboto', sans-serif;
+    background: linear-gradient(135deg, #e8f5e9, #b2dfdb);
+    min-height: 100vh;
+    padding-top: 80px;
+    overflow-x: hidden;
+}
+
+/* ===== MAIN SECTION ===== */
+.main-section {
+    padding: 24px;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+/* ===== HEADER CARD ===== */
+.reporte-header {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(12px);
+    border-radius: 16px;
+    padding: 32px;
+    margin-bottom: 24px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+.reporte-title {
+    font-size: 2.2em;
+    color: #222;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 8px;
+}
+
+.reporte-title i {
+    color: #00cc66;
+    font-size: 0.9em;
+}
+
+.reporte-subtitle {
+    color: #666;
+    font-size: 1em;
+    margin-bottom: 24px;
+}
+
+/* ===== FILTROS ===== */
+.filtros-reporte {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+.filtro-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.filtro-group label {
+    font-weight: 600;
+    color: #333;
+    font-size: 0.9em;
+    letter-spacing: 0.3px;
+}
+
+.filtro-group input {
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 2px solid #e0e0e0;
+    font-size: 1em;
+    transition: all 0.2s;
+    background: white;
+}
+
+.filtro-group input:focus {
+    outline: none;
+    border-color: #00cc66;
+    box-shadow: 0 0 0 3px rgba(0, 204, 102, 0.1);
+}
+
+.btn-filtrar {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    background: linear-gradient(90deg, #00cc66, #66ccff);
+    color: #fff;
+    font-weight: 700;
+    font-size: 1em;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    box-shadow: 0 4px 12px rgba(0, 204, 102, 0.3);
+}
+
+.btn-filtrar:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0, 204, 102, 0.4);
+}
+
+.btn-hoy {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    background: linear-gradient(90deg, #2196f3, #64b5f6);
+    color: #fff;
+    font-weight: 700;
+    font-size: 1em;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    box-shadow: 0 4px 12px rgba(33, 150, 243, 0.3);
+}
+
+.btn-hoy:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(33, 150, 243, 0.4);
+    background: linear-gradient(90deg, #1976d2, #42a5f5);
+}
+
+/* ===== ACCIONES ===== */
+.acciones-reporte {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid #e0e0e0;
+}
+
+.btn-accion {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 0.95em;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.btn-excel {
+    background: #217346;
+    color: white;
+}
+
+.btn-excel:hover {
+    background: #1a5c37;
+    transform: translateY(-2px);
+}
+
+.btn-pdf {
+    background: #dc3545;
+    color: white;
+}
+
+.btn-pdf:hover {
+    background: #c82333;
+    transform: translateY(-2px);
+}
+
+/* ===== TABLA CARD ===== */
+.tabla-card {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(12px);
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    margin-bottom: 24px;
+}
+
+.tabla-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid #e0e0e0;
+}
+
+.tabla-info {
+    font-size: 0.95em;
+    color: #666;
+    font-weight: 600;
+}
+
+.tabla-container {
+    overflow-x: auto;
+    overflow-y: auto;
+    max-height: 600px;
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+}
+
+.tabla-reporte {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 800px;
+}
+
+.tabla-reporte thead {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.tabla-reporte th {
+    background: linear-gradient(135deg, #00cc66, #00aa55);
+    color: white;
+    padding: 14px 12px;
+    text-align: left;
+    font-weight: 600;
+    font-size: 0.9em;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    border-bottom: 2px solid #00aa55;
+}
+
+.tabla-reporte td {
+    padding: 12px;
+    border-bottom: 1px solid #f0f0f0;
+    color: #333;
+    font-size: 0.95em;
+    background: white;
+}
+
+.tabla-reporte tbody tr:hover {
+    background: #f0f8ff;
+}
+
+.tabla-reporte tfoot td {
+    background: #f8f9fa;
+    font-weight: 700;
+    color: #00cc66;
+    font-size: 1.1em;
+    padding: 16px 12px;
+    border-top: 2px solid #00cc66;
+}
+
+/* ===== STATS ===== */
+.stats-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.stat-box {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(12px);
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    transition: transform 0.2s;
+}
+
+.stat-box:hover {
+    transform: translateY(-4px);
+}
+
+.stat-box h4 {
+    color: #666;
+    font-size: 0.85em;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+}
+
+.stat-box span {
+    font-size: 1.8em;
+    font-weight: 700;
+    color: #00cc66;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+    .main-section {
+        padding: 16px;
+    }
+    
+    .reporte-header {
+        padding: 20px;
+    }
+    
+    .reporte-title {
+        font-size: 1.6em;
+    }
+    
+    .filtros-reporte {
+        grid-template-columns: 1fr;
+    }
+    
+    .tabla-header {
+        flex-direction: column;
+        gap: 12px;
+        align-items: flex-start;
+    }
+    
+    .acciones-reporte {
+        flex-direction: column;
+    }
+    
+    .btn-accion {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+/* ===== ANIMACIONES ===== */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.reporte-header, .tabla-card, .stat-box {
+    animation: fadeIn 0.5s ease-out backwards;
+}
+
+.stat-box:nth-child(1) { animation-delay: 0.1s; }
+.stat-box:nth-child(2) { animation-delay: 0.2s; }
+.stat-box:nth-child(3) { animation-delay: 0.3s; }
+    </style>
+</head>
+<body>
+    <div id="header-container"></div>
+    
+    <div class="main-section">
+        <!-- Header del Reporte -->
+        <div class="reporte-header">
+            <h1 class="reporte-title">
+                <i class="fas fa-chart-line"></i>
+                Reporte de Ventas
+            </h1>
+            <p class="reporte-subtitle">Análisis detallado de transacciones de venta</p>
+            
+            <!-- Filtros -->
+            <form id="filtros-reporte" onsubmit="event.preventDefault();filtrarVentas();">
+                <div class="filtros-reporte">
+                    <div class="filtro-group">
+                        <label for="fecha_inicio"><i class="fas fa-calendar"></i> Fecha inicio</label>
+                        <input type="date" id="fecha_inicio" name="fecha_inicio">
+                    </div>
+                    <div class="filtro-group">
+                        <label for="fecha_fin"><i class="fas fa-calendar"></i> Fecha fin</label>
+                        <input type="date" id="fecha_fin" name="fecha_fin">
+                    </div>
+                    <div class="filtro-group">
+                        <label for="producto"><i class="fas fa-box"></i> Producto</label>
+                        <input type="text" id="producto" name="producto" placeholder="Nombre o ID">
+                    </div>
+                    <div class="filtro-group">
+                        <label for="cliente"><i class="fas fa-user"></i> Cliente</label>
+                        <input type="text" id="cliente" name="cliente" placeholder="Nombre o ID">
+                    </div>
+                    <button type="button" onclick="filtrarHoy()" class="btn-hoy">
+                        <i class="fas fa-calendar-day"></i>
+                        Ventas de Hoy
+                    </button>
+                    <button type="submit" class="btn-filtrar">
+                        <i class="fas fa-filter"></i>
+                        Aplicar Filtros
+                    </button>
+                </div>
+            </form>
+            
+            <!-- Acciones -->
+            <div class="acciones-reporte">
+                <button onclick="descargarExcel()" class="btn-accion btn-excel">
+                    <i class="fas fa-file-excel"></i>
+                    Exportar a Excel
+                </button>
+                <button onclick="descargarPDF()" class="btn-accion btn-pdf">
+                    <i class="fas fa-file-pdf"></i>
+                    Exportar a PDF
+                </button>
+            </div>
+        </div>
+        
+        <!-- Estadísticas -->
+        <div class="stats-row">
+            <div class="stat-box">
+                <h4>Total Ventas</h4>
+                <span id="stat-total-ventas">RD$ 0.00</span>
+            </div>
+            <div class="stat-box">
+                <h4>Transacciones</h4>
+                <span id="stat-transacciones">0</span>
+            </div>
+            <div class="stat-box">
+                <h4>Ticket Promedio</h4>
+                <span id="stat-ticket-promedio">RD$ 0.00</span>
+            </div>
+        </div>
+        
+        <!-- Tabla de Resultados -->
+        <div class="tabla-card">
+            <div class="tabla-header">
+                <h3 style="color: #333; font-size: 1.2em; margin: 0;">Detalle de Ventas</h3>
+                <div id="contador-filas" class="tabla-info">0 registros</div>
+            </div>
+            
+            <div class="tabla-container">
+                <table id="tabla-ventas" class="tabla-reporte">
+                    <thead>
+                        <tr>
+                            <th>Fecha</th>
+                            <th>Producto</th>
+                            <th>Cliente</th>
+                            <th>Cantidad</th>
+                            <th>Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Las filas se llenarán dinámicamente -->
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <td colspan="4" style="text-align:right; background: #f8f9fa;">Total Vendido:</td>
+                            <td id="total-vendido">RD$ 0.00</td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Cargar header global
+        document.addEventListener('DOMContentLoaded', function() {
+            fetch('header.html')
+                .then(r => r.text())
+                .then(html => {
+                    document.getElementById('header-container').innerHTML = html;
+                    const scripts = document.getElementById('header-container').querySelectorAll('script');
+                    scripts.forEach(script => {
+                        const newScript = document.createElement('script');
+                        if (script.src) {
+                            newScript.src = script.src;
+                        } else {
+                            newScript.textContent = script.textContent;
+                        }
+                        document.body.appendChild(newScript);
+                    });
+                });
+            
+            // Cargar datos iniciales
+            setTimeout(() => {
+                actualizarContadorFilas();
+                actualizarTotalVendido();
+            }, 500);
+        });
+        
+        // Función para filtrar ventas de hoy
+        function filtrarHoy() {
+            const hoy = new Date();
+            const year = hoy.getFullYear();
+            const month = String(hoy.getMonth() + 1).padStart(2, '0');
+            const day = String(hoy.getDate()).padStart(2, '0');
+            const fechaHoy = `${year}-${month}-${day}`;
+            
+            document.getElementById('fecha_inicio').value = fechaHoy;
+            document.getElementById('fecha_fin').value = fechaHoy;
+            document.getElementById('producto').value = '';
+            document.getElementById('cliente').value = '';
+            
+            // Llamar a la función de filtrado si existe
+            if (typeof filtrarVentas === 'function') {
+                filtrarVentas();
+            }
+        }
+        
+        // Actualizar contador de filas
+        function actualizarContadorFilas() {
+            const tbody = document.querySelector('#tabla-ventas tbody');
+            const contador = document.getElementById('contador-filas');
+            if (tbody && contador) {
+                const filas = tbody.querySelectorAll('tr').length;
+                contador.textContent = filas + (filas === 1 ? ' registro' : ' registros');
+            }
+        }
+        
+        // Actualizar total vendido y estadísticas
+        function actualizarTotalVendido() {
+            const tbody = document.querySelector('#tabla-ventas tbody');
+            const totalCell = document.getElementById('total-vendido');
+            const statTotal = document.getElementById('stat-total-ventas');
+            const statTransacciones = document.getElementById('stat-transacciones');
+            const statTicket = document.getElementById('stat-ticket-promedio');
+            
+            if (tbody) {
+                let total = 0;
+                let transacciones = 0;
+                
+                tbody.querySelectorAll('tr').forEach(tr => {
+                    const tds = tr.querySelectorAll('td');
+                    if (tds.length >= 5) {
+                        // Obtener el texto de la última columna (total)
+                        let valorTexto = tds[4].textContent || tds[4].innerText;
+                        // Limpiar el texto: remover todo excepto números, puntos y guiones
+                        let valorLimpio = valorTexto.replace(/[^\d.\-]/g, '');
+                        let valor = parseFloat(valorLimpio);
+                        
+                        if (!isNaN(valor)) {
+                            total += valor;
+                            transacciones++;
+                        }
+                    }
+                });
+                
+                const totalFormateado = 'RD$ ' + total.toLocaleString('es-DO', {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                });
+                
+                const ticketPromedio = transacciones > 0 ? total / transacciones : 0;
+                const ticketFormateado = 'RD$ ' + ticketPromedio.toLocaleString('es-DO', {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                });
+                
+                // Actualizar todos los elementos
+                if (totalCell) totalCell.textContent = totalFormateado;
+                if (statTotal) statTotal.textContent = totalFormateado;
+                if (statTransacciones) statTransacciones.textContent = transacciones;
+                if (statTicket) statTicket.textContent = ticketFormateado;
+                
+                console.log('Totales actualizados:', {
+                    total: total,
+                    transacciones: transacciones,
+                    ticketPromedio: ticketPromedio
+                });
+            }
+        }
+        
+        // Hook para actualizar después de llenar la tabla
+        if (!window._llenarTablaVentasHooked) {
+            const oldLlenarTablaVentas = window.llenarTablaVentas;
+            window.llenarTablaVentas = function() {
+                if (typeof oldLlenarTablaVentas === 'function') {
+                    oldLlenarTablaVentas.apply(this, arguments);
+                }
+                // Esperar un poco para que el DOM se actualice
+                setTimeout(() => {
+                    actualizarContadorFilas();
+                    actualizarTotalVendido();
+                }, 100);
+            };
+            window._llenarTablaVentasHooked = true;
+        }
+        
+        // Observar cambios en la tabla con MutationObserver
+        document.addEventListener('DOMContentLoaded', function() {
+            const tbody = document.querySelector('#tabla-ventas tbody');
+            if (tbody) {
+                const observer = new MutationObserver(function(mutations) {
+                    actualizarContadorFilas();
+                    actualizarTotalVendido();
+                });
+                
+                observer.observe(tbody, {
+                    childList: true,
+                    subtree: true,
+                    characterData: true
+                });
+            }
+        });
+    </script>
+    
+    <script src="js/reporte_ventas.js"></script>
+</body>
+</html>
