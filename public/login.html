@@ -141,7 +141,6 @@
             letter-spacing: 0.5px;
         }
         .footer a { color: #222; text-decoration: underline; }
-        /* Animación de fondo flotante */
         .bubble {
             position: absolute;
             border-radius: 50%;
@@ -164,7 +163,7 @@
 
     <div class="glass-bg">
         <div class="logo">
-            <img src="images/Logo2.png" alt="Logo de JCTechnology">
+            <img id="logoLogin" src="images/Logo2.png" alt="Logo de JCTechnology">
         </div>
         <h1>Inicio de Sesión</h1>
         <form id="loginForm" onsubmit="event.preventDefault(); iniciarSesion();">
@@ -189,11 +188,23 @@
     <script>
         const API = 'http://localhost:5000';
 
-        // ===== VERIFICAR SI YA HAY SESIÓN ACTIVA =====
+        // ===== CARGAR LOGO ACTIVO AL INICIO =====
         window.addEventListener('DOMContentLoaded', function() {
+            // Cargar logo activo desde la base de datos
+            fetch(`${API}/api/config/logo/activo`)
+                .then(r => r.json())
+                .then(data => {
+                    if (data.logo && data.logo.nombre_archivo) {
+                        document.getElementById('logoLogin').src = `${API}/images/${data.logo.nombre_archivo}`;
+                    }
+                })
+                .catch(err => {
+                    console.log('Usando logo por defecto');
+                });
+            
+            // Verificar si ya hay sesión activa
             const token = localStorage.getItem('token');
             if (token) {
-                // Si ya hay sesión activa, redirigir al menú principal
                 window.location.replace('menu_principal.html');
             }
         });
@@ -219,7 +230,6 @@
             const mensaje = document.getElementById('mensaje');
             const btnLogin = document.getElementById('btnLogin');
 
-            // Validación básica
             if (!username || !password) {
                 mensaje.textContent = 'Por favor, complete todos los campos';
                 mensaje.style.display = 'block';
@@ -227,87 +237,158 @@
                 return;
             }
 
-            // Deshabilitar botón mientras se procesa
             btnLogin.disabled = true;
             btnLogin.textContent = 'Conectando...';
 
-            // Realizar petición de login
             fetch(`${API}/api/auth/login`, {
                 method: 'POST',
-                headers: { 
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ 
-                    username: username, 
-                    password: password 
-                })
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password })
             })
             .then(response => {
-                if (!response.ok) {
-                    throw new Error('Credenciales incorrectas');
-                }
+                if (!response.ok) throw new Error('Credenciales incorrectas');
                 return response.json();
             })
             .then(data => {
                 if (data.token) {
-                    // Limpiar cualquier sesión anterior
                     localStorage.clear();
                     sessionStorage.clear();
-                    
-                    // Guardar nuevo token
                     localStorage.setItem('token', data.token);
+                    if (data.user) localStorage.setItem('user', JSON.stringify(data.user));
                     
-                    // Guardar información adicional si viene en la respuesta
-                    if (data.user) {
-                        localStorage.setItem('user', JSON.stringify(data.user));
-                    }
-                    
-                    // Mostrar mensaje de éxito
                     mensaje.style.color = '#27ae60';
                     mensaje.style.background = 'rgba(255,255,255,0.9)';
                     mensaje.textContent = '¡Bienvenido! Redirigiendo...';
                     mensaje.style.display = 'block';
                     
-                    // Redirigir usando replace para no dejar en el historial
-                    setTimeout(() => {
-                        window.location.replace('menu_principal.html');
-                    }, 800);
+                    setTimeout(() => window.location.replace('menu_principal.html'), 800);
                 } else {
-                    throw new Error('No se recibió token de autenticación');
+                    throw new Error('No se recibió token');
                 }
             })
             .catch(error => {
-                console.error('Error en login:', error);
-                
-                // Mostrar mensaje de error
                 mensaje.style.color = '#e74c3c';
                 mensaje.style.background = 'rgba(255,255,255,0.7)';
                 mensaje.textContent = error.message || 'Credenciales incorrectas';
                 mensaje.style.display = 'block';
-                
-                // Ocultar mensaje después de 3 segundos
                 setTimeout(() => mensaje.style.display = 'none', 3000);
-                
-                // Rehabilitar botón
                 btnLogin.disabled = false;
                 btnLogin.textContent = 'Conectar';
             });
         }
 
-        // ===== PERMITIR LOGIN CON ENTER =====
         document.getElementById('password').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                iniciarSesion();
-            }
+            if (e.key === 'Enter') iniciarSesion();
         });
 
-        // ===== PREVENIR DOBLE SUBMIT =====
-        document.getElementById('loginForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-        });
+
+        
     </script>
 
-    <!-- Cargar scripts.js si existe -->
+
     <script src="js/scripts.js"></script>
+
+<script>
+    // ===== AL CARGAR LA PÁGINA =====
+    window.addEventListener('DOMContentLoaded', () => {
+        // Cargar logo activo
+        fetch(`${API}/api/config/logo/activo`)
+            .then(r => r.json())
+            .then(data => {
+                if (data.logo && data.logo.nombre_archivo) {
+                    document.getElementById('logoLogin').src =
+                        `${API}/images/${data.logo.nombre_archivo}`;
+                }
+            })
+            .catch(() => console.log('Logo por defecto'));
+
+        // Si ya hay sesión, redirigir
+        const user = localStorage.getItem('user');
+        if (user) {
+            window.location.replace('menu_principal.html');
+        }
+    });
+
+    // ===== MOSTRAR / OCULTAR CONTRASEÑA =====
+    function togglePassword() {
+        const input = document.getElementById('password');
+        const icon = document.getElementById('togglePassword');
+
+        if (input.type === 'password') {
+            input.type = 'text';
+            icon.textContent = 'visibility_off';
+        } else {
+            input.type = 'password';
+            icon.textContent = 'visibility';
+        }
+    }
+
+    // ===== INICIAR SESIÓN =====
+    function iniciarSesion() {
+        const username = document.getElementById('username').value.trim();
+        const password = document.getElementById('password').value;
+        const mensaje = document.getElementById('mensaje');
+        const btnLogin = document.getElementById('btnLogin');
+
+        if (!username || !password) {
+            mostrarMensaje('Complete todos los campos', false);
+            return;
+        }
+
+        btnLogin.disabled = true;
+        btnLogin.textContent = 'Conectando...';
+
+        fetch(`${API}/api/auth/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include', // 🔐 cookies httpOnly
+            body: JSON.stringify({ username, password })
+        })
+        .then(res => {
+            if (!res.ok) throw new Error('Credenciales incorrectas');
+            return res.json();
+        })
+        .then(data => {
+            // Limpiar sesión previa
+            localStorage.removeItem('user');
+
+            // Guardar SOLO info visual del usuario
+            if (data.user) {
+                localStorage.setItem('user', JSON.stringify(data.user));
+            }
+
+            mostrarMensaje('¡Bienvenido! Redirigiendo...', true);
+
+            setTimeout(() => {
+                window.location.replace('menu_principal.html');
+            }, 800);
+        })
+        .catch(err => {
+            mostrarMensaje(err.message || 'Error al iniciar sesión', false);
+            btnLogin.disabled = false;
+            btnLogin.textContent = 'Conectar';
+        });
+    }
+
+    // ===== MENSAJES =====
+    function mostrarMensaje(texto, ok = false) {
+        const mensaje = document.getElementById('mensaje');
+        mensaje.textContent = texto;
+        mensaje.style.display = 'block';
+        mensaje.style.color = ok ? '#27ae60' : '#e74c3c';
+        mensaje.style.background = 'rgba(255,255,255,0.85)';
+
+        if (!ok) {
+            setTimeout(() => mensaje.style.display = 'none', 3000);
+        }
+    }
+
+    // ===== ENTER PARA LOGIN =====
+    document.getElementById('password').addEventListener('keypress', e => {
+        if (e.key === 'Enter') iniciarSesion();
+    });
+</script>
+
+    
 </body>
 </html>

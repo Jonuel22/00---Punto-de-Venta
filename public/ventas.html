@@ -7,369 +7,575 @@
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
   <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
     body {
       font-family: 'Roboto', sans-serif;
-      background: #b2d0e0;
-      margin: 0;
-      padding-top: 80px;
+      background: linear-gradient(135deg, #e8f5e9, #b2dfdb);
       min-height: 100vh;
+      padding-top: 80px;
     }
+
     .main-section {
-      max-width: 900px;
-      margin: 40px auto;
-      background: #fff;
-      padding: 32px 28px 24px 28px;
-      border-radius: 18px;
-      box-shadow: 0 6px 24px rgba(0,0,0,0.08);
-      position: relative;
+      max-width: 1000px;
+      margin: 24px auto;
+      padding: 24px;
     }
-    h1 {
+
+    .page-header {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(12px);
+      border-radius: 16px;
+      padding: 32px;
+      margin-bottom: 24px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .page-title {
       font-size: 2.2em;
-      font-weight: 700;
-      color: #1769aa;
-      margin-bottom: 18px;
-      letter-spacing: 1px;
+      color: #222;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 8px;
     }
+
+    .page-title i {
+      color: #00cc66;
+    }
+
+    .search-card {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(12px);
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 24px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
     .search-box {
       display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 18px;
+      gap: 12px;
       position: relative;
     }
+
     .search-box input {
       flex: 1;
-      padding: 12px 16px;
-      border-radius: 8px;
-      border: 1px solid #bcdffb;
-      font-size: 1.1em;
-      background: #f7fbff;
-      transition: border 0.2s;
+      padding: 14px 16px;
+      border: 2px solid #e0e0e0;
+      border-radius: 12px;
+      font-size: 1em;
+      transition: all 0.3s;
+      background: white;
     }
+
     .search-box input:focus {
-      border: 1.5px solid #1769aa;
       outline: none;
+      border-color: #00cc66;
+      box-shadow: 0 0 0 3px rgba(0, 204, 102, 0.1);
     }
-    .search-box button {
-      margin-bottom: auto;
-      background: #1769aa;
-      color: #fff;
+
+    .btn-search {
+      padding: 14px 20px;
+      background: linear-gradient(90deg, #00cc66, #66ccff);
+      color: white;
       border: none;
-      border-radius: 8px;
-      padding: 10px 16px;
-      font-size: 1.2em;
+      border-radius: 12px;
+      font-size: 1.1em;
       cursor: pointer;
-      box-shadow: 0 2px 8px rgba(33,150,243,0.08);
-      transition: background 0.2s;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      box-shadow: 0 4px 12px rgba(0, 204, 102, 0.3);
+      transition: all 0.3s;
     }
-    .search-box button:hover {
-      background: #114d7c;
+
+    .btn-search:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(0, 204, 102, 0.4);
     }
+
     #resultadosBusqueda {
-      background: #fff;
-      border: 1px solid #bcdffb;
       position: absolute;
-      top: 45px;
+      top: 60px;
       left: 0;
-      right: 0;
-      z-index: 20;
-      border-radius: 8px;
-      box-shadow: 0 2px 12px rgba(33,150,243,0.08);
-      max-height: 220px;
+      right: 80px;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+      max-height: 300px;
       overflow-y: auto;
+      z-index: 1000;
     }
+
     #resultadosBusqueda div {
-      padding: 10px 16px;
+      padding: 12px 16px;
       cursor: pointer;
-      font-size: 1.05em;
       border-bottom: 1px solid #f0f0f0;
       transition: background 0.2s;
     }
+
     #resultadosBusqueda div:hover {
-      background: #eaf2fb;
+      background: #f0f8ff;
     }
+
     #resultadosBusqueda div[style*='color:#f44336'] {
-      background: #ffeaea;
-      color: #f44336 !important;
+      background: #fff0f0;
     }
-    form {
-      margin-top: 18px;
-      background: #f7fbff;
-      border-radius: 12px;
-      padding: 18px 20px 10px 20px;
-      box-shadow: 0 2px 8px rgba(33,150,243,0.06);
+
+    .form-card {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(12px);
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     }
+
     table {
       width: 100%;
       border-collapse: collapse;
-      margin-bottom: 18px;
-      background: #fff;
-      border-radius: 8px;
+      margin-bottom: 20px;
+      background: white;
+      border-radius: 12px;
       overflow: hidden;
-      box-shadow: 0 2px 8px rgba(33,150,243,0.04);
     }
-    th, td {
-      border: none;
-      padding: 12px 8px;
-      text-align: left;
-      font-size: 1em;
-      vertical-align: middle;
+
+    thead {
+      background: linear-gradient(135deg, #00cc66, #66ccff);
     }
+
     th {
-      background: #eaf2fb;
-      color: #1769aa;
-      font-weight: 700;
-      letter-spacing: 0.5px;
+      padding: 14px 12px;
+      text-align: left;
+      color: white;
+      font-weight: 600;
+      font-size: 0.95em;
+      text-transform: uppercase;
     }
-    tr:nth-child(even) td {
-      background: #f7fbff;
+
+    td {
+      padding: 12px;
+      border-bottom: 1px solid #f0f0f0;
+      color: #333;
     }
+
+    tbody tr:hover {
+      background: #f0f8ff;
+    }
+
+    td input {
+      width: 80px;
+      padding: 6px 8px;
+      border: 2px solid #e0e0e0;
+      border-radius: 6px;
+      text-align: center;
+    }
+
+    td input:focus {
+      outline: none;
+      border-color: #00cc66;
+    }
+
     .totals {
       text-align: right;
-      margin-top: 10px;
-      font-size: 1.15em;
-      color: #1769aa;
-    }
-    label {
-      display: block;
-      margin: 12px 0 6px 0;
-      font-weight: 500;
-      color: #1769aa;
-      font-size: 1.08em;
-    }
-    input[type="text"], input[type="number"] {
-      padding: 10px 0px;
-      border-radius: 7px;
-      border: 1px solid #bcdffb;
-      font-size: 1em;
-      background: #fff;
-      margin-bottom: 10px;
-      transition: border 0.2s;
-    }
-    input[type="text"]:focus, input[type="number"]:focus {
-      border: 1.5px solid #1769aa;
-      outline: none;
-    }
-    .btn {
-      padding: 12px 24px;
-      background: #1769aa;
-      color: #fff;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
+      margin-top: 16px;
+      padding: 16px;
+      background: linear-gradient(135deg, rgba(0, 204, 102, 0.05), rgba(102, 204, 255, 0.05));
+      border-radius: 12px;
       font-size: 1.1em;
+    }
+
+    .totals div {
+      margin: 8px 0;
+      color: #333;
+    }
+
+    .totals div:last-child {
+      font-size: 1.3em;
+      font-weight: 700;
+      color: #00cc66;
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 2px solid #e0e0e0;
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 6px;
       font-weight: 600;
-      box-shadow: 0 2px 8px rgba(33,150,243,0.08);
-      margin-top: 10px;
-      transition: background 0.2s;
-      display: inline-block;
+      color: #333;
     }
-    .btn:hover {
-      background: #114d7c;
+
+    .form-group input, .form-group select {
+      width: 100%;
+      padding: 12px 16px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 1em;
+      transition: all 0.2s;
     }
-    .btn[disabled] {
-      background: #bcdffb;
-      color: #888;
-      cursor: not-allowed;
+
+    .form-group input:focus, .form-group select:focus {
+      outline: none;
+      border-color: #00cc66;
+      box-shadow: 0 0 0 3px rgba(0, 204, 102, 0.1);
     }
+
+    .btn {
+      padding: 14px 28px;
+      border: none;
+      border-radius: 12px;
+      font-size: 1.1em;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(90deg, #00cc66, #66ccff);
+      color: white;
+      box-shadow: 0 4px 12px rgba(0, 204, 102, 0.3);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(0, 204, 102, 0.4);
+    }
+
+    .btn-danger {
+      background: linear-gradient(90deg, #f44336, #e91e63);
+      color: white;
+      box-shadow: 0 4px 12px rgba(244, 67, 54, 0.3);
+    }
+
+    .btn-danger:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(244, 67, 54, 0.4);
+    }
+
     .icon-btn {
       background: none;
       border: none;
       color: #f44336;
       font-size: 1.3em;
       cursor: pointer;
-      padding: 6px 10px;
+      padding: 6px;
       border-radius: 6px;
-      transition: background 0.2s;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      transition: all 0.2s;
     }
+
     .icon-btn:hover {
-      background: #ffeaea;
-      color: #b71c1c;
+      background: #ffebee;
+      transform: scale(1.1);
     }
+
     #mensajeVenta, #mensajeError {
       position: fixed;
-      top: 90px;
+      top: 100px;
       right: 30px;
-      left: auto;
-      background: #fff;
-      color: #1769aa;
-      border-radius: 10px;
-      box-shadow: 0 2px 12px rgba(33,150,243,0.12);
-      padding: 18px 32px;
-      font-size: 1.15em;
+      background: white;
+      padding: 20px 32px;
+      border-radius: 12px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+      font-size: 1.1em;
       font-weight: 600;
-      z-index: 2000;
-      border-left: 6px solid #1769aa;
+      z-index: 9999;
       display: none;
+      animation: slideIn 0.3s;
     }
+
+    #mensajeVenta {
+      border-left: 6px solid #00cc66;
+      color: #00cc66;
+    }
+
     #mensajeError {
-      color: #f44336;
       border-left: 6px solid #f44336;
-      background: #fff0f0;
-    }
-    #modalFactura, #modalProductos {
-      display: none;
-      position: fixed;
-      top: 0; left: 0;
-      width: 100vw; height: 100vh;
-      background: rgba(33,150,243,0.08);
-      z-index: 4000;
-    }
-    #modalFactura > div, #modalProductos > div {
-      background: #fff;
-      max-width: 600px;
-      margin: 60px auto;
-      padding: 28px 24px;
-      border-radius: 14px;
-      box-shadow: 0 4px 24px rgba(33,150,243,0.12);
-      position: relative;
-      animation: modalFadeIn 0.3s;
-    }
-    @keyframes modalFadeIn {
-      from { opacity: 0; transform: translateY(-30px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    #cerrarModalFactura, #cerrarModal {
-      position: absolute;
-      top: 12px;
-      right: 12px;
-      font-size: 1.5em;
-      background: none;
-      border: none;
-      color: #1769aa;
-      cursor: pointer;
-      transition: color 0.2s;
-    }
-    #cerrarModalFactura:hover, #cerrarModal:hover {
       color: #f44336;
     }
-    #modalFacturaContent h2 {
-      text-align: center;
-      color: #1769aa;
-      margin-bottom: 12px;
+
+    @keyframes slideIn {
+      from {
+        transform: translateX(400px);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
     }
-    #modalFacturaContent table {
-      margin-top: 10px;
-      font-size: 1em;
-      border-radius: 8px;
-      box-shadow: 0 2px 8px rgba(33,150,243,0.04);
-    }
-    #modalFacturaContent th {
-      background: #eaf2fb;
-      color: #1769aa;
-      font-weight: 700;
-    }
-    #modalFacturaContent td {
-      background: #fff;
-      color: #333;
-    }
-    #modalFacturaContent .totals {
-      margin-top: 12px;
-      font-size: 1.1em;
-      color: #1769aa;
-      text-align: right;
-    }
-    #modalFacturaContent .btn {
-      margin-top: 18px;
-      width: 100%;
-      font-size: 1.1em;
-    }
-    #modalConfirmacion {
+
+    .modal {
       display: none;
       position: fixed;
       top: 0;
       left: 0;
       width: 100vw;
       height: 100vh;
-      background: rgba(0, 0, 0, 0.3);
+      background: rgba(0, 0, 0, 0.5);
       z-index: 5000;
+      align-items: center;
+      justify-content: center;
     }
-    #modalConfirmacion > div {
-      background: #fff;
-      max-width: 350px;
-      margin: 120px auto;
-      padding: 24px 20px;
-      border-radius: 10px;
-      box-shadow: 0 2px 12px rgba(33, 150, 243, 0.18);
+
+    .modal.active {
+      display: flex;
+    }
+
+    .modal-content {
+      background: white;
+      max-width: 600px;
+      width: 90%;
+      max-height: 90vh;
+      overflow-y: auto;
+      border-radius: 16px;
+      padding: 32px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
       position: relative;
-      text-align: center;
+      animation: modalFadeIn 0.3s;
     }
-    #modalConfirmacion h3 {
-      color: #1769aa;
-      margin-bottom: 18px;
+
+    @keyframes modalFadeIn {
+      from {
+        opacity: 0;
+        transform: scale(0.9) translateY(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+      }
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .modal-title {
+      font-size: 1.5em;
+      color: #222;
+      font-weight: 700;
+    }
+
+    .btn-close {
+      background: none;
+      border: none;
+      font-size: 1.8em;
+      cursor: pointer;
+      color: #666;
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      transition: all 0.2s;
+    }
+
+    .btn-close:hover {
+      background: #f0f0f0;
+      color: #f44336;
+    }
+
+    .factura-header {
+      text-align: center;
+      margin-bottom: 20px;
+      padding-bottom: 20px;
+      border-bottom: 2px solid #e0e0e0;
+    }
+
+    .factura-header img {
+      max-width: 150px;
+      max-height: 80px;
+      margin-bottom: 12px;
+    }
+
+    .factura-info {
+      margin-bottom: 20px;
+    }
+
+    .factura-info div {
+      margin: 8px 0;
+      font-size: 1em;
+    }
+
+    #modalLista div {
+      padding: 12px 16px;
+      border-bottom: 1px solid #f0f0f0;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    #modalLista div:hover {
+      background: #f0f8ff;
+    }
+
+    .empty-cart {
+      text-align: center;
+      padding: 40px;
+      color: #999;
+    }
+
+    .empty-cart i {
+      font-size: 3em;
+      margin-bottom: 16px;
+      color: #ddd;
+    }
+
+    /* Clase para ocultar elementos en impresión */
+    @media print {
+      .no-print {
+        display: none !important;
+      }
     }
   </style>
 </head>
 <body>
   <div id="header-container"></div>
+
   <section class="main-section">
-    <h1>Registrar Venta</h1>
-    <div class="search-box">
-      <input type="text" id="buscarProducto" placeholder="Buscar producto por nombre o código..." style="width:60%;">
-      <button type="button" id="btnLupa" style="margin-left:5px;"><i class="fas fa-search"></i></button>
-      <div id="resultadosBusqueda" style="background:#fafafa; border:1px solid #ccc; position:absolute; z-index:10;"></div>
-    </div>
-    <div id="modalProductos" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.3);z-index:3000;">
-      <div style="background:#fff;max-width:500px;margin:60px auto;padding:20px;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,0.2);position:relative;">
-        <button id="cerrarModal" style="position:absolute;top:10px;right:10px;font-size:1.2em;">&times;</button>
-        <h3>Todos los productos</h3>
-        <input type="text" id="modalBuscar" placeholder="Buscar por nombre..." style="width:100%;margin-bottom:10px;">
-        <div id="modalLista" style="max-height:300px;overflow-y:auto;"></div>
+    <div class="page-header">
+      <h1 class="page-title">
+        <i class="fas fa-cash-register"></i>
+        Registrar Venta
+      </h1>
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <p style="color: #666;">Busca productos y registra las ventas del negocio</p>
+        <div id="cajeroInfo" style="background: linear-gradient(90deg, #00cc66, #66ccff); color: white; padding: 8px 16px; border-radius: 8px; font-weight: 600; display: flex; align-items: center; gap: 8px;">
+          <i class="fas fa-user-tie"></i>
+          <span id="cajeroNombre">Cargando...</span>
+        </div>
       </div>
     </div>
-    <div id="modalFactura" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.3);z-index:4000;">
-      <div style="background:#fff;max-width:600px;margin:60px auto;padding:20px;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,0.2);position:relative;">
-        <button id="cerrarModalFactura" style="position:absolute;top:10px;right:10px;font-size:1.2em;">&times;</button>
-        <div id="modalFacturaContent"></div>
+
+    <div class="search-card">
+      <div class="search-box">
+        <input type="text" id="buscarProducto" placeholder="Buscar producto por nombre o código de barras...">
+        <button type="button" id="btnLupa" class="btn-search">
+          <i class="fas fa-search"></i>
+        </button>
+        <div id="resultadosBusqueda"></div>
       </div>
     </div>
-    <div id="modalConfirmacion" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.3);z-index:5000;">
-      <div style="background:#fff;max-width:350px;margin:120px auto;padding:24px 20px;border-radius:10px;box-shadow:0 2px 12px rgba(33,150,243,0.18);position:relative;text-align:center;">
-        <h3 style="color:#1769aa;margin-bottom:18px;">¿Está seguro de finalizar la venta?</h3>
-        <button id="btnConfirmarVenta" class="btn" style="margin-right:12px;">Aceptar</button>
-        <button id="btnCancelarVenta" class="btn" style="background:#f44336;">Cancelar</button>
-      </div>
+
+    <div class="form-card">
+      <form id="ventaForm">
+        <div id="tablaContainer">
+          <table id="tablaVenta">
+            <thead>
+              <tr>
+                <th>Producto</th>
+                <th>Cantidad</th>
+                <th>Precio Unit.</th>
+                <th>Subtotal</th>
+                <th style="width: 80px; text-align: center;">Eliminar</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+          <div id="emptyCart" class="empty-cart">
+            <i class="fas fa-shopping-cart"></i>
+            <p>No hay productos en el carrito</p>
+            <p style="font-size: 0.9em; color: #bbb;">Busca y agrega productos para comenzar</p>
+          </div>
+        </div>
+
+        <div class="totals">
+          <div>Subtotal: $<span id="subtotal">0.00</span></div>
+          <div>ITBIS (18%): $<span id="itbis">0.00</span></div>
+          <div>Total: $<span id="total">0.00</span></div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 24px;">
+          <div class="form-group">
+            <label>Cliente</label>
+            <input type="text" id="clienteNombre" placeholder="Nombre del cliente">
+          </div>
+          <div class="form-group">
+            <label>RNC</label>
+            <input type="text" id="clienteRNC" placeholder="RNC del cliente">
+          </div>
+        </div>
+
+        <button type="button" id="btnVenta" class="btn btn-primary" style="width: 100%; margin-top: 16px;">
+          <i class="fas fa-check-circle"></i>
+          Realizar Venta e Imprimir Factura
+        </button>
+      </form>
     </div>
-    <form id="ventaForm">
-      <table id="tablaVenta">
-        <thead>
-          <tr>
-            <th>Producto</th>
-            <th>Cantidad</th>
-            <th>Precio Unitario</th>
-            <th>Subtotal</th>
-            <th>Eliminar</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-      <div class="totals">
-        <div>Subtotal: <span id="subtotal">0.00</span></div>
-        <div>ITBIS (18%): <span id="itbis">0.00</span></div>
-        <div><b>Total: <span id="total">0.00</span></b></div>
-      </div>
-      <label>Cliente:</label>
-      <input type="text" id="clienteNombre" placeholder="Nombre del cliente">
-      <input type="text" id="clienteRNC" placeholder="RNC">
-      <button type="button" id="btnVenta" class="btn">Realizar Venta e Imprimir Factura</button>
-    </form>
-    <div id="factura" style="display:none; margin-top:30px;"></div>
-    <div id="mensajeVenta" style="display:none;position:fixed;top:90px;right:30px;background:#4caf50;color:#fff;padding:15px 30px;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,0.2);font-size:1.2em;z-index:2000;">¡Venta realizada exitosamente!</div>
-    <div id="mensajeError" style="display:none;position:fixed;top:90px;left:30px;background:#f44336;color:#fff;padding:15px 30px;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,0.2);font-size:1.1em;z-index:2000;"></div>
   </section>
+
+  <div id="modalConfirmacion" class="modal">
+    <div class="modal-content" style="max-width: 400px;">
+      <div class="modal-header">
+        <h3 class="modal-title">Confirmar Venta</h3>
+      </div>
+      <p style="text-align: center; margin: 20px 0; font-size: 1.1em; color: #666;">
+        ¿Está seguro de finalizar esta venta?
+      </p>
+      <div style="display: flex; gap: 12px; margin-top: 24px;">
+        <button id="btnCancelarVenta" class="btn btn-danger" style="flex: 1;">
+          <i class="fas fa-times"></i>
+          Cancelar
+        </button>
+        <button id="btnConfirmarVenta" class="btn btn-primary" style="flex: 1;">
+          <i class="fas fa-check"></i>
+          Confirmar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div id="modalProductos" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title">Todos los Productos</h3>
+        <button id="cerrarModal" class="btn-close">&times;</button>
+      </div>
+      <div class="form-group">
+        <input type="text" id="modalBuscar" placeholder="Buscar por nombre...">
+      </div>
+      <div id="modalLista" style="max-height: 400px; overflow-y: auto;"></div>
+    </div>
+  </div>
+
+  <div id="modalFactura" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title">Factura de Venta</h3>
+        <button id="cerrarModalFactura" class="btn-close">&times;</button>
+      </div>
+      <div id="modalFacturaContent"></div>
+    </div>
+  </div>
+
+  <div id="mensajeVenta">
+    <i class="fas fa-check-circle"></i>
+    ¡Venta realizada exitosamente!
+  </div>
+  <div id="mensajeError"></div>
+
+  <script src="js/ventas.js"></script>
+  
   <script>
+    const API = 'http://localhost:5000';
+    let cajeroActual = null;
+
     document.addEventListener('DOMContentLoaded', function() {
       fetch('header.html')
         .then(r => r.text())
         .then(html => {
           document.getElementById('header-container').innerHTML = html;
-          // Ejecutar los scripts del header
           const scripts = document.getElementById('header-container').querySelectorAll('script');
           scripts.forEach(script => {
             const newScript = document.createElement('script');
@@ -381,88 +587,150 @@
             document.body.appendChild(newScript);
           });
         });
+      cargarInfoCajero();
     });
+
+    function cargarInfoCajero() {
+      const userStr = localStorage.getItem('user');
+      if (userStr) {
+        const user = JSON.parse(userStr);
+        cajeroActual = {
+          id: user.cajero_id,
+          nombre: user.nombre,
+          usuario: user.username
+        };
+
+        if (cajeroActual.id) {
+          document.getElementById('cajeroNombre').textContent = cajeroActual.nombre || cajeroActual.usuario;
+        } else {
+          document.getElementById('cajeroNombre').textContent = 'Sin cajero asignado';
+          document.getElementById('cajeroInfo').style.background = '#f44336';
+        }
+      }
+    }
+
     let productosVenta = [];
     let productosBuscados = [];
     let todosProductos = [];
-    let inventarioActual = {};
+
     document.getElementById('buscarProducto').addEventListener('input', function(e) {
-      if (e.inputType === 'insertLineBreak') return; // Ignorar Enter
+      if (e.inputType === 'insertLineBreak') return;
       buscarProductos(this.value);
     });
-    document.getElementById('btnLupa').addEventListener('click', function() {
-      abrirModalProductos();
-    });
-    document.getElementById('btnVenta').addEventListener('click', function() {
-      document.getElementById('modalConfirmacion').style.display = 'block';
-    });
-    document.getElementById('btnConfirmarVenta').addEventListener('click', function() {
-      document.getElementById('modalConfirmacion').style.display = 'none';
-      realizarVenta();
-    });
-    document.getElementById('btnCancelarVenta').addEventListener('click', function() {
-      document.getElementById('modalConfirmacion').style.display = 'none';
-    });
-    document.getElementById('ventaForm').addEventListener('submit', function(e) {
-      e.preventDefault(); // Evitar submit por Enter
-    });
-    function buscarProductos(q) {
-      fetch(`http://localhost:5000/api/sales/productos?q=${encodeURIComponent(q)}`)
-        .then (r => r.json())
-        .then(data => {
-          productosBuscados = data;
-          actualizarInventario(data);
-          let html = '';
-          data.forEach(p => {
-            const rojo = p.cantidad < 1 ? "color:#f44336;" : "";
-            const disabled = p.cantidad < 1 ? "pointer-events:none;opacity:0.6;" : "";
-            html += `<div style='padding:5px; cursor:pointer;${rojo}${disabled}' onclick='agregarProducto(${p.id})'>${p.nombre} (${p.codigo_barras}) - ${p.precio} <span style='color:#888;'>[${p.cantidad} disponibles]</span></div>`;
-          });
-          document.getElementById('resultadosBusqueda').innerHTML = html;
-        });
-    }
-    function actualizarInventario(lista) {
-      lista.forEach(p => { inventarioActual[p.id] = p.cantidad; });
-    }
-    window.agregarProducto = function(id) {
-      const prod = (productosBuscados.find(p => p.id === id) || todosProductos.find(p => p.id === id));
-      if (!prod) return;
-      if (productosVenta.find(p => p.id === id)) return;
-      if (prod.cantidad < 1) {
-        mostrarMensajeError(`No quedan existencias de ${prod.nombre}`);
+
+    document.getElementById('btnLupa').addEventListener('click', abrirModalProductos);
+    document.getElementById('btnVenta').addEventListener('click', () => {
+      if (productosVenta.length === 0) {
+        mostrarMensajeError('Agregue productos a la venta');
         return;
       }
-      productosVenta.push({ id: prod.id, nombre: prod.nombre, precio: prod.precio, cantidad: 1, max: prod.cantidad });
+      document.getElementById('modalConfirmacion').classList.add('active');
+    });
+
+    document.getElementById('btnConfirmarVenta').addEventListener('click', () => {
+      document.getElementById('modalConfirmacion').classList.remove('active');
+      realizarVenta();
+    });
+
+    document.getElementById('btnCancelarVenta').addEventListener('click', () => {
+      document.getElementById('modalConfirmacion').classList.remove('active');
+    });
+
+    document.getElementById('ventaForm').addEventListener('submit', e => e.preventDefault());
+
+    function buscarProductos(q) {
+      if (!q.trim()) {
+        document.getElementById('resultadosBusqueda').innerHTML = '';
+        return;
+      }
+
+      fetch(`${API}/api/sales/productos?q=${encodeURIComponent(q)}`)
+        .then(r => r.json())
+        .then(data => {
+          productosBuscados = data;
+          let html = '';
+          data.forEach(p => {
+            const sinStock = p.cantidad < 1;
+            const estilo = sinStock ? "color:#f44336; opacity:0.6; pointer-events:none;" : "";
+            html += `<div style='${estilo}' onclick='agregarProducto(${p.id})'>
+              ${p.nombre} (${p.codigo_barras}) - $${p.precio.toFixed(2)}
+              <span style='color:#888;'>[${p.cantidad} disponibles]</span>
+            </div>`;
+          });
+          document.getElementById('resultadosBusqueda').innerHTML = html || '<div style="color:#999; text-align:center;">No se encontraron productos</div>';
+        });
+    }
+
+    window.agregarProducto = function(id) {
+      const prod = (productosBuscados.find(p => p.id === id) || todosProductos.find(p => p.id === id));
+      if (!prod || prod.cantidad < 1) {
+        mostrarMensajeError(`No hay stock disponible`);
+        return;
+      }
+      if (productosVenta.find(p => p.id === id)) {
+        mostrarMensajeError('Este producto ya está en el carrito');
+        return;
+      }
+
+      productosVenta.push({
+        id: prod.id,
+        nombre: prod.nombre,
+        precio: prod.precio,
+        cantidad: 1,
+        max: prod.cantidad
+      });
+
       renderTablaVenta();
       document.getElementById('resultadosBusqueda').innerHTML = '';
       document.getElementById('buscarProducto').value = '';
       cerrarModalProductos();
     }
+
     function renderTablaVenta() {
       const tbody = document.querySelector('#tablaVenta tbody');
-      tbody.innerHTML = '';
-      let subtotal = 0;
-      productosVenta.forEach((p, idx) => {
-        const sub = p.precio * p.cantidad;
-        subtotal += sub;
-        tbody.innerHTML += `<tr>
-          <td>${p.nombre}</td>
-          <td><input type='number' min='1' max='${p.max}' value='${p.cantidad}' onchange='cambiarCantidad(${idx}, this.value)'> <span style='color:#888;'>[${p.max} disponibles]</span></td>
-          <td>${p.precio.toFixed(2)}</td>
-          <td>${sub.toFixed(2)}</td>
-          <td><button type='button' class='icon-btn' title='Eliminar' onclick='eliminarProducto(${idx})'><i class='fas fa-times-circle'></i></button></td>
-        </tr>`;
-      });
-      const itbis = +(subtotal * 0.18).toFixed(2);
-      const total = +(subtotal + itbis).toFixed(2);
-      document.getElementById('subtotal').textContent = subtotal.toFixed(2);
-      document.getElementById('itbis').textContent = itbis.toFixed(2);
-      document.getElementById('total').textContent = total.toFixed(2);
+      const emptyCart = document.getElementById('emptyCart');
+      
+      if (productosVenta.length === 0) {
+        emptyCart.style.display = 'block';
+        tbody.innerHTML = '';
+      } else {
+        emptyCart.style.display = 'none';
+        tbody.innerHTML = '';
+        let subtotal = 0;
+
+        productosVenta.forEach((p, idx) => {
+          const sub = p.precio * p.cantidad;
+          subtotal += sub;
+          tbody.innerHTML += `<tr>
+            <td>${p.nombre}</td>
+            <td>
+              <input type='number' min='1' max='${p.max}' value='${p.cantidad}' 
+                onchange='cambiarCantidad(${idx}, this.value)' style="width: 70px;">
+              <span style='color:#888; font-size:0.9em; margin-left: 8px;'>[${p.max} disp.]</span>
+            </td>
+            <td>$${p.precio.toFixed(2)}</td>
+            <td><strong>$${sub.toFixed(2)}</strong></td>
+            <td style="text-align: center;">
+              <button type='button' class='icon-btn' onclick='eliminarProducto(${idx})'>
+                <i class='fas fa-trash'></i>
+              </button>
+            </td>
+          </tr>`;
+        });
+
+        const itbis = subtotal * 0.18;
+        const total = subtotal + itbis;
+
+        document.getElementById('subtotal').textContent = subtotal.toFixed(2);
+        document.getElementById('itbis').textContent = itbis.toFixed(2);
+        document.getElementById('total').textContent = total.toFixed(2);
+      }
     }
+
     window.cambiarCantidad = function(idx, val) {
       val = parseInt(val) || 1;
       if (val > productosVenta[idx].max) {
-        mostrarMensajeError(`Solo quedan ${productosVenta[idx].max} unidades de ${productosVenta[idx].nombre}`);
+        mostrarMensajeError(`Solo hay ${productosVenta[idx].max} unidades disponibles`);
         productosVenta[idx].cantidad = productosVenta[idx].max;
       } else if (val < 1) {
         productosVenta[idx].cantidad = 1;
@@ -471,174 +739,372 @@
       }
       renderTablaVenta();
     }
+
     window.eliminarProducto = function(idx) {
       productosVenta.splice(idx, 1);
       renderTablaVenta();
     }
+
     function realizarVenta() {
-      if (productosVenta.length === 0) {
-        mostrarMensajeError('Agregue productos a la venta');
+      if (!cajeroActual || !cajeroActual.id) {
+        mostrarMensajeError('No hay cajero asignado a este usuario');
         return;
       }
-      for (let p of productosVenta) {
-        if (p.cantidad > p.max) {
-          mostrarMensajeError(`Solo quedan ${p.max} unidades de ${p.nombre}`);
-          return;
-        }
-      }
+
       const cliente = {
         nombre: document.getElementById('clienteNombre').value,
         rnc: document.getElementById('clienteRNC').value
       };
-      fetch('http://localhost:5000/api/sales/crear', {
+
+      fetch(`${API}/api/sales/crear`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ productos: productosVenta, cliente })
+        body: JSON.stringify({ 
+          productos: productosVenta, 
+          cliente: cliente,
+          cajero_id: cajeroActual.id
+        })
       })
       .then(r => r.json())
       .then(data => {
         if (data.ventaId) {
           mostrarMensajeVenta();
-          // Guardar notificación de venta
-          fetch('http://localhost:5000/api/notifications/add', {
+          fetch(`${API}/api/notifications/add`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ mensaje: `Venta realizada: ${cliente.nombre || 'Sin nombre'} - Total: $${document.getElementById('total').textContent}` })
+            body: JSON.stringify({
+              mensaje: `Venta realizada por ${cajeroActual.nombre}: ${cliente.nombre || 'Cliente'} - Total: $${document.getElementById('total').textContent}`
+            })
           });
-          fetch(`http://localhost:5000/api/sales/factura/${data.ventaId}`)
+
+          fetch(`${API}/api/sales/factura/${data.ventaId}`)
             .then(r => r.json())
             .then(factura => mostrarFacturaModal(factura));
+
           limpiarVenta();
         } else {
           mostrarMensajeError(data.message || 'Error al realizar la venta');
         }
       });
     }
+
     function limpiarVenta() {
       productosVenta = [];
       renderTablaVenta();
       document.getElementById('clienteNombre').value = '';
       document.getElementById('clienteRNC').value = '';
     }
+
     function mostrarMensajeVenta() {
       const msg = document.getElementById('mensajeVenta');
       msg.style.display = 'block';
-      setTimeout(() => { msg.style.display = 'none'; }, 2500);
+      setTimeout(() => msg.style.display = 'none', 3000);
     }
+
     function mostrarMensajeError(texto) {
       const msg = document.getElementById('mensajeError');
-      msg.textContent = texto;
+      msg.innerHTML = `<i class="fas fa-exclamation-circle"></i> ${texto}`;
       msg.style.display = 'block';
-      setTimeout(() => { msg.style.display = 'none'; }, 3000);
+      setTimeout(() => msg.style.display = 'none', 3500);
     }
+
     function mostrarFacturaModal(factura) {
-      function formatFecha(fechaStr) {
+      const formatFecha = (fechaStr) => {
         const d = new Date(fechaStr);
-        const pad = n => n < 10 ? '0'+n : n;
-        return `${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
-      }
-      let html = `<div id='facturaContent' style='max-width:400px;margin:auto;'>
-        <div style='text-align:center;margin-bottom:10px;'>
-          <img src='images/LOGO.jpg' alt='Logo' style='max-width:120px;max-height:60px;margin-bottom:8px;'>
+        const pad = n => n < 10 ? '0' + n : n;
+        return `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+      };
+
+      let html = `<div id='facturaContent'>
+        <div class='factura-header'>
+          <img src='images/Logo2.png' alt='Logo'>
+          <h2 style='color: #00cc66; margin: 12px 0;'>Mi Empresa S.A.</h2>
+          <div style='color: #666; font-size: 0.95em;'>
+            <div>Dirección: Calle Principal #123</div>
+            <div>Teléfono: (809) 555-1234</div>
+            <div style='margin-top: 8px;'><strong>Cajero:</strong> ${factura.venta.cajero_nombre || 'N/A'}</div>
+          </div>
         </div>
-        <div style='text-align:center;font-size:1.08em;margin-bottom:6px;font-weight:700;color:#1769aa;'>Mi Empresa S.A.</div>
-        <div style='text-align:center;font-size:0.98em;margin-bottom:4px;'>Dirección: Calle Principal #123, Ciudad</div>
-        <div style='text-align:center;font-size:0.98em;margin-bottom:4px;'>Teléfono: (809) 555-1234</div>
-        <div style='text-align:center;font-size:0.98em;margin-bottom:8px;'>Vendedor: Vendedor</div>
-        <h2 style='text-align:center;color:#1769aa;margin-bottom:8px;'>Factura</h2>
-        <div style='font-size:1em;margin-bottom:6px;'>Cliente: <b>${factura.venta.cliente_nombre || ''}</b></div>
-        <div style='font-size:1em;margin-bottom:6px;'>RNC: <b>${factura.venta.cliente_rnc || ''}</b></div>
-        <div style='font-size:1em;margin-bottom:10px;'>Fecha: <b>${formatFecha(factura.venta.fecha)}</b></div>
-        <table style='width:100%;font-size:0.98em;'>
+
+        <div class='factura-info'>
+          <div><strong>Cliente:</strong> ${factura.venta.cliente_nombre || 'N/A'}</div>
+          <div><strong>RNC:</strong> ${factura.venta.cliente_rnc || 'N/A'}</div>
+          <div><strong>Fecha:</strong> ${formatFecha(factura.venta.fecha)}</div>
+        </div>
+
+        <table>
           <thead><tr>
             <th>Producto</th>
-            <th>Cant.</th>
-            <th>Precio</th>
+            <th style='text-align: center;'>Cant.</th>
+            <th style='text-align: right;'>Precio</th>
+            <th style='text-align: right;'>Total</th>
           </tr></thead>
           <tbody>`;
+
       factura.detalle.forEach(d => {
         html += `<tr>
           <td>${d.nombre}</td>
-          <td style='text-align:center;'>${d.cantidad}</td>
-          <td style='text-align:right;'>${d.precio_unitario.toFixed(2)}</td>
+          <td style='text-align: center;'>${d.cantidad}</td>
+          <td style='text-align: right;'>$${d.precio_unitario.toFixed(2)}</td>
+          <td style='text-align: right;'><strong>$${(d.cantidad * d.precio_unitario).toFixed(2)}</strong></td>
         </tr>`;
       });
+
       html += `</tbody></table>
-        <div class='totals' style='margin-top:10px;font-size:1.05em;text-align:right;'>
-          Subt.: <b>${factura.venta.subtotal.toFixed(2)}</b><br>
-          ITBIS: <b>${factura.venta.itbis.toFixed(2)}</b><br>
-          <span style='font-size:1.15em;'>Total: <b>${factura.venta.total.toFixed(2)}</b></span>
+        <div class='totals'>
+          <div>Subtotal: $${factura.venta.subtotal.toFixed(2)}</div>
+          <div>ITBIS (18%): $${factura.venta.itbis.toFixed(2)}</div>
+          <div>Total: $${factura.venta.total.toFixed(2)}</div>
         </div>
-        <button class='btn' style='margin-top:18px;width:100%;font-size:1.1em;' onclick='imprimirSoloFactura()'>Imprimir</button>
+      </div>
+      
+      <div class='no-print' style='margin-top: 24px;'>
+        <div class='form-group' style='margin-bottom: 16px;'>
+          <label>
+            <i class='fas fa-print'></i> Tipo de Impresión:
+          </label>
+          <select id='tipoImpresion'>
+            <option value='termica' selected>Impresora Térmica (58mm)</option>
+            <option value='normal'>Impresora Normal (A4)</option>
+          </select>
+        </div>
+        <button class='btn btn-primary' onclick='imprimirFactura()' style='width: 100%;'>
+          <i class='fas fa-print'></i>
+          Imprimir Factura
+        </button>
       </div>`;
+
       document.getElementById('modalFacturaContent').innerHTML = html;
-      document.getElementById('modalFactura').style.display = 'block';
+      document.getElementById('modalFactura').classList.add('active');
     }
-    document.getElementById('cerrarModalFactura').addEventListener('click', function() {
-      document.getElementById('modalFactura').style.display = 'none';
+
+    document.getElementById('cerrarModalFactura').addEventListener('click', () => {
+      document.getElementById('modalFactura').classList.remove('active');
       location.reload();
     });
-    function imprimirSoloFactura() {
-      const facturaHtml = document.getElementById('facturaContent').innerHTML;
-      const ventana = window.open('', '', 'width=350,height=600');
-      ventana.document.write(`
-        <html><head><title>Factura</title>
-        <style>
-          body { font-family: 'Courier New', Courier, monospace; font-size: 12px; margin: 0; padding: 10px; width: 58mm; }
-          h2 { font-size: 16px; text-align: center; margin: 5px 0; }
-          table { width: 100%; border-collapse: collapse; font-size: 12px; }
-          th, td { border: none; padding: 2px 0; text-align: left; }
-          th { font-weight: bold; border-bottom: 1px solid #000; }
-          .totals { text-align: right; margin-top: 8px; font-size: 13px; }
-          @media print {
-            body { width: 58mm; }
-            .btn { display: none; }
-          }
-        </style>
-        </head><body>
-          ${facturaHtml}
-        </body></html>`);
-      ventana.document.close();
-      ventana.focus();
-      ventana.print();
-      ventana.close();
-      document.getElementById('modalFactura').style.display = 'none';
-      location.reload();
+
+    function imprimirFactura() {
+      const tipoImpresion = document.getElementById('tipoImpresion').value;
+      const facturaHTML = document.getElementById('facturaContent').innerHTML;
+      
+      if (tipoImpresion === 'termica') {
+        // Formato para impresora térmica de 58mm
+        const ventana = window.open('', '', 'width=400,height=600');
+        ventana.document.write(`
+          <html>
+          <head>
+            <title>Factura</title>
+            <style>
+              @media print {
+                @page {
+                  size: 58mm auto;
+                  margin: 0;
+                }
+              }
+              body { 
+                font-family: 'Courier New', Courier, monospace; 
+                font-size: 10px; 
+                padding: 5mm; 
+                width: 58mm; 
+                margin: 0;
+              }
+              .factura-header {
+                text-align: center;
+                margin-bottom: 10px;
+                padding-bottom: 10px;
+                border-bottom: 1px dashed #000;
+              }
+              .factura-header img {
+                max-width: 40mm;
+                max-height: 20mm;
+                margin-bottom: 5px;
+              }
+              h2 { 
+                text-align: center; 
+                margin: 3px 0; 
+                font-size: 12px;
+              }
+              .factura-info div {
+                margin: 3px 0;
+                font-size: 10px;
+              }
+              table { 
+                width: 100%; 
+                border-collapse: collapse; 
+                margin: 8px 0; 
+              }
+              th, td { 
+                padding: 3px 1px; 
+                text-align: left; 
+                border-bottom: 1px dashed #ccc; 
+                font-size: 9px;
+              }
+              th {
+                font-weight: bold;
+              }
+              .totals { 
+                text-align: right; 
+                margin-top: 8px;
+                font-size: 10px;
+                font-weight: bold;
+              }
+              .totals div { 
+                margin: 3px 0; 
+              }
+              .no-print {
+                display: none !important;
+              }
+            </style>
+          </head>
+          <body>
+            ${facturaHTML}
+            <script>
+              window.onload = function() {
+                window.print();
+                window.onafterprint = function() {
+                  window.close();
+                }
+              }
+            <\/script>
+          </body>
+          </html>
+        `);
+        ventana.document.close();
+      } else {
+        // Formato para impresora normal A4
+        const ventana = window.open('', '', 'width=800,height=600');
+        ventana.document.write(`
+          <html>
+          <head>
+            <title>Factura</title>
+            <style>
+              @media print {
+                @page {
+                  size: A4;
+                  margin: 20mm;
+                }
+              }
+              body { 
+                font-family: Arial, sans-serif; 
+                font-size: 12px; 
+                padding: 20px; 
+                max-width: 800px; 
+                margin: 0 auto;
+              }
+              .factura-header {
+                text-align: center;
+                margin-bottom: 20px;
+                padding-bottom: 20px;
+                border-bottom: 2px solid #333;
+              }
+              .factura-header img {
+                max-width: 200px;
+                max-height: 100px;
+                margin-bottom: 15px;
+              }
+              h2 { 
+                text-align: center; 
+                margin: 10px 0; 
+                font-size: 22px;
+                color: #333;
+              }
+              .factura-info {
+                margin: 20px 0;
+              }
+              .factura-info div {
+                margin: 8px 0;
+                font-size: 13px;
+              }
+              table { 
+                width: 100%; 
+                border-collapse: collapse; 
+                margin: 20px 0; 
+              }
+              th, td { 
+                padding: 10px; 
+                text-align: left; 
+                border-bottom: 1px solid #ddd; 
+              }
+              th {
+                background: #f0f0f0;
+                font-weight: bold;
+              }
+              .totals { 
+                text-align: right; 
+                margin-top: 20px;
+                font-size: 14px;
+              }
+              .totals div { 
+                margin: 8px 0; 
+              }
+              .no-print {
+                display: none !important;
+              }
+            </style>
+          </head>
+          <body>
+            ${facturaHTML}
+            <script>
+              window.onload = function() {
+                window.print();
+                window.onafterprint = function() {
+                  window.close();
+                }
+              }
+            <\/script>
+          </body>
+          </html>
+        `);
+        ventana.document.close();
+      }
+      
+      // Cerrar modal después de un momento
+      setTimeout(() => {
+        document.getElementById('modalFactura').classList.remove('active');
+        location.reload();
+      }, 1000);
     }
-    // Modal de productos
+
     function abrirModalProductos() {
-      document.getElementById('modalProductos').style.display = 'block';
+      document.getElementById('modalProductos').classList.add('active');
       if (todosProductos.length === 0) {
-        fetch('http://localhost:5000/api/sales/productos?q=')
+        fetch(`${API}/api/sales/productos?q=`)
           .then(r => r.json())
           .then(data => {
             todosProductos = data;
-            actualizarInventario(data);
             renderModalLista(data);
           });
       } else {
         renderModalLista(todosProductos);
       }
-      document.getElementById('modalBuscar').value = '';
     }
+
     function cerrarModalProductos() {
-      document.getElementById('modalProductos').style.display = 'none';
+      document.getElementById('modalProductos').classList.remove('active');
     }
+
     document.getElementById('cerrarModal').addEventListener('click', cerrarModalProductos);
+
     document.getElementById('modalBuscar').addEventListener('input', function() {
       const val = this.value.toLowerCase();
       const filtrados = todosProductos.filter(p => p.nombre.toLowerCase().includes(val));
       renderModalLista(filtrados);
     });
+
     function renderModalLista(lista) {
       let html = '';
       lista.forEach(p => {
-        const rojo = p.cantidad < 1 ? "color:#f44336;" : "";
-        const disabled = p.cantidad < 1 ? "pointer-events:none;opacity:0.6;" : "";
-        html += `<div style='padding:7px; border-bottom:1px solid #eee; cursor:pointer;${rojo}${disabled}' onclick='agregarProducto(${p.id})'>${p.nombre} (${p.codigo_barras}) - ${p.precio} <span style='color:#888;'>[${p.cantidad} disponibles]</span></div>`;
+        const sinStock = p.cantidad < 1;
+        const estilo = sinStock ? "color:#f44336; opacity:0.6; pointer-events:none;" : "";
+        html += `<div style='${estilo}' onclick='agregarProducto(${p.id})'>
+          ${p.nombre} (${p.codigo_barras}) - $${p.precio.toFixed(2)}
+          <span style='color:#888;'>[${p.cantidad} disponibles]</span>
+        </div>`;
       });
-      document.getElementById('modalLista').innerHTML = html;
+      document.getElementById('modalLista').innerHTML = html || '<div style="color:#999; text-align:center; padding: 20px;">No hay productos</div>';
     }
+
+    renderTablaVenta();
   </script>
 </body>
 </html>

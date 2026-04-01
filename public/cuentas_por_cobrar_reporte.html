@@ -1,0 +1,1009 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cuentas por Cobrar - Reporte</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.1/jspdf.plugin.autotable.min.js"></script>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Roboto', sans-serif;
+      background: linear-gradient(135deg, #e8f5e9, #b2dfdb);
+      min-height: 100vh;
+      padding-top: 80px;
+    }
+
+    .main-section {
+      max-width: 1400px;
+      margin: 24px auto;
+      padding: 24px;
+    }
+
+    .page-header {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(12px);
+      border-radius: 16px;
+      padding: 32px;
+      margin-bottom: 24px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .page-title {
+      font-size: 2.2em;
+      color: #222;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+
+    .page-title i {
+      color: #f44336;
+    }
+
+    .acciones-header {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 20px;
+    }
+
+    .btn {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 0.95em;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-excel {
+      background: #217346;
+      color: white;
+      box-shadow: 0 2px 8px rgba(33, 115, 70, 0.3);
+    }
+
+    .btn-excel:hover {
+      background: #1a5c37;
+      transform: translateY(-2px);
+    }
+
+    .btn-pdf {
+      background: #dc3545;
+      color: white;
+      box-shadow: 0 2px 8px rgba(220, 53, 69, 0.3);
+    }
+
+    .btn-pdf:hover {
+      background: #c82333;
+      transform: translateY(-2px);
+    }
+
+    .btn-print {
+      background: #6c757d;
+      color: white;
+      box-shadow: 0 2px 8px rgba(108, 117, 125, 0.3);
+    }
+
+    .btn-print:hover {
+      background: #5a6268;
+      transform: translateY(-2px);
+    }
+
+    .btn-primary {
+      background: linear-gradient(90deg, #00cc66, #66ccff);
+      color: white;
+      box-shadow: 0 4px 12px rgba(0, 204, 102, 0.3);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(0, 204, 102, 0.4);
+    }
+
+    .btn-small {
+      padding: 8px 16px;
+      font-size: 0.9em;
+    }
+
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+      margin-bottom: 24px;
+    }
+
+    .stat-box {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(12px);
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      transition: transform 0.2s;
+    }
+
+    .stat-box:hover {
+      transform: translateY(-4px);
+    }
+
+    .stat-box h4 {
+      color: #666;
+      font-size: 0.85em;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+    }
+
+    .stat-box .stat-number {
+      font-size: 2em;
+      font-weight: 700;
+      color: #f44336;
+    }
+
+    .stat-box .stat-subtitle {
+      font-size: 0.9em;
+      color: #999;
+      margin-top: 8px;
+    }
+
+    .tabla-card {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(12px);
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .tabla-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 2px solid #e0e0e0;
+    }
+
+    .tabla-container {
+      overflow-x: auto;
+      overflow-y: auto;
+      max-height: 600px;
+      border-radius: 12px;
+      border: 1px solid #e0e0e0;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 1000px;
+    }
+
+    thead {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: linear-gradient(135deg, #f44336, #e91e63);
+    }
+
+    th {
+      padding: 14px 12px;
+      text-align: left;
+      color: white;
+      font-weight: 600;
+      font-size: 0.9em;
+      text-transform: uppercase;
+    }
+
+    td {
+      padding: 12px;
+      border-bottom: 1px solid #f0f0f0;
+      color: #333;
+      background: white;
+    }
+
+    tbody tr:hover {
+      background: #fff5f5 !important;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 8px;
+      background: #e0e0e0;
+      border-radius: 4px;
+      overflow: hidden;
+      margin-top: 4px;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #00cc66, #66ccff);
+      transition: width 0.3s;
+    }
+
+    .progress-fill.danger {
+      background: linear-gradient(90deg, #f44336, #e91e63);
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 5000;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal.active {
+      display: flex;
+    }
+
+    .modal-content {
+      background: white;
+      max-width: 700px;
+      width: 90%;
+      max-height: 90vh;
+      overflow-y: auto;
+      border-radius: 16px;
+      padding: 32px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+      animation: modalFadeIn 0.3s;
+    }
+
+    @keyframes modalFadeIn {
+      from {
+        opacity: 0;
+        transform: scale(0.9) translateY(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+      }
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+      padding-bottom: 16px;
+      border-bottom: 2px solid #e0e0e0;
+    }
+
+    .modal-title {
+      font-size: 1.5em;
+      color: #222;
+      font-weight: 700;
+    }
+
+    .btn-close {
+      background: none;
+      border: none;
+      font-size: 1.8em;
+      cursor: pointer;
+      color: #666;
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      transition: all 0.2s;
+    }
+
+    .btn-close:hover {
+      background: #f0f0f0;
+      color: #f44336;
+    }
+
+    .info-cliente {
+      background: linear-gradient(135deg, rgba(244, 67, 54, 0.05), rgba(233, 30, 99, 0.05));
+      padding: 16px;
+      border-radius: 12px;
+      margin-bottom: 20px;
+    }
+
+    .info-cliente-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 12px;
+    }
+
+    .info-cliente-item strong {
+      color: #666;
+      display: block;
+      font-size: 0.85em;
+      margin-bottom: 4px;
+    }
+
+    .info-cliente-item span {
+      color: #222;
+      font-weight: 600;
+    }
+
+    .historial-item {
+      padding: 12px;
+      border-bottom: 1px solid #f0f0f0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: background 0.2s;
+    }
+
+    .historial-item:hover {
+      background: #fff5f5;
+    }
+
+    .historial-fecha {
+      font-size: 0.85em;
+      color: #999;
+    }
+
+    .historial-monto {
+      font-weight: 700;
+      font-size: 1.1em;
+    }
+
+    .historial-monto.positivo {
+      color: #f44336;
+    }
+
+    .historial-monto.negativo {
+      color: #00cc66;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: #333;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      width: 100%;
+      padding: 12px 16px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 1em;
+      transition: all 0.2s;
+      font-family: 'Roboto', sans-serif;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      outline: none;
+      border-color: #00cc66;
+      box-shadow: 0 0 0 3px rgba(0, 204, 102, 0.1);
+    }
+
+    .form-group textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
+
+    #mensajeExito, #mensajeError {
+      position: fixed;
+      top: 100px;
+      right: 30px;
+      background: white;
+      padding: 20px 32px;
+      border-radius: 12px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+      font-size: 1.1em;
+      font-weight: 600;
+      z-index: 9999;
+      display: none;
+      animation: slideIn 0.3s;
+    }
+
+    #mensajeExito {
+      border-left: 6px solid #00cc66;
+      color: #00cc66;
+    }
+
+    #mensajeError {
+      border-left: 6px solid #f44336;
+      color: #f44336;
+    }
+
+    @keyframes slideIn {
+      from {
+        transform: translateX(400px);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .stats-row {
+        grid-template-columns: 1fr;
+      }
+
+      .acciones-header {
+        flex-direction: column;
+      }
+
+      .btn {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+
+    @media print {
+      body {
+        background: white;
+        padding-top: 0;
+      }
+
+      .page-header {
+        box-shadow: none;
+      }
+
+      .acciones-header,
+      .btn,
+      .modal {
+        display: none !important;
+      }
+
+      .tabla-container {
+        max-height: none;
+        border: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="header-container"></div>
+
+  <section class="main-section">
+    <!-- Header -->
+    <div class="page-header">
+      <h1 class="page-title">
+        <i class="fas fa-file-invoice-dollar"></i>
+        Cuentas por Cobrar
+      </h1>
+      <p style="color: #666; margin-top: 8px;">Reporte detallado de clientes con deudas pendientes</p>
+      
+      <div class="acciones-header">
+        <button onclick="exportarExcel()" class="btn btn-excel">
+          <i class="fas fa-file-excel"></i>
+          Exportar Excel
+        </button>
+        <button onclick="exportarPDF()" class="btn btn-pdf">
+          <i class="fas fa-file-pdf"></i>
+          Exportar PDF
+        </button>
+        <button onclick="window.print()" class="btn btn-print">
+          <i class="fas fa-print"></i>
+          Imprimir
+        </button>
+        <button onclick="cargarDeudas()" class="btn btn-primary">
+          <i class="fas fa-sync-alt"></i>
+          Actualizar
+        </button>
+      </div>
+    </div>
+
+    <!-- Estadísticas -->
+    <div class="stats-row">
+      <div class="stat-box">
+        <h4>Total de Clientes con Deuda</h4>
+        <div class="stat-number" id="statClientesDeuda">0</div>
+        <div class="stat-subtitle">Clientes activos</div>
+      </div>
+      <div class="stat-box">
+        <h4>Monto Total por Cobrar</h4>
+        <div class="stat-number" id="statMontoTotal">RD$ 0.00</div>
+        <div class="stat-subtitle">Total pendiente</div>
+      </div>
+      <div class="stat-box">
+        <h4>Cliente con Mayor Deuda</h4>
+        <div class="stat-number" id="statMayorDeuda" style="font-size: 1.2em;">-</div>
+        <div class="stat-subtitle" id="statMayorDeudaMonto">RD$ 0.00</div>
+      </div>
+      <div class="stat-box">
+        <h4>Promedio de Deuda</h4>
+        <div class="stat-number" id="statPromedioDeuda">RD$ 0.00</div>
+        <div class="stat-subtitle">Por cliente</div>
+      </div>
+    </div>
+
+    <!-- Tabla -->
+    <div class="tabla-card">
+      <div class="tabla-header">
+        <h3 style="color: #333; font-size: 1.2em; margin: 0;">Listado de Deudores</h3>
+        <div id="contadorClientes" style="font-size: 0.95em; color: #666; font-weight: 600;">0 clientes</div>
+      </div>
+      
+      <div class="tabla-container">
+        <table id="tablaDeudas">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Cliente</th>
+              <th>Cédula/RNC</th>
+              <th>Teléfono</th>
+              <th>Deuda Actual</th>
+              <th>Límite Crédito</th>
+              <th>Uso de Crédito</th>
+              <th>Última Actividad</th>
+              <th style="width: 150px; text-align: center;">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Se llena dinámicamente -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- Modal Historial -->
+  <div id="modalHistorial" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title">Historial de Movimientos</h3>
+        <button class="btn-close" onclick="cerrarModalHistorial()">&times;</button>
+      </div>
+      
+      <div class="info-cliente" id="infoCliente"></div>
+      
+      <div id="listaHistorial" style="max-height: 400px; overflow-y: auto;">
+        <!-- Se llena dinámicamente -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Registrar Pago -->
+  <div id="modalPago" class="modal">
+    <div class="modal-content" style="max-width: 500px;">
+      <div class="modal-header">
+        <h3 class="modal-title">Registrar Pago</h3>
+        <button class="btn-close" onclick="cerrarModalPago()">&times;</button>
+      </div>
+      
+      <div class="info-cliente" id="infoClientePago"></div>
+      
+      <form id="formPago" onsubmit="event.preventDefault(); registrarPago();">
+        <input type="hidden" id="pagoClienteId">
+        
+        <div class="form-group">
+          <label>Monto (RD$) <span style="color: #f44336;">*</span></label>
+          <input type="number" id="pagoMonto" step="0.01" min="0.01" required placeholder="0.00">
+        </div>
+
+        <div class="form-group">
+          <label>Método de Pago</label>
+          <select id="pagoMetodo">
+            <option value="efectivo">Efectivo</option>
+            <option value="tarjeta">Tarjeta</option>
+            <option value="transferencia">Transferencia</option>
+            <option value="cheque">Cheque</option>
+            <option value="otros">Otros</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Referencia (Opcional)</label>
+          <input type="text" id="pagoReferencia" placeholder="Núm. de transacción, cheque, etc.">
+        </div>
+
+        <div class="form-group">
+          <label>Descripción (Opcional)</label>
+          <textarea id="pagoDescripcion" placeholder="Descripción del pago"></textarea>
+        </div>
+
+        <div style="display: flex; gap: 12px; margin-top: 24px;">
+          <button type="button" onclick="cerrarModalPago()" class="btn btn-pdf" style="flex: 1;">
+            <i class="fas fa-times"></i>
+            Cancelar
+          </button>
+          <button type="submit" class="btn btn-primary" style="flex: 1;">
+            <i class="fas fa-check"></i>
+            Registrar Pago
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Mensajes -->
+  <div id="mensajeExito">
+    <i class="fas fa-check-circle"></i>
+    <span id="textoExito"></span>
+  </div>
+  <div id="mensajeError">
+    <i class="fas fa-exclamation-circle"></i>
+    <span id="textoError"></span>
+  </div>
+
+  <script>
+    const API = 'http://localhost:5000';
+    let datosDeudas = [];
+    let cajeroActual = null;
+
+    document.addEventListener('DOMContentLoaded', function() {
+      // Cargar header
+      fetch('header.html')
+        .then(r => r.text())
+        .then(html => {
+          document.getElementById('header-container').innerHTML = html;
+          const scripts = document.getElementById('header-container').querySelectorAll('script');
+          scripts.forEach(script => {
+            const newScript = document.createElement('script');
+            if (script.src) {
+              newScript.src = script.src;
+            } else {
+              newScript.textContent = script.textContent;
+            }
+            document.body.appendChild(newScript);
+          });
+        });
+
+      // Obtener info del cajero
+      const userStr = localStorage.getItem('user');
+      if (userStr) {
+        const user = JSON.parse(userStr);
+        cajeroActual = {
+          id: user.cajero_id,
+          nombre: user.nombre
+        };
+      }
+
+      // Cargar datos
+      cargarDeudas();
+    });
+
+    function cargarDeudas() {
+      fetch(`${API}/api/clientes/reporte/deudas`)
+        .then(r => r.json())
+        .then(data => {
+          datosDeudas = data;
+          renderTabla();
+          actualizarEstadisticas();
+        })
+        .catch(err => {
+          console.error('Error al cargar deudas:', err);
+          mostrarError('Error al cargar el reporte');
+        });
+    }
+
+    function renderTabla() {
+      const tbody = document.querySelector('#tablaDeudas tbody');
+      tbody.innerHTML = '';
+
+      if (datosDeudas.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:40px;color:#999;"><i class="fas fa-check-circle" style="font-size:3em;margin-bottom:16px;display:block;color:#00cc66;"></i>¡Excelente! No hay clientes con deudas pendientes</td></tr>';
+        document.getElementById('contadorClientes').textContent = '0 clientes';
+        return;
+      }
+
+      document.getElementById('contadorClientes').textContent = `${datosDeudas.length} ${datosDeudas.length === 1 ? 'cliente' : 'clientes'}`;
+
+      datosDeudas.forEach(cliente => {
+        const disponible = cliente.limite_credito - cliente.balance_actual;
+        const porcentajeUso = (cliente.balance_actual / cliente.limite_credito * 100).toFixed(1);
+        const ultimaActividad = cliente.ultima_actividad ? 
+          new Date(cliente.ultima_actividad).toLocaleDateString('es-DO') : 
+          '-';
+
+        tbody.innerHTML += `
+          <tr>
+            <td>${cliente.id}</td>
+            <td><strong>${cliente.nombre}</strong></td>
+            <td>${cliente.cedula || cliente.rnc || '-'}</td>
+            <td>${cliente.telefono || '-'}</td>
+            <td style="color:#f44336;font-weight:700;font-size:1.1em;">RD$ ${cliente.balance_actual.toFixed(2)}</td>
+            <td>RD$ ${cliente.limite_credito.toFixed(2)}</td>
+            <td>
+              <div style="font-size:0.9em;margin-bottom:4px;">${porcentajeUso}%</div>
+              <div class="progress-bar">
+                <div class="progress-fill ${porcentajeUso > 80 ? 'danger' : ''}" style="width: ${Math.min(porcentajeUso, 100)}%"></div>
+              </div>
+            </td>
+            <td>${ultimaActividad}</td>
+            <td style="text-align:center;">
+              <button onclick='verHistorial(${cliente.id})' class="btn btn-primary btn-small" title="Historial">
+                <i class="fas fa-history"></i>
+              </button>
+              <button onclick='abrirModalPago(${JSON.stringify(cliente).replace(/'/g, "&apos;")})' class="btn btn-primary btn-small" title="Pago">
+                <i class="fas fa-dollar-sign"></i>
+              </button>
+            </td>
+          </tr>
+        `;
+      });
+    }
+
+    function actualizarEstadisticas() {
+      const totalClientes = datosDeudas.length;
+      const montoTotal = datosDeudas.reduce((sum, c) => sum + parseFloat(c.balance_actual), 0);
+      const mayorDeuda = datosDeudas.length > 0 ? 
+        datosDeudas.reduce((max, c) => parseFloat(c.balance_actual) > parseFloat(max.balance_actual) ? c : max) : 
+        null;
+      const promedioDeuda = totalClientes > 0 ? montoTotal / totalClientes : 0;
+
+      document.getElementById('statClientesDeuda').textContent = totalClientes;
+      document.getElementById('statMontoTotal').textContent = `RD$ ${montoTotal.toLocaleString('es-DO', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      })}`;
+
+      if (mayorDeuda) {
+        document.getElementById('statMayorDeuda').textContent = mayorDeuda.nombre;
+        document.getElementById('statMayorDeudaMonto').textContent = `RD$ ${mayorDeuda.balance_actual.toFixed(2)}`;
+      } else {
+        document.getElementById('statMayorDeuda').textContent = '-';
+        document.getElementById('statMayorDeudaMonto').textContent = 'RD$ 0.00';
+      }
+
+      document.getElementById('statPromedioDeuda').textContent = `RD$ ${promedioDeuda.toLocaleString('es-DO', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      })}`;
+    }
+
+    function verHistorial(clienteId) {
+      fetch(`${API}/api/clientes/${clienteId}`)
+        .then(r => r.json())
+        .then(cliente => {
+          const infoHTML = `
+            <h4 style="margin:0 0 12px 0;">${cliente.nombre}</h4>
+            <div class="info-cliente-grid">
+              <div class="info-cliente-item">
+                <strong>Deuda Actual:</strong>
+                <span style="color:#f44336;font-size:1.2em;">RD$ ${cliente.balance_actual.toFixed(2)}</span>
+              </div>
+              <div class="info-cliente-item">
+                <strong>Límite de Crédito:</strong>
+                <span>RD$ ${cliente.limite_credito.toFixed(2)}</span>
+              </div>
+            </div>
+          `;
+          document.getElementById('infoCliente').innerHTML = infoHTML;
+
+          return fetch(`${API}/api/clientes/${clienteId}/historial`);
+        })
+        .then(r => r.json())
+        .then(historial => {
+          const lista = document.getElementById('listaHistorial');
+          
+          if (historial.length === 0) {
+            lista.innerHTML = '<div style="text-align:center;padding:40px;color:#999;">Sin movimientos registrados</div>';
+          } else {
+            lista.innerHTML = '';
+            historial.forEach(mov => {
+              const fecha = new Date(mov.fecha).toLocaleString('es-DO');
+              const montoClass = mov.monto < 0 ? 'negativo' : 'positivo';
+              const tipoIcon = mov.tipo === 'pago' ? 'fa-dollar-sign' : 
+                              mov.tipo === 'venta' ? 'fa-shopping-cart' : 'fa-edit';
+              const tipoColor = mov.tipo === 'pago' ? '#00cc66' : '#f44336';
+              
+              lista.innerHTML += `
+                <div class="historial-item">
+                  <div>
+                    <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+                      <i class="fas ${tipoIcon}" style="color:${tipoColor};"></i>
+                      <strong>${mov.tipo.toUpperCase()}</strong>
+                    </div>
+                    <div style="font-size:0.9em;color:#666;">${mov.descripcion}</div>
+                    <div class="historial-fecha">${fecha}</div>
+                    ${mov.cajero_nombre ? `<div style="font-size:0.85em;color:#999;">Cajero: ${mov.cajero_nombre}</div>` : ''}
+                  </div>
+                  <div style="text-align:right;">
+                    <div class="historial-monto ${montoClass}">
+                      ${mov.monto < 0 ? '-' : '+'}RD$ ${Math.abs(mov.monto).toFixed(2)}
+                    </div>
+                    <div style="font-size:0.85em;color:#999;">
+                      Balance: RD$ ${mov.balance_despues.toFixed(2)}
+                    </div>
+                  </div>
+                </div>
+              `;
+            });
+          }
+
+          document.getElementById('modalHistorial').classList.add('active');
+        })
+        .catch(err => {
+          console.error('Error:', err);
+          mostrarError('Error al cargar historial');
+        });
+    }
+
+    function cerrarModalHistorial() {
+      document.getElementById('modalHistorial').classList.remove('active');
+    }
+
+    function abrirModalPago(cliente) {
+      const infoHTML = `
+        <h4 style="margin:0 0 12px 0;">${cliente.nombre}</h4>
+        <div class="info-cliente-grid">
+          <div class="info-cliente-item">
+            <strong>Deuda Actual:</strong>
+            <span style="color:#f44336;font-size:1.3em;">RD$ ${cliente.balance_actual.toFixed(2)}</span>
+          </div>
+          <div class="info-cliente-item">
+            <strong>Límite de Crédito:</strong>
+            <span>RD$ ${cliente.limite_credito.toFixed(2)}</span>
+          </div>
+        </div>
+      `;
+      document.getElementById('infoClientePago').innerHTML = infoHTML;
+      document.getElementById('pagoClienteId').value = cliente.id;
+      document.getElementById('formPago').reset();
+      document.getElementById('modalPago').classList.add('active');
+    }
+
+    function cerrarModalPago() {
+      document.getElementById('modalPago').classList.remove('active');
+    }
+
+    function registrarPago() {
+      const clienteId = document.getElementById('pagoClienteId').value;
+      const datos = {
+        monto: parseFloat(document.getElementById('pagoMonto').value),
+        metodo_pago: document.getElementById('pagoMetodo').value,
+        referencia: document.getElementById('pagoReferencia').value,
+        descripcion: document.getElementById('pagoDescripcion').value,
+        cajero_id: cajeroActual?.id || null
+      };
+
+      fetch(`${API}/api/clientes/${clienteId}/pago`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(datos)
+      })
+      .then(r => r.json())
+      .then(data => {
+        if (data.nuevoBalance !== undefined) {
+          mostrarExito(`Pago registrado. Nuevo balance: RD$ ${data.nuevoBalance.toFixed(2)}`);
+          cerrarModalPago();
+          cargarDeudas();
+        } else {
+          mostrarError(data.message || 'Error al registrar pago');
+        }
+      })
+      .catch(err => {
+        console.error('Error:', err);
+        mostrarError('Error al registrar pago');
+      });
+    }
+
+    function exportarExcel() {
+      if (datosDeudas.length === 0) {
+        mostrarError('No hay datos para exportar');
+        return;
+      }
+
+      const datos = datosDeudas.map(c => ({
+        'ID': c.id,
+        'Cliente': c.nombre,
+        'Cédula/RNC': c.cedula || c.rnc || '-',
+        'Teléfono': c.telefono || '-',
+        'Deuda Actual': c.balance_actual.toFixed(2),
+        'Límite Crédito': c.limite_credito.toFixed(2),
+        'Disponible': (c.limite_credito - c.balance_actual).toFixed(2),
+        'Uso de Crédito %': (c.balance_actual / c.limite_credito * 100).toFixed(1),
+        'Última Actividad': c.ultima_actividad ? new Date(c.ultima_actividad).toLocaleDateString('es-DO') : '-'
+      }));
+
+      const ws = XLSX.utils.json_to_sheet(datos);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, 'Cuentas por Cobrar');
+      
+      const fecha = new Date().toISOString().split('T')[0];
+      XLSX.writeFile(wb, `Cuentas_por_Cobrar_${fecha}.xlsx`);
+      
+      mostrarExito('Archivo Excel descargado exitosamente');
+    }
+
+    function exportarPDF() {
+      if (datosDeudas.length === 0) {
+        mostrarError('No hay datos para exportar');
+        return;
+      }
+
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+
+      // Título
+      doc.setFontSize(20);
+      doc.setTextColor(244, 67, 54);
+      doc.text('Cuentas por Cobrar', 14, 20);
+      
+      // Fecha
+      doc.setFontSize(10);
+      doc.setTextColor(0, 0, 0);
+      doc.text(`Fecha: ${new Date().toLocaleDateString('es-DO')}`, 14, 30);
+
+      // Estadísticas
+      const totalClientes = datosDeudas.length;
+      const montoTotal = datosDeudas.reduce((sum, c) => sum + parseFloat(c.balance_actual), 0);
+      
+      doc.setFontSize(11);
+      doc.text(`Total de Clientes con Deuda: ${totalClientes}`, 14, 40);
+      doc.text(`Monto Total por Cobrar: RD$ ${montoTotal.toFixed(2)}`, 14, 47);
+
+      // Tabla
+      const tableData = datosDeudas.map(c => [
+        c.id,
+        c.nombre,
+        c.cedula || c.rnc || '-',
+        c.telefono || '-',
+        `RD$ ${c.balance_actual.toFixed(2)}`,
+        `RD$ ${c.limite_credito.toFixed(2)}`,
+        `${(c.balance_actual / c.limite_credito * 100).toFixed(1)}%`
+      ]);
+
+      doc.autoTable({
+        head: [['ID', 'Cliente', 'Cédula/RNC', 'Teléfono', 'Deuda', 'Límite', 'Uso %']],
+        body: tableData,
+        startY: 55,
+        theme: 'striped',
+        headStyles: { 
+          fillColor: [244, 67, 54],
+          fontSize: 9
+        },
+        bodyStyles: {
+          fontSize: 8
+        },
+        columnStyles: {
+          0: { cellWidth: 15 },
+          1: { cellWidth: 40 },
+          4: { halign: 'right' },
+          5: { halign: 'right' },
+          6: { halign: 'center' }
+        }
+      });
+
+      const fecha = new Date().toISOString().split('T')[0];
+      doc.save(`Cuentas_por_Cobrar_${fecha}.pdf`);
+      
+      mostrarExito('Archivo PDF descargado exitosamente');
+    }
+
+    function mostrarExito(mensaje) {
+      const elemento = document.getElementById('mensajeExito');
+      document.getElementById('textoExito').textContent = mensaje;
+      elemento.style.display = 'block';
+      setTimeout(() => elemento.style.display = 'none', 3000);
+    }
+
+    function mostrarError(mensaje) {
+      const elemento = document.getElementById('mensajeError');
+      document.getElementById('textoError').textContent = mensaje;
+      elemento.style.display = 'block';
+      setTimeout(() => elemento.style.display = 'none', 3500);
+    }
+  </script>
+</body>
+</html>

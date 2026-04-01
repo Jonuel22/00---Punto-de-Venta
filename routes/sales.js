@@ -9,10 +9,66 @@ const db = mysql.createConnection({
   database: 'punto_de_venta'
 });
 
+// Variable para almacenar la instancia de WebSocket Server
+let wss = null;
+
+// Función para configurar WebSocket Server
+const setWebSocketServer = (webSocketServer) => {
+  wss = webSocketServer;
+};
+
+// Función para emitir actualización de KPIs a todos los clientes conectados
+const emitirKPIActualizados = () => {
+  if (!wss) return;
+  
+  const hoy = new Date();
+  const year = hoy.getFullYear();
+  const month = String(hoy.getMonth() + 1).padStart(2, '0');
+  const day = String(hoy.getDate()).padStart(2, '0');
+  const fechaHoy = `${year}-${month}-${day}`;
+
+  const query = `
+    SELECT 
+      COUNT(DISTINCT v.id) AS transacciones,
+      ROUND(
+        COALESCE(SUM(dv.precio_unitario * dv.cantidad), 0)
+        + COALESCE(SUM(DISTINCT v.itbis), 0),
+        2
+      ) AS total
+    FROM ventas v
+    LEFT JOIN detalle_ventas dv 
+      ON v.id = dv.venta_id
+    WHERE v.fecha >= ?
+      AND v.fecha < DATE_ADD(?, INTERVAL 1 DAY);
+  `;
+  
+  db.query(query, [fechaHoy, fechaHoy], (err, rows) => {
+    if (err) {
+      console.error('Error al obtener KPIs para WebSocket:', err);
+      return;
+    }
+    
+    const resultado = {
+      type: 'KPI_UPDATE',
+      data: {
+        transacciones: parseInt(rows[0]?.transacciones) || 0,
+        total: parseFloat(rows[0]?.total) || 0
+      }
+    };
+    
+    // Enviar a todos los clientes conectados
+    wss.clients.forEach((client) => {
+      if (client.readyState === 1) { // 1 = OPEN
+        client.send(JSON.stringify(resultado));
+      }
+    });
+    
+    console.log('KPIs actualizados emitidos:', resultado.data);
+  });
+};
+
 // ===== ENDPOINT DE KPIs - DEBE IR PRIMERO =====
-// Endpoint específico para KPIs del día actual
 router.get('/kpi', (req, res) => {
-  // Obtener fecha actual en formato YYYY-MM-DD
   const hoy = new Date();
   const year = hoy.getFullYear();
   const month = String(hoy.getMonth() + 1).padStart(2, '0');
@@ -22,18 +78,18 @@ router.get('/kpi', (req, res) => {
   console.log('Consultando KPIs para la fecha:', fechaHoy);
   
   const query = `
- SELECT 
-    COUNT(DISTINCT v.id) AS transacciones,
-    ROUND(
+    SELECT 
+      COUNT(DISTINCT v.id) AS transacciones,
+      ROUND(
         COALESCE(SUM(dv.precio_unitario * dv.cantidad), 0)
         + COALESCE(SUM(DISTINCT v.itbis), 0),
         2
-    ) AS total
-FROM ventas v
-LEFT JOIN detalle_ventas dv 
-    ON v.id = dv.venta_id
-WHERE v.fecha >= ?
-  AND v.fecha < DATE_ADD(?, INTERVAL 1 DAY);
+      ) AS total
+    FROM ventas v
+    LEFT JOIN detalle_ventas dv 
+      ON v.id = dv.venta_id
+    WHERE v.fecha >= ?
+      AND v.fecha < DATE_ADD(?, INTERVAL 1 DAY);
   `;
   
   db.query(query, [fechaHoy, fechaHoy], (err, rows) => {
@@ -48,7 +104,6 @@ WHERE v.fecha >= ?
     
     console.log('Resultado de KPIs:', rows);
     
-    // Si no hay ventas hoy, retornar 0
     if (rows.length === 0 || rows[0].transacciones === 0) {
       console.log('No hay ventas hoy');
       return res.json({ 
@@ -86,7 +141,6 @@ router.get('/top-selling', (req, res) => {
       return res.status(500).json({ message: 'Error al obtener productos' });
     }
     
-    // Si no hay datos, enviar array vacío
     if (rows.length === 0) {
       return res.json([]);
     }
@@ -101,6 +155,7 @@ router.get('/daily-month', (req, res) => {
   const year = hoy.getFullYear();
   const month = String(hoy.getMonth() + 1).padStart(2, '0');
   const primerDia = `${year}-${month}-01`;
+
   
   const query = `
     SELECT 
@@ -125,7 +180,6 @@ router.get('/daily-month', (req, res) => {
       return res.status(500).json({ message: 'Error al obtener ventas diarias' });
     }
     
-    // Si no hay datos, enviar array vacío
     if (rows.length === 0) {
       return res.json([]);
     }
@@ -147,11 +201,16 @@ router.get('/productos', (req, res) => {
   });
 });
 
-// ===== CREAR VENTA =====
+// ===== CREAR VENTA CON CAJERO =====
 router.post('/crear', (req, res) => {
-  const { productos, cliente } = req.body;
+  const { productos, cliente, cajero_id } = req.body;
+  
   if (!productos || productos.length === 0) {
     return res.status(400).json({ message: 'No hay productos en la venta' });
+  }
+  
+  if (!cajero_id) {
+    return res.status(400).json({ message: 'Debe especificar el cajero' });
   }
   
   let subtotal = 0;
@@ -161,8 +220,8 @@ router.post('/crear', (req, res) => {
   const itbis = +(subtotal * 0.18).toFixed(2);
   const total = +(subtotal + itbis).toFixed(2);
 
-  const ventaQuery = 'INSERT INTO ventas (fecha, cliente_nombre, cliente_rnc, subtotal, itbis, total) VALUES (NOW(), ?, ?, ?, ?, ?)';
-  db.query(ventaQuery, [cliente?.nombre || '', cliente?.rnc || '', subtotal, itbis, total], (err, ventaResult) => {
+  const ventaQuery = 'INSERT INTO ventas (fecha, cliente_nombre, cliente_rnc, subtotal, itbis, total, cajero_id) VALUES (NOW(), ?, ?, ?, ?, ?, ?)';
+  db.query(ventaQuery, [cliente?.nombre || '', cliente?.rnc || '', subtotal, itbis, total, cajero_id], (err, ventaResult) => {
     if (err) {
       console.error('Error al crear venta:', err);
       return res.status(500).json({ message: 'Error al crear la venta' });
@@ -183,24 +242,38 @@ router.post('/crear', (req, res) => {
         });
       });
       
-      // Agregar notificación de venta realizada
-      const mensajeNotificacion = `Venta realizada - Total: RD$ ${total.toLocaleString('es-DO', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-      db.query('INSERT INTO notificaciones (mensaje, fecha) VALUES (?, NOW())', [mensajeNotificacion], (err) => {
-        if (err) console.error('Error al agregar notificación:', err);
-      });
+      const mensajeNotificacion = `Venta realizada - Total: RD$ ${total.toLocaleString('es-DO', {
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2
+})}`;
+
+      
+      // ⚡ EMITIR ACTUALIZACIÓN DE KPIs VÍA WEBSOCKET
+      emitirKPIActualizados();
       
       res.json({ message: 'Venta realizada exitosamente', ventaId });
     });
   });
 });
 
-// ===== OBTENER FACTURA =====
+// ===== OBTENER FACTURA CON INFORMACIÓN DEL CAJERO =====
 router.get('/factura/:id', (req, res) => {
   const ventaId = req.params.id;
-  db.query('SELECT * FROM ventas WHERE id = ?', [ventaId], (err, ventaRows) => {
+  
+  const ventaQuery = `
+    SELECT 
+      v.*,
+      c.nombre as cajero_nombre
+    FROM ventas v
+    LEFT JOIN cajeros c ON v.cajero_id = c.id
+    WHERE v.id = ?
+  `;
+  
+  db.query(ventaQuery, [ventaId], (err, ventaRows) => {
     if (err || ventaRows.length === 0) {
       return res.status(404).json({ message: 'Venta no encontrada' });
     }
+    
     db.query('SELECT dv.*, i.nombre FROM detalle_ventas dv JOIN inventario i ON dv.producto_id = i.id WHERE dv.venta_id = ?', [ventaId], (err, detalleRows) => {
       if (err) {
         return res.status(500).json({ message: 'Error al obtener detalle' });
@@ -210,4 +283,6 @@ router.get('/factura/:id', (req, res) => {
   });
 });
 
+// Exportar router y función para configurar WebSocket
 module.exports = router;
+module.exports.setWebSocketServer = setWebSocketServer;

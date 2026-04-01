@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ventas por Cajero</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+    <style>
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Roboto', sans-serif;
+    background: linear-gradient(135deg, #e8f5e9, #b2dfdb);
+    min-height: 100vh;
+    padding-top: 80px;
+}
+
+.main-section {
+    max-width: 1200px;
+    margin: 24px auto;
+    padding: 24px;
+}
+
+.page-header {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(12px);
+    border-radius: 16px;
+    padding: 32px;
+    margin-bottom: 24px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.page-title {
+    font-size: 2.2em;
+    color: #222;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 8px;
+}
+
+.page-title i {
+    color: #2196f3;
+}
+
+.filters-card {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(12px);
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 24px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.filters-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group label {
+    margin-bottom: 6px;
+    font-weight: 600;
+    color: #333;
+}
+
+.form-group input,
+.form-group select {
+    padding: 10px 12px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 1em;
+    transition: all 0.2s;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    outline: none;
+    border-color: #2196f3;
+    box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.1);
+}
+
+.actions-row {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.btn {
+    padding: 12px 20px;
+    border: none;
+    border-radius: 8px;
+    font-size: 1em;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-primary {
+    background: linear-gradient(90deg, #2196f3, #64b5f6);
+    color: white;
+    box-shadow: 0 4px 12px rgba(33, 150, 243, 0.3);
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(33, 150, 243, 0.4);
+}
+
+.btn-success {
+    background: #217346;
+    color: white;
+}
+
+.btn-danger {
+    background: #dc3545;
+    color: white;
+}
+
+.stats-card {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(12px);
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 24px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+}
+
+.stat-item {
+    background: linear-gradient(135deg, rgba(33, 150, 243, 0.05), rgba(100, 181, 246, 0.05));
+    padding: 20px;
+    border-radius: 12px;
+    text-align: center;
+}
+
+.stat-label {
+    font-size: 0.9em;
+    color: #666;
+    margin-bottom: 8px;
+}
+
+.stat-value {
+    font-size: 1.8em;
+    font-weight: 700;
+    color: #2196f3;
+}
+
+.table-card {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(12px);
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+thead {
+    background: linear-gradient(135deg, #2196f3, #1976d2);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+th {
+    padding: 14px 12px;
+    text-align: left;
+    color: white;
+    font-weight: 600;
+    font-size: 0.95em;
+    text-transform: uppercase;
+}
+
+td {
+    padding: 12px;
+    border-bottom: 1px solid #f0f0f0;
+    color: #333;
+}
+
+tbody tr:hover {
+    background: #f0f8ff;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: #999;
+}
+
+.empty-state i {
+    font-size: 4em;
+    margin-bottom: 16px;
+    color: #ddd;
+}
+    </style>
+</head>
+<body>
+    <div id="header-container"></div>
+
+    <section class="main-section">
+        <div class="page-header">
+            <h1 class="page-title">
+                <i class="fas fa-chart-line"></i>
+                Ventas por Cajero
+            </h1>
+            <p style="color: #666;">Analiza el desempeño de ventas por cajero</p>
+        </div>
+
+        <!-- Filtros -->
+        <div class="filters-card">
+            <h3 style="margin-bottom: 16px; color: #333;">
+                <i class="fas fa-filter"></i>
+                Filtros
+            </h3>
+            <div class="filters-grid">
+                <div class="form-group">
+                    <label>Fecha Inicio</label>
+                    <input type="date" id="fecha_inicio">
+                </div>
+                <div class="form-group">
+                    <label>Fecha Fin</label>
+                    <input type="date" id="fecha_fin">
+                </div>
+                <div class="form-group">
+                    <label>Cajero</label>
+                    <select id="cajero_filtro">
+                        <option value="">Todos los cajeros</option>
+                    </select>
+                </div>
+            </div>
+            <div class="actions-row">
+                <button class="btn btn-primary" onclick="aplicarFiltros()">
+                    <i class="fas fa-search"></i>
+                    Buscar
+                </button>
+                <button class="btn btn-success" onclick="descargarExcel()">
+                    <i class="fas fa-file-excel"></i>
+                    Excel
+                </button>
+                <button class="btn btn-danger" onclick="descargarPDF()">
+                    <i class="fas fa-file-pdf"></i>
+                    PDF
+                </button>
+            </div>
+        </div>
+
+        <!-- Estadísticas -->
+        <div class="stats-card">
+            <h3 style="margin-bottom: 16px; color: #333;">
+                <i class="fas fa-chart-bar"></i>
+                Resumen
+            </h3>
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <div class="stat-label">Total Ventas</div>
+                    <div class="stat-value" id="stat_total">$0.00</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Total Transacciones</div>
+                    <div class="stat-value" id="stat_transacciones">0</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Ticket Promedio</div>
+                    <div class="stat-value" id="stat_promedio">$0.00</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabla -->
+        <div class="table-card">
+            <h3 style="margin-bottom: 16px; color: #333;">
+                <i class="fas fa-table"></i>
+                Detalle por Cajero
+            </h3>
+            <div id="tabla-container">
+                <table id="tabla-ventas-cajero">
+                    <thead>
+                        <tr>
+                            <th>Cajero</th>
+                            <th>Total Ventas</th>
+                            <th>Transacciones</th>
+                            <th>Ticket Promedio</th>
+                            <th>Comisión (2%)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Datos dinámicos -->
+                    </tbody>
+                </table>
+                <div id="empty-state" class="empty-state" style="display: none;">
+                    <i class="fas fa-inbox"></i>
+                    <p>No hay datos para mostrar</p>
+                    <p style="font-size: 0.9em;">Ajusta los filtros y busca nuevamente</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        const API = 'http://localhost:5000';
+        let datosActuales = [];
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Cargar header
+            fetch('header.html')
+                .then(r => r.text())
+                .then(html => {
+                    document.getElementById('header-container').innerHTML = html;
+                    const scripts = document.getElementById('header-container').querySelectorAll('script');
+                    scripts.forEach(script => {
+                        const newScript = document.createElement('script');
+                        if (script.src) newScript.src = script.src;
+                        else newScript.textContent = script.textContent;
+                        document.body.appendChild(newScript);
+                    });
+                });
+
+            // Configurar fechas por defecto (último mes)
+            const hoy = new Date();
+            const hace30dias = new Date(hoy.getTime() - 30 * 24 * 60 * 60 * 1000);
+            
+            document.getElementById('fecha_fin').valueAsDate = hoy;
+            document.getElementById('fecha_inicio').valueAsDate = hace30dias;
+
+            // Cargar cajeros
+            cargarCajeros();
+
+            // Cargar datos iniciales
+            aplicarFiltros();
+        });
+
+        function cargarCajeros() {
+            fetch(`${API}/api/cajeros/activos`)
+                .then(r => r.json())
+                .then(cajeros => {
+                    const select = document.getElementById('cajero_filtro');
+                    cajeros.forEach(cajero => {
+                        const option = document.createElement('option');
+                        option.value = cajero.id;
+                        option.textContent = cajero.nombre;
+                        select.appendChild(option);
+                    });
+                })
+                .catch(err => console.error('Error al cargar cajeros:', err));
+        }
+
+        function aplicarFiltros() {
+            const filtros = {
+                fecha_inicio: document.getElementById('fecha_inicio').value,
+                fecha_fin: document.getElementById('fecha_fin').value,
+                cajero_id: document.getElementById('cajero_filtro').value
+            };
+
+            const params = new URLSearchParams();
+            if (filtros.fecha_inicio) params.append('fecha_inicio', filtros.fecha_inicio);
+            if (filtros.fecha_fin) params.append('fecha_fin', filtros.fecha_fin);
+            if (filtros.cajero_id) params.append('cajero_id', filtros.cajero_id);
+
+            fetch(`${API}/api/reportes/ventas-por-cajero?${params}`)
+                .then(r => r.json())
+                .then(data => {
+                    datosActuales = data;
+                    renderizarTabla(data);
+                    actualizarEstadisticas(data);
+                })
+                .catch(err => {
+                    console.error('Error:', err);
+                    mostrarEstadoVacio();
+                });
+        }
+
+        function renderizarTabla(datos) {
+            const tbody = document.querySelector('#tabla-ventas-cajero tbody');
+            const emptyState = document.getElementById('empty-state');
+            
+            if (!datos || datos.length === 0) {
+                mostrarEstadoVacio();
+                return;
+            }
+
+            emptyState.style.display = 'none';
+            tbody.innerHTML = '';
+
+            datos.forEach(cajero => {
+                const comision = cajero.total_ventas * 0.02;
+                
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td><strong>${cajero.cajero_nombre || 'Sin cajero'}</strong></td>
+                    <td><strong style="color: #2196f3;">$${parseFloat(cajero.total_ventas || 0).toFixed(2)}</strong></td>
+                    <td>${cajero.num_transacciones || 0}</td>
+                    <td>$${parseFloat(cajero.ticket_promedio || 0).toFixed(2)}</td>
+                    <td style="color: #4caf50;">$${comision.toFixed(2)}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function actualizarEstadisticas(datos) {
+            if (!datos || datos.length === 0) {
+                document.getElementById('stat_total').textContent = '$0.00';
+                document.getElementById('stat_transacciones').textContent = '0';
+                document.getElementById('stat_promedio').textContent = '$0.00';
+                return;
+            }
+
+            const totalVentas = datos.reduce((sum, c) => sum + parseFloat(c.total_ventas || 0), 0);
+            const totalTransacciones = datos.reduce((sum, c) => sum + parseInt(c.num_transacciones || 0), 0);
+            const ticketPromedio = totalTransacciones > 0 ? totalVentas / totalTransacciones : 0;
+
+            document.getElementById('stat_total').textContent = '$' + totalVentas.toFixed(2);
+            document.getElementById('stat_transacciones').textContent = totalTransacciones;
+            document.getElementById('stat_promedio').textContent = '$' + ticketPromedio.toFixed(2);
+        }
+
+        function mostrarEstadoVacio() {
+            document.querySelector('#tabla-ventas-cajero tbody').innerHTML = '';
+            document.getElementById('empty-state').style.display = 'block';
+            actualizarEstadisticas([]);
+        }
+
+        function descargarExcel() {
+            if (datosActuales.length === 0) {
+                alert('No hay datos para exportar');
+                return;
+            }
+
+            const datosExcel = datosActuales.map(c => ({
+                'Cajero': c.cajero_nombre || 'Sin cajero',
+                'Total Ventas': parseFloat(c.total_ventas || 0).toFixed(2),
+                'Transacciones': c.num_transacciones || 0,
+                'Ticket Promedio': parseFloat(c.ticket_promedio || 0).toFixed(2),
+                'Comisión 2%': (parseFloat(c.total_ventas || 0) * 0.02).toFixed(2)
+            }));
+
+            const ws = XLSX.utils.json_to_sheet(datosExcel);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'Ventas por Cajero');
+            XLSX.writeFile(wb, `ventas_por_cajero_${new Date().toISOString().split('T')[0]}.xlsx`);
+        }
+
+        function descargarPDF() {
+            if (datosActuales.length === 0) {
+                alert('No hay datos para exportar');
+                return;
+            }
+
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
+            doc.setFontSize(18);
+            doc.text('Reporte de Ventas por Cajero', 14, 20);
+
+            doc.setFontSize(11);
+            doc.text(`Fecha: ${new Date().toLocaleDateString()}`, 14, 30);
+            doc.text(`Período: ${document.getElementById('fecha_inicio').value} - ${document.getElementById('fecha_fin').value}`, 14, 36);
+
+            const tableData = datosActuales.map(c => [
+                c.cajero_nombre || 'Sin cajero',
+                '$' + parseFloat(c.total_ventas || 0).toFixed(2),
+                c.num_transacciones || 0,
+                '$' + parseFloat(c.ticket_promedio || 0).toFixed(2),
+                '$' + (parseFloat(c.total_ventas || 0) * 0.02).toFixed(2)
+            ]);
+
+            doc.autoTable({
+                startY: 45,
+                head: [['Cajero', 'Total Ventas', 'Transacciones', 'Ticket Promedio', 'Comisión 2%']],
+                body: tableData,
+                theme: 'striped',
+                headStyles: { fillColor: [33, 150, 243] }
+            });
+
+            doc.save(`ventas_por_cajero_${new Date().toISOString().split('T')[0]}.pdf`);
+        }
+    </script>
+</body>
+</html>

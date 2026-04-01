@@ -69,4 +69,58 @@ router.get('/ventas', (req, res) => {
   });
 });
 
+// ===== REPORTE DE VENTAS POR CAJERO =====
+router.get('/ventas-por-cajero', (req, res) => {
+  const { fecha_inicio, fecha_fin, cajero_id } = req.query;
+  
+  let query = `
+    SELECT 
+      c.id as cajero_id,
+      c.nombre as cajero_nombre,
+      COUNT(v.id) as num_transacciones,
+      COALESCE(SUM(v.total), 0) as total_ventas,
+      COALESCE(AVG(v.total), 0) as ticket_promedio
+    FROM cajeros c
+    LEFT JOIN ventas v ON c.id = v.cajero_id
+    WHERE c.activo = 1
+  `;
+  
+  const params = [];
+  
+  // 🔹 Filtro por fecha inicio
+  if (fecha_inicio) {
+    query += ' AND v.fecha >= ?';
+    params.push(fecha_inicio);
+  }
+  
+  // 🔹 Filtro por fecha fin (día completo)
+  if (fecha_fin) {
+    query += ' AND v.fecha < DATE_ADD(?, INTERVAL 1 DAY)';
+    params.push(fecha_fin);
+  }
+  
+  // 🔹 Filtro por cajero específico
+  if (cajero_id) {
+    query += ' AND c.id = ?';
+    params.push(cajero_id);
+  }
+  
+  query += ' GROUP BY c.id, c.nombre';
+  query += ' HAVING num_transacciones > 0'; // Solo cajeros con ventas
+  query += ' ORDER BY total_ventas DESC';
+  
+  console.log('Query ventas por cajero:', query);
+  console.log('Params:', params);
+  
+  db.query(query, params, (err, rows) => {
+    if (err) {
+      console.error('Error en query de ventas por cajero:', err);
+      return res.status(500).json({ 
+        message: 'Error al obtener reporte de ventas por cajero' 
+      });
+    }
+    res.json(rows);
+  });
+});
+
 module.exports = router;

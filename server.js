@@ -20,8 +20,10 @@ const notificationsRoutes = require('./routes/notifications');
 const reportesRoutes = require('./routes/reportes');
 const cajerosRoutes = require('./routes/cajeros');
 const cuadreCajaRoutes = require('./routes/cuadre_caja');
+const usuariosRouter = require('./routes/usuarios');
+const clientes_backendRouter = require('./routes/clientes_backend'); 
+const configRouter = require('./routes/config'); 
 const { authMiddleware } = require('./routes/authMiddleware');
-
 
 // Usar rutas
 app.use('/api/auth', authRoutes);
@@ -40,7 +42,9 @@ app.use('/api/notifications', authMiddleware, noCacheHeaders, notificationsRoute
 app.use('/api/reportes', authMiddleware, noCacheHeaders, reportesRoutes);
 app.use('/api/cajeros', authMiddleware, noCacheHeaders, cajerosRoutes);
 app.use('/api/cuadre-caja', authMiddleware, noCacheHeaders, cuadreCajaRoutes);
-
+app.use('/api/usuarios', authMiddleware, noCacheHeaders, usuariosRouter); 
+app.use('/api/config', authMiddleware, noCacheHeaders, configRouter); 
+app.use('/api/clientes_backend', authMiddleware, noCacheHeaders, clientes_backendRouter); 
 
 
 app.listen(port, () => {

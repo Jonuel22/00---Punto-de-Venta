@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configuración de Usuarios</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <style>
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Roboto', sans-serif;
+    background: linear-gradient(135deg, #e8f5e9, #b2dfdb);
+    min-height: 100vh;
+    padding-top: 80px;
+}
+
+.main-section {
+    padding: 24px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.page-header {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(12px);
+    border-radius: 16px;
+    padding: 32px;
+    margin-bottom: 24px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.page-title {
+    font-size: 2.2em;
+    color: #222;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 8px;
+}
+
+.page-title i {
+    color: #2196f3;
+}
+
+.actions-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+.btn-primary {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    background: linear-gradient(90deg, #2196f3, #64b5f6);
+    color: white;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 4px 12px rgba(33, 150, 243, 0.3);
+    transition: all 0.3s;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(33, 150, 243, 0.4);
+}
+
+.tabla-card {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(12px);
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+thead {
+    background: linear-gradient(135deg, #2196f3, #1976d2);
+}
+
+th {
+    padding: 14px 12px;
+    text-align: left;
+    color: white;
+    font-weight: 600;
+    font-size: 0.9em;
+    text-transform: uppercase;
+}
+
+td {
+    padding: 12px;
+    border-bottom: 1px solid #f0f0f0;
+    color: #333;
+}
+
+tbody tr:hover {
+    background: #f0f8ff;
+}
+
+.badge {
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 0.85em;
+    font-weight: 600;
+}
+
+.badge-activo {
+    background: #e8f5e9;
+    color: #2e7d32;
+}
+
+.badge-inactivo {
+    background: #ffebee;
+    color: #c62828;
+}
+
+.btn-icon {
+    padding: 6px 12px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    margin: 0 4px;
+    transition: all 0.2s;
+}
+
+.btn-editar {
+    background: #2196f3;
+    color: white;
+}
+
+.btn-cambiar-password {
+    background: #ff9800;
+    color: white;
+}
+
+.btn-eliminar {
+    background: #f44336;
+    color: white;
+}
+
+.btn-icon:hover {
+    transform: scale(1.1);
+}
+
+/* Modal */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 9999;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal.active {
+    display: flex;
+}
+
+.modal-content {
+    background: white;
+    border-radius: 16px;
+    padding: 32px;
+    max-width: 500px;
+    width: 90%;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+.modal-title {
+    font-size: 1.5em;
+    color: #222;
+    font-weight: 700;
+}
+
+.btn-close {
+    background: none;
+    border: none;
+    font-size: 1.5em;
+    cursor: pointer;
+    color: #666;
+}
+
+.form-group {
+    margin-bottom: 16px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 600;
+    color: #333;
+}
+
+.form-group input,
+.form-group select {
+    width: 100%;
+    padding: 10px 12px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 1em;
+    transition: all 0.2s;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    outline: none;
+    border-color: #2196f3;
+    box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.1);
+}
+
+.modal-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 24px;
+}
+
+.btn-secondary {
+    padding: 12px 24px;
+    border: 2px solid #2196f3;
+    border-radius: 8px;
+    background: white;
+    color: #2196f3;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.form-help {
+    font-size: 0.85em;
+    color: #666;
+    margin-top: 4px;
+}
+    </style>
+</head>
+<body>
+    <div id="header-container"></div>
+    
+    <div class="main-section">
+        <div class="page-header">
+            <h1 class="page-title">
+                <i class="fas fa-users"></i>
+                Configuración de Usuarios
+            </h1>
+            <p style="color: #666;">Gestiona los usuarios del sistema</p>
+        </div>
+        
+        <div class="actions-bar">
+            <button onclick="window.location.href='config_general.html'" class="btn-secondary" style="display: inline-flex; align-items: center; gap: 8px;">
+                <i class="fas fa-arrow-left"></i> Volver
+            </button>
+            <button onclick="abrirModalNuevo()" class="btn-primary">
+                <i class="fas fa-plus"></i>
+                Nuevo Usuario
+            </button>
+        </div>
+        
+        <div class="tabla-card">
+            <table id="tabla-usuarios">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Usuario</th>
+                        <th>Nombre</th>
+                        <th>Rol</th>
+                        <th>Cajero Asociado</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Datos dinámicos -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <!-- Modal Usuario -->
+    <div id="modal-usuario" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="modal-title">Nuevo Usuario</h2>
+                <button onclick="cerrarModal('modal-usuario')" class="btn-close">&times;</button>
+            </div>
+            
+            <form id="form-usuario" onsubmit="guardarUsuario(event)">
+                <input type="hidden" id="usuario_id">
+                
+                <div class="form-group">
+                    <label for="username">Nombre de Usuario *</label>
+                    <input type="text" id="username" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="nombre_completo">Nombre Completo *</label>
+                    <input type="text" id="nombre_completo" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">Contraseña <span id="password-required">*</span></label>
+                    <input type="password" id="password">
+                    <div class="form-help" id="password-help">Mínimo 6 caracteres</div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="rol">Rol *</label>
+                    <select id="rol" required>
+                        <option value="cajero">Cajero</option>
+                        <option value="supervisor">Supervisor</option>
+                        <option value="admin">Administrador</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="cajero_id">Cajero Asociado</label>
+                    <select id="cajero_id">
+                        <option value="">Ninguno</option>
+                    </select>
+                    <div class="form-help">Opcional: vincular a un cajero existente</div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="activo">Estado</label>
+                    <select id="activo">
+                        <option value="1">Activo</option>
+                        <option value="0">Inactivo</option>
+                    </select>
+                </div>
+                
+                <div class="modal-actions">
+                    <button type="button" onclick="cerrarModal('modal-usuario')" class="btn-secondary">
+                        Cancelar
+                    </button>
+                    <button type="submit" class="btn-primary">
+                        <i class="fas fa-save"></i>
+                        Guardar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Modal Cambiar Contraseña -->
+    <div id="modal-password" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Cambiar Contraseña</h2>
+                <button onclick="cerrarModal('modal-password')" class="btn-close">&times;</button>
+            </div>
+            
+            <form id="form-password" onsubmit="cambiarPassword(event)">
+                <input type="hidden" id="password_usuario_id">
+                
+                <div class="form-group">
+                    <label for="password_actual">Contraseña Actual *</label>
+                    <input type="password" id="password_actual" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="password_nuevo">Nueva Contraseña *</label>
+                    <input type="password" id="password_nuevo" required minlength="6">
+                    <div class="form-help">Mínimo 6 caracteres</div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="password_confirmar">Confirmar Nueva Contraseña *</label>
+                    <input type="password" id="password_confirmar" required minlength="6">
+                </div>
+                
+                <div class="modal-actions">
+                    <button type="button" onclick="cerrarModal('modal-password')" class="btn-secondary">
+                        Cancelar
+                    </button>
+                    <button type="submit" class="btn-primary">
+                        <i class="fas fa-key"></i>
+                        Cambiar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <script>
+        const API = 'http://localhost:5000';
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            fetch('header.html')
+                .then(r => r.text())
+                .then(html => {
+                    document.getElementById('header-container').innerHTML = html;
+                    const scripts = document.getElementById('header-container').querySelectorAll('script');
+                    scripts.forEach(script => {
+                        const newScript = document.createElement('script');
+                        if (script.src) newScript.src = script.src;
+                        else newScript.textContent = script.textContent;
+                        document.body.appendChild(newScript);
+                    });
+                });
+            
+            cargarUsuarios();
+            cargarCajeros();
+        });
+        
+        function cargarUsuarios() {
+            fetch(`${API}/api/usuarios/all`)
+                .then(r => r.json())
+                .then(usuarios => {
+                    const tbody = document.querySelector('#tabla-usuarios tbody');
+                    tbody.innerHTML = '';
+                    
+                    usuarios.forEach(usuario => {
+                        const rolBadge = {
+                            'admin': '<span class="badge" style="background: #e3f2fd; color: #1976d2;">Admin</span>',
+                            'supervisor': '<span class="badge" style="background: #fff3e0; color: #f57c00;">Supervisor</span>',
+                            'cajero': '<span class="badge" style="background: #f3e5f5; color: #7b1fa2;">Cajero</span>'
+                        };
+                        
+                        const tr = document.createElement('tr');
+                        tr.innerHTML = `
+                            <td>${usuario.id}</td>
+                            <td>${usuario.username}</td>
+                            <td>${usuario.nombre_completo || 'N/A'}</td>
+                            <td>${rolBadge[usuario.rol] || 'N/A'}</td>
+                            <td>${usuario.cajero_nombre || 'N/A'}</td>
+                            <td>
+                                <span class="badge ${usuario.activo ? 'badge-activo' : 'badge-inactivo'}">
+                                    ${usuario.activo ? 'Activo' : 'Inactivo'}
+                                </span>
+                            </td>
+                            <td>
+                                <button onclick="editarUsuario(${usuario.id})" class="btn-icon btn-editar" title="Editar">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button onclick="abrirCambiarPassword(${usuario.id})" class="btn-icon btn-cambiar-password" title="Cambiar Contraseña">
+                                    <i class="fas fa-key"></i>
+                                </button>
+                                <button onclick="eliminarUsuario(${usuario.id})" class="btn-icon btn-eliminar" title="Eliminar">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </td>
+                        `;
+                        tbody.appendChild(tr);
+                    });
+                })
+                .catch(err => console.error('Error:', err));
+        }
+        
+        function cargarCajeros() {
+            fetch(`${API}/api/cajeros/activos`)
+                .then(r => r.json())
+                .then(cajeros => {
+                    const select = document.getElementById('cajero_id');
+                    cajeros.forEach(cajero => {
+                        const option = document.createElement('option');
+                        option.value = cajero.id;
+                        option.textContent = cajero.nombre;
+                        select.appendChild(option);
+                    });
+                });
+        }
+        
+        function abrirModalNuevo() {
+            document.getElementById('modal-title').textContent = 'Nuevo Usuario';
+            document.getElementById('form-usuario').reset();
+            document.getElementById('usuario_id').value = '';
+            document.getElementById('password').required = true;
+            document.getElementById('password-required').style.display = 'inline';
+            document.getElementById('modal-usuario').classList.add('active');
+        }
+        
+        function editarUsuario(id) {
+            fetch(`${API}/api/usuarios/${id}`)
+                .then(r => r.json())
+                .then(usuario => {
+                    document.getElementById('modal-title').textContent = 'Editar Usuario';
+                    document.getElementById('usuario_id').value = usuario.id;
+                    document.getElementById('username').value = usuario.username;
+                    document.getElementById('nombre_completo').value = usuario.nombre_completo || '';
+                    document.getElementById('rol').value = usuario.rol;
+                    document.getElementById('cajero_id').value = usuario.cajero_id || '';
+                    document.getElementById('activo').value = usuario.activo;
+                    document.getElementById('password').value = '';
+                    document.getElementById('password').required = false;
+                    document.getElementById('password-required').style.display = 'none';
+                    document.getElementById('password-help').textContent = 'Dejar en blanco para mantener la contraseña actual';
+                    document.getElementById('modal-usuario').classList.add('active');
+                });
+        }
+        
+        function guardarUsuario(event) {
+            event.preventDefault();
+            
+            const id = document.getElementById('usuario_id').value;
+            const datos = {
+                username: document.getElementById('username').value,
+                nombre_completo: document.getElementById('nombre_completo').value,
+                password: document.getElementById('password').value,
+                rol: document.getElementById('rol').value,
+                cajero_id: document.getElementById('cajero_id').value || null,
+                activo: document.getElementById('activo').value
+            };
+            
+            const url = id ? `${API}/api/usuarios/update/${id}` : `${API}/api/usuarios/create`;
+            const method = id ? 'PUT' : 'POST';
+            
+            fetch(url, {
+                method: method,
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(datos)
+            })
+            .then(r => r.json())
+            .then(result => {
+                alert(result.message);
+                cerrarModal('modal-usuario');
+                cargarUsuarios();
+            })
+            .catch(err => alert('Error al guardar usuario'));
+        }
+        
+        function abrirCambiarPassword(id) {
+            document.getElementById('password_usuario_id').value = id;
+            document.getElementById('form-password').reset();
+            document.getElementById('modal-password').classList.add('active');
+        }
+        
+        function cambiarPassword(event) {
+            event.preventDefault();
+            
+            const nuevo = document.getElementById('password_nuevo').value;
+            const confirmar = document.getElementById('password_confirmar').value;
+            
+            if (nuevo !== confirmar) {
+                alert('Las contraseñas no coinciden');
+                return;
+            }
+            
+            const datos = {
+                usuario_id: document.getElementById('password_usuario_id').value,
+                password_actual: document.getElementById('password_actual').value,
+                password_nuevo: nuevo
+            };
+            
+            fetch(`${API}/api/auth/cambiar-password`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(datos)
+            })
+            .then(r => r.json())
+            .then(result => {
+                alert(result.message);
+                cerrarModal('modal-password');
+            })
+            .catch(err => alert('Error al cambiar contraseña'));
+        }
+        
+        function eliminarUsuario(id) {
+            if (confirm('¿Está seguro de desactivar este usuario?')) {
+                fetch(`${API}/api/usuarios/delete/${id}`, { method: 'DELETE' })
+                .then(r => r.json())
+                .then(result => {
+                    alert(result.message);
+                    cargarUsuarios();
+                });
+            }
+        }
+        
+        function cerrarModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
+    </script>
+</body>
+</html>

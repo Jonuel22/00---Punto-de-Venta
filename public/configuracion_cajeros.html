@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Configuración - Cajeros</title>
+    <title>Configuración de Cajeros</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
     <style>
@@ -45,12 +45,7 @@ body {
 }
 
 .page-title i {
-    color: #00cc66;
-}
-
-.page-subtitle {
-    color: #666;
-    font-size: 1em;
+    color: #ff9800;
 }
 
 .actions-bar {
@@ -64,20 +59,38 @@ body {
     padding: 12px 24px;
     border: none;
     border-radius: 8px;
-    background: linear-gradient(90deg, #00cc66, #66ccff);
+    background: linear-gradient(90deg, #ff9800, #ffb74d);
     color: white;
     font-weight: 700;
     cursor: pointer;
     display: flex;
     align-items: center;
     gap: 8px;
-    box-shadow: 0 4px 12px rgba(0, 204, 102, 0.3);
+    box-shadow: 0 4px 12px rgba(255, 152, 0, 0.3);
     transition: all 0.3s;
 }
 
 .btn-primary:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(0, 204, 102, 0.4);
+    box-shadow: 0 6px 16px rgba(255, 152, 0, 0.4);
+}
+
+.btn-secondary {
+    padding: 12px 24px;
+    border: 2px solid #ff9800;
+    border-radius: 8px;
+    background: white;
+    color: #ff9800;
+    font-weight: 700;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s;
+}
+
+.btn-secondary:hover {
+    background: #fff3e0;
 }
 
 .tabla-card {
@@ -94,7 +107,7 @@ table {
 }
 
 thead {
-    background: linear-gradient(135deg, #00cc66, #00aa55);
+    background: linear-gradient(135deg, #ff9800, #f57c00);
 }
 
 th {
@@ -104,7 +117,6 @@ th {
     font-weight: 600;
     font-size: 0.9em;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
 }
 
 td {
@@ -114,7 +126,7 @@ td {
 }
 
 tbody tr:hover {
-    background: #f0f8ff;
+    background: #fff3e0;
 }
 
 .badge {
@@ -148,17 +160,13 @@ tbody tr:hover {
     color: white;
 }
 
-.btn-editar:hover {
-    background: #1976d2;
-}
-
 .btn-eliminar {
     background: #f44336;
     color: white;
 }
 
-.btn-eliminar:hover {
-    background: #d32f2f;
+.btn-icon:hover {
+    transform: scale(1.1);
 }
 
 /* Modal */
@@ -234,8 +242,8 @@ tbody tr:hover {
 .form-group input:focus,
 .form-group select:focus {
     outline: none;
-    border-color: #00cc66;
-    box-shadow: 0 0 0 3px rgba(0, 204, 102, 0.1);
+    border-color: #ff9800;
+    box-shadow: 0 0 0 3px rgba(255, 152, 0, 0.1);
 }
 
 .modal-actions {
@@ -244,25 +252,20 @@ tbody tr:hover {
     margin-top: 24px;
 }
 
-.btn-secondary {
-    flex: 1;
-    padding: 12px 24px;
-    border: 2px solid #00cc66;
-    border-radius: 8px;
-    background: white;
-    color: #00cc66;
-    font-weight: 700;
-    cursor: pointer;
-}
-
-.btn-secondary:hover {
-    background: #f0f8ff;
-}
-
 .form-help {
     font-size: 0.85em;
     color: #666;
     margin-top: 4px;
+}
+
+.info-box {
+    background: #e3f2fd;
+    border-left: 4px solid #2196f3;
+    padding: 12px;
+    margin-bottom: 16px;
+    border-radius: 4px;
+    font-size: 0.9em;
+    color: #1565c0;
 }
     </style>
 </head>
@@ -272,13 +275,16 @@ tbody tr:hover {
     <div class="main-section">
         <div class="page-header">
             <h1 class="page-title">
-                <i class="fas fa-cog"></i>
+                <i class="fas fa-user-tie"></i>
                 Configuración de Cajeros
             </h1>
-            <p class="page-subtitle">Gestiona los usuarios del sistema de punto de venta</p>
+            <p style="color: #666;">Gestiona los cajeros del punto de venta</p>
         </div>
         
         <div class="actions-bar">
+            <button onclick="window.location.href='config_general.html'" class="btn-secondary">
+                <i class="fas fa-arrow-left"></i> Volver
+            </button>
             <button onclick="abrirModalNuevo()" class="btn-primary">
                 <i class="fas fa-plus"></i>
                 Nuevo Cajero
@@ -291,7 +297,7 @@ tbody tr:hover {
                     <tr>
                         <th>ID</th>
                         <th>Nombre</th>
-                        <th>Usuario</th>
+                        <th>Usuario Vinculado</th>
                         <th>Email</th>
                         <th>Teléfono</th>
                         <th>Estado</th>
@@ -305,12 +311,17 @@ tbody tr:hover {
         </div>
     </div>
     
-    <!-- Modal -->
+    <!-- Modal Cajero -->
     <div id="modal-cajero" class="modal">
         <div class="modal-content">
             <div class="modal-header">
                 <h2 class="modal-title" id="modal-title">Nuevo Cajero</h2>
                 <button onclick="cerrarModal()" class="btn-close">&times;</button>
+            </div>
+            
+            <div class="info-box">
+                <i class="fas fa-info-circle"></i>
+                Para que un cajero pueda usar el sistema, debe estar vinculado a un usuario.
             </div>
             
             <form id="form-cajero" onsubmit="guardarCajero(event)">
@@ -322,15 +333,11 @@ tbody tr:hover {
                 </div>
                 
                 <div class="form-group">
-                    <label for="usuario">Usuario *</label>
-                    <input type="text" id="usuario" required>
-                    <div class="form-help">Usado para iniciar sesión</div>
-                </div>
-                
-                <div class="form-group">
-                    <label for="password">Contraseña <span id="password-required">*</span></label>
-                    <input type="password" id="password">
-                    <div class="form-help" id="password-help">Mínimo 6 caracteres</div>
+                    <label for="usuario_id">Usuario del Sistema *</label>
+                    <select id="usuario_id" required>
+                        <option value="">Seleccionar usuario...</option>
+                    </select>
+                    <div class="form-help">El usuario se crea en la sección "Usuarios"</div>
                 </div>
                 
                 <div class="form-group">
@@ -352,10 +359,10 @@ tbody tr:hover {
                 </div>
                 
                 <div class="modal-actions">
-                    <button type="button" onclick="cerrarModal()" class="btn-secondary">
+                    <button type="button" onclick="cerrarModal()" class="btn-secondary" style="flex: 1;">
                         Cancelar
                     </button>
-                    <button type="submit" class="btn-primary">
+                    <button type="submit" class="btn-primary" style="flex: 1;">
                         <i class="fas fa-save"></i>
                         Guardar
                     </button>
@@ -367,7 +374,6 @@ tbody tr:hover {
     <script>
         const API = 'http://localhost:5000';
         
-        // Cargar header
         document.addEventListener('DOMContentLoaded', function() {
             fetch('header.html')
                 .then(r => r.text())
@@ -376,19 +382,16 @@ tbody tr:hover {
                     const scripts = document.getElementById('header-container').querySelectorAll('script');
                     scripts.forEach(script => {
                         const newScript = document.createElement('script');
-                        if (script.src) {
-                            newScript.src = script.src;
-                        } else {
-                            newScript.textContent = script.textContent;
-                        }
+                        if (script.src) newScript.src = script.src;
+                        else newScript.textContent = script.textContent;
                         document.body.appendChild(newScript);
                     });
                 });
             
             cargarCajeros();
+            cargarUsuarios();
         });
         
-        // Cargar cajeros
         function cargarCajeros() {
             fetch(`${API}/api/cajeros/all`)
                 .then(r => r.json())
@@ -406,19 +409,19 @@ tbody tr:hover {
                         tr.innerHTML = `
                             <td>${cajero.id}</td>
                             <td>${cajero.nombre}</td>
-                            <td>${cajero.usuario}</td>
+                            <td>${cajero.username || '<span style="color: #999;">Sin usuario</span>'}</td>
                             <td>${cajero.email || 'N/A'}</td>
                             <td>${cajero.telefono || 'N/A'}</td>
                             <td>
-                                <span class="badge ${cajero.activo ? 'badge-activo' : 'badge-inactivo'}">
-                                    ${cajero.activo ? 'Activo' : 'Inactivo'}
+                                <span class="badge ${cajero.cajero_activo ? 'badge-activo' : 'badge-inactivo'}">
+                                    ${cajero.cajero_activo ? 'Activo' : 'Inactivo'}
                                 </span>
                             </td>
                             <td>
-                                <button onclick="editarCajero(${cajero.id})" class="btn-icon btn-editar">
+                                <button onclick="editarCajero(${cajero.id})" class="btn-icon btn-editar" title="Editar">
                                     <i class="fas fa-edit"></i>
                                 </button>
-                                <button onclick="eliminarCajero(${cajero.id})" class="btn-icon btn-eliminar">
+                                <button onclick="eliminarCajero(${cajero.id})" class="btn-icon btn-eliminar" title="Eliminar">
                                     <i class="fas fa-trash"></i>
                                 </button>
                             </td>
@@ -432,18 +435,31 @@ tbody tr:hover {
                 });
         }
         
-        // Abrir modal para nuevo cajero
+        function cargarUsuarios() {
+            fetch(`${API}/api/usuarios/activos`)
+                .then(r => r.json())
+                .then(usuarios => {
+                    const select = document.getElementById('usuario_id');
+                    // Limpiar opciones excepto la primera
+                    select.innerHTML = '<option value="">Seleccionar usuario...</option>';
+                    
+                    usuarios.forEach(usuario => {
+                        const option = document.createElement('option');
+                        option.value = usuario.id;
+                        option.textContent = `${usuario.username} - ${usuario.nombre_completo || 'Sin nombre'}`;
+                        select.appendChild(option);
+                    });
+                })
+                .catch(err => console.error('Error al cargar usuarios:', err));
+        }
+        
         function abrirModalNuevo() {
             document.getElementById('modal-title').textContent = 'Nuevo Cajero';
             document.getElementById('form-cajero').reset();
             document.getElementById('cajero_id').value = '';
-            document.getElementById('password').required = true;
-            document.getElementById('password-required').style.display = 'inline';
-            document.getElementById('password-help').textContent = 'Mínimo 6 caracteres';
             document.getElementById('modal-cajero').classList.add('active');
         }
         
-        // Editar cajero
         function editarCajero(id) {
             fetch(`${API}/api/cajeros/${id}`)
                 .then(r => r.json())
@@ -451,14 +467,10 @@ tbody tr:hover {
                     document.getElementById('modal-title').textContent = 'Editar Cajero';
                     document.getElementById('cajero_id').value = cajero.id;
                     document.getElementById('nombre').value = cajero.nombre;
-                    document.getElementById('usuario').value = cajero.usuario;
+                    document.getElementById('usuario_id').value = cajero.usuario_id || '';
                     document.getElementById('email').value = cajero.email || '';
                     document.getElementById('telefono').value = cajero.telefono || '';
                     document.getElementById('activo').value = cajero.activo;
-                    document.getElementById('password').value = '';
-                    document.getElementById('password').required = false;
-                    document.getElementById('password-required').style.display = 'none';
-                    document.getElementById('password-help').textContent = 'Dejar en blanco para mantener la contraseña actual';
                     document.getElementById('modal-cajero').classList.add('active');
                 })
                 .catch(err => {
@@ -467,51 +479,44 @@ tbody tr:hover {
                 });
         }
         
-        // Guardar cajero
         function guardarCajero(event) {
             event.preventDefault();
             
             const id = document.getElementById('cajero_id').value;
             const datos = {
                 nombre: document.getElementById('nombre').value,
-                usuario: document.getElementById('usuario').value,
-                password: document.getElementById('password').value,
+                usuario_id: document.getElementById('usuario_id').value,
                 email: document.getElementById('email').value,
                 telefono: document.getElementById('telefono').value,
                 activo: document.getElementById('activo').value
             };
             
-            const url = id ? `${API}/api/cajeros/update/${id}` : `${API}/api/cajeros/create`;
+            const url = id ? `${API}/api/cajeros/update/${id}` : `${API}/api/cajeros/create-simple`;
             const method = id ? 'PUT' : 'POST';
             
             fetch(url, {
                 method: method,
-                headers: {
-                    'Content-Type': 'application/json'
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(datos)
             })
-                .then(r => r.json())
-                .then(result => {
-                    alert(result.message);
-                    cerrarModal();
-                    cargarCajeros();
-                })
-                .catch(err => {
-                    console.error('Error al guardar cajero:', err);
-                    alert('Error al guardar cajero');
-                });
+            .then(r => r.json())
+            .then(result => {
+                alert(result.message);
+                cerrarModal();
+                cargarCajeros();
+            })
+            .catch(err => {
+                console.error('Error al guardar cajero:', err);
+                alert('Error al guardar cajero');
+            });
         }
         
-        // Eliminar cajero
         function eliminarCajero(id) {
             if (!confirm('¿Está seguro de desactivar este cajero?')) {
                 return;
             }
             
-            fetch(`${API}/api/cajeros/delete/${id}`, {
-                method: 'DELETE'
-            })
+            fetch(`${API}/api/cajeros/delete/${id}`, { method: 'DELETE' })
                 .then(r => r.json())
                 .then(result => {
                     alert(result.message);
@@ -523,7 +528,6 @@ tbody tr:hover {
                 });
         }
         
-        // Cerrar modal
         function cerrarModal() {
             document.getElementById('modal-cajero').classList.remove('active');
         }
