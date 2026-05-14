@@ -1,10 +1,12 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+  <link rel="stylesheet" href="theme.css">
+  <script src="theme-init.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Configuración de Cajeros</title>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
     <style>
 * {
@@ -15,7 +17,7 @@
 
 body {
     font-family: 'Roboto', sans-serif;
-    background: linear-gradient(135deg, #e8f5e9, #b2dfdb);
+    background: var(--bg);
     min-height: 100vh;
     padding-top: 80px;
 }
@@ -27,17 +29,17 @@ body {
 }
 
 .page-header {
-    background: rgba(255, 255, 255, 0.95);
+    background: var(--card-bg);
     backdrop-filter: blur(12px);
     border-radius: 16px;
     padding: 32px;
     margin-bottom: 24px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--shadow-sm);
 }
 
 .page-title {
     font-size: 2.2em;
-    color: #222;
+    color: var(--text);
     display: flex;
     align-items: center;
     gap: 12px;
@@ -79,7 +81,7 @@ body {
     padding: 12px 24px;
     border: 2px solid #ff9800;
     border-radius: 8px;
-    background: white;
+    background: var(--card-bg);
     color: #ff9800;
     font-weight: 700;
     cursor: pointer;
@@ -94,11 +96,11 @@ body {
 }
 
 .tabla-card {
-    background: rgba(255, 255, 255, 0.95);
+    background: var(--card-bg);
     backdrop-filter: blur(12px);
     border-radius: 16px;
     padding: 24px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--shadow-sm);
 }
 
 table {
@@ -122,7 +124,7 @@ th {
 td {
     padding: 12px;
     border-bottom: 1px solid #f0f0f0;
-    color: #333;
+    color: var(--text);
 }
 
 tbody tr:hover {
@@ -188,7 +190,7 @@ tbody tr:hover {
 }
 
 .modal-content {
-    background: white;
+    background: var(--card-bg);
     border-radius: 16px;
     padding: 32px;
     max-width: 500px;
@@ -206,7 +208,7 @@ tbody tr:hover {
 
 .modal-title {
     font-size: 1.5em;
-    color: #222;
+    color: var(--text);
     font-weight: 700;
 }
 
@@ -215,7 +217,7 @@ tbody tr:hover {
     border: none;
     font-size: 1.5em;
     cursor: pointer;
-    color: #666;
+    color: var(--text-muted);
 }
 
 .form-group {
@@ -226,7 +228,7 @@ tbody tr:hover {
     display: block;
     margin-bottom: 6px;
     font-weight: 600;
-    color: #333;
+    color: var(--text);
 }
 
 .form-group input,
@@ -254,7 +256,7 @@ tbody tr:hover {
 
 .form-help {
     font-size: 0.85em;
-    color: #666;
+    color: var(--text-muted);
     margin-top: 4px;
 }
 
@@ -278,7 +280,7 @@ tbody tr:hover {
                 <i class="fas fa-user-tie"></i>
                 Configuración de Cajeros
             </h1>
-            <p style="color: #666;">Gestiona los cajeros del punto de venta</p>
+            <p style="color: var(--text-muted);">Gestiona los cajeros del punto de venta</p>
         </div>
         
         <div class="actions-bar">

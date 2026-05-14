@@ -1,10 +1,12 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+  <link rel="stylesheet" href="theme.css">
+  <script src="theme-init.js"></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Cuentas por Cobrar - Reporte</title>
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -18,7 +20,7 @@
 
     body {
       font-family: 'Roboto', sans-serif;
-      background: linear-gradient(135deg, #e8f5e9, #b2dfdb);
+      background: var(--bg);
       min-height: 100vh;
       padding-top: 80px;
     }
@@ -30,17 +32,17 @@
     }
 
     .page-header {
-      background: rgba(255, 255, 255, 0.95);
+      background: var(--card-bg);
       backdrop-filter: blur(12px);
       border-radius: 16px;
       padding: 32px;
       margin-bottom: 24px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      box-shadow: var(--shadow-sm);
     }
 
     .page-title {
       font-size: 2.2em;
-      color: #222;
+      color: var(--text);
       display: flex;
       align-items: center;
       gap: 12px;
@@ -128,11 +130,11 @@
     }
 
     .stat-box {
-      background: rgba(255, 255, 255, 0.95);
+      background: var(--card-bg);
       backdrop-filter: blur(12px);
       border-radius: 12px;
       padding: 24px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      box-shadow: var(--shadow-sm);
       transition: transform 0.2s;
     }
 
@@ -141,7 +143,7 @@
     }
 
     .stat-box h4 {
-      color: #666;
+      color: var(--text-muted);
       font-size: 0.85em;
       font-weight: 600;
       text-transform: uppercase;
@@ -157,16 +159,16 @@
 
     .stat-box .stat-subtitle {
       font-size: 0.9em;
-      color: #999;
+      color: var(--text-faint);
       margin-top: 8px;
     }
 
     .tabla-card {
-      background: rgba(255, 255, 255, 0.95);
+      background: var(--card-bg);
       backdrop-filter: blur(12px);
       border-radius: 16px;
       padding: 24px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      box-shadow: var(--shadow-sm);
     }
 
     .tabla-header {
@@ -211,8 +213,8 @@
     td {
       padding: 12px;
       border-bottom: 1px solid #f0f0f0;
-      color: #333;
-      background: white;
+      color: var(--text);
+      background: var(--card-bg);
     }
 
     tbody tr:hover {
@@ -256,7 +258,7 @@
     }
 
     .modal-content {
-      background: white;
+      background: var(--card-bg);
       max-width: 700px;
       width: 90%;
       max-height: 90vh;
@@ -289,7 +291,7 @@
 
     .modal-title {
       font-size: 1.5em;
-      color: #222;
+      color: var(--text);
       font-weight: 700;
     }
 
@@ -298,7 +300,7 @@
       border: none;
       font-size: 1.8em;
       cursor: pointer;
-      color: #666;
+      color: var(--text-muted);
       width: 36px;
       height: 36px;
       display: flex;
@@ -328,14 +330,14 @@
     }
 
     .info-cliente-item strong {
-      color: #666;
+      color: var(--text-muted);
       display: block;
       font-size: 0.85em;
       margin-bottom: 4px;
     }
 
     .info-cliente-item span {
-      color: #222;
+      color: var(--text);
       font-weight: 600;
     }
 
@@ -354,7 +356,7 @@
 
     .historial-fecha {
       font-size: 0.85em;
-      color: #999;
+      color: var(--text-faint);
     }
 
     .historial-monto {
@@ -378,7 +380,7 @@
       display: block;
       margin-bottom: 8px;
       font-weight: 600;
-      color: #333;
+      color: var(--text);
     }
 
     .form-group input,
@@ -386,7 +388,7 @@
     .form-group textarea {
       width: 100%;
       padding: 12px 16px;
-      border: 2px solid #e0e0e0;
+      border: 1px solid var(--input-border);
       border-radius: 8px;
       font-size: 1em;
       transition: all 0.2s;
@@ -410,7 +412,7 @@
       position: fixed;
       top: 100px;
       right: 30px;
-      background: white;
+      background: var(--card-bg);
       padding: 20px 32px;
       border-radius: 12px;
       box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
@@ -459,7 +461,7 @@
 
     @media print {
       body {
-        background: white;
+        background: var(--card-bg);
         padding-top: 0;
       }
 
@@ -490,7 +492,7 @@
         <i class="fas fa-file-invoice-dollar"></i>
         Cuentas por Cobrar
       </h1>
-      <p style="color: #666; margin-top: 8px;">Reporte detallado de clientes con deudas pendientes</p>
+      <p style="color: var(--text-muted); margin-top: 8px;">Reporte detallado de clientes con deudas pendientes</p>
       
       <div class="acciones-header">
         <button onclick="exportarExcel()" class="btn btn-excel">
@@ -539,8 +541,8 @@
     <!-- Tabla -->
     <div class="tabla-card">
       <div class="tabla-header">
-        <h3 style="color: #333; font-size: 1.2em; margin: 0;">Listado de Deudores</h3>
-        <div id="contadorClientes" style="font-size: 0.95em; color: #666; font-weight: 600;">0 clientes</div>
+        <h3 style="color: var(--text); font-size: 1.2em; margin: 0;">Listado de Deudores</h3>
+        <div id="contadorClientes" style="font-size: 0.95em; color: var(--text-muted); font-weight: 600;">0 clientes</div>
       </div>
       
       <div class="tabla-container">

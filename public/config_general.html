@@ -1,10 +1,12 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+  <link rel="stylesheet" href="theme.css">
+  <script src="theme-init.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Configuración General</title>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
     <style>
 * {
@@ -349,8 +351,36 @@ input[type="file"] {
                 <h3>Cajeros</h3>
                 <p>Gestionar cajeros y turnos</p>
             </a>
+
+            <a href="roles.html" class="nav-card" style="border-top:3px solid #9c27b0;">
+                <i class="fas fa-shield-alt" style="color:#9c27b0;"></i>
+                <h3>Roles</h3>
+                <p>Gestionar roles y permisos</p>
+            </a>
         </div>
         
+        <!-- Apariencia / Tema -->
+        <div class="config-card">
+            <h2 class="config-section-title">
+                <i class="fas fa-palette"></i>
+                Apariencia
+            </h2>
+            <p style="color:#666;margin-bottom:20px;">Selecciona el tema visual del sistema. El cambio se aplica de inmediato en todas las páginas.</p>
+            <div style="display:flex;gap:16px;flex-wrap:wrap;">
+                <div id="theme-dark-card" onclick="setTheme('dark')" style="flex:1;min-width:160px;border:2px solid transparent;border-radius:14px;padding:20px;cursor:pointer;background:#0d1117;text-align:center;transition:all 0.2s;">
+                    <i class="fas fa-moon" style="font-size:2em;color:#00cc66;display:block;margin-bottom:10px;"></i>
+                    <div style="color:#e6edf3;font-weight:700;margin-bottom:4px;">Modo Oscuro</div>
+                    <div style="color:#8b949e;font-size:0.82em;">Fondo oscuro, ideal para uso prolongado</div>
+                </div>
+                <div id="theme-light-card" onclick="setTheme('light')" style="flex:1;min-width:160px;border:2px solid transparent;border-radius:14px;padding:20px;cursor:pointer;background:#f0f4f8;text-align:center;transition:all 0.2s;">
+                    <i class="fas fa-sun" style="font-size:2em;color:#00a854;display:block;margin-bottom:10px;"></i>
+                    <div style="color:#1c2128;font-weight:700;margin-bottom:4px;">Modo Claro</div>
+                    <div style="color:#57606a;font-size:0.82em;">Fondo claro, mayor contraste diurno</div>
+                </div>
+            </div>
+            <div id="themeMsg" style="display:none;margin-top:14px;padding:10px 14px;border-radius:8px;font-size:0.88em;font-weight:600;"></div>
+        </div>
+
         <!-- Configuración de Logo -->
         <div class="config-card">
             <h2 class="config-section-title">
@@ -500,6 +530,40 @@ input[type="file"] {
             msg.style.display = 'block';
             setTimeout(() => msg.style.display = 'none', 4000);
         }
+
+        // ── SELECTOR DE TEMA ──
+        function setTheme(theme) {
+            if (typeof ThemeManager !== 'undefined') {
+                ThemeManager.set(theme);
+            } else {
+                localStorage.setItem('jct_theme', theme);
+                document.documentElement.setAttribute('data-theme', theme);
+            }
+            actualizarTarjetasTema(theme);
+            const msg = document.getElementById('themeMsg');
+            msg.style.display = 'block';
+            msg.style.background = theme === 'dark' ? 'rgba(0,204,102,0.1)' : 'rgba(0,168,84,0.1)';
+            msg.style.color      = theme === 'dark' ? '#00cc66' : '#00a854';
+            msg.style.border     = theme === 'dark' ? '1px solid rgba(0,204,102,0.25)' : '1px solid rgba(0,168,84,0.25)';
+            msg.innerHTML = `<i class="fas fa-check-circle"></i> Tema ${theme === 'dark' ? 'oscuro' : 'claro'} aplicado correctamente`;
+            setTimeout(() => msg.style.display = 'none', 2500);
+        }
+
+        function actualizarTarjetasTema(theme) {
+            const darkCard  = document.getElementById('theme-dark-card');
+            const lightCard = document.getElementById('theme-light-card');
+            if (!darkCard || !lightCard) return;
+            darkCard.style.borderColor  = theme === 'dark'  ? '#00cc66' : 'transparent';
+            lightCard.style.borderColor = theme === 'light' ? '#00a854' : 'transparent';
+            darkCard.style.boxShadow    = theme === 'dark'  ? '0 4px 14px rgba(0,204,102,0.25)' : 'none';
+            lightCard.style.boxShadow   = theme === 'light' ? '0 4px 14px rgba(0,168,84,0.2)' : 'none';
+        }
+
+        // Marcar el tema activo al cargar
+        document.addEventListener('DOMContentLoaded', function() {
+            const current = localStorage.getItem('jct_theme') || 'dark';
+            actualizarTarjetasTema(current);
+        });
     </script>
 </body>
 </html>

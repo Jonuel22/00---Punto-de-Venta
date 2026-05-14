@@ -1,172 +1,293 @@
-<header class="header-global" style="position:fixed;top:0;left:0;width:100vw;min-width:100vw;max-width:100vw;background:rgba(255,255,255,0.92);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);color:#222;padding:14px 32px 14px 24px;z-index:1000;display:flex;align-items:center;justify-content:space-between;box-sizing:border-box;box-shadow:0 2px 12px 0 rgba(31,38,135,0.10);border-bottom:1px solid #e0e0e0;">
-  <div style="display:flex;align-items:center;min-width:0;">
-    <!-- Sin flecha de volver atrás -->
-    <a href="menu_principal.html" class="home-icon" style="color:#00cc66;font-size:1.7em;margin-right:18px;">
-      <i class="fas fa-home"></i>
+<!-- ============================================================
+   header.html — JCT POS v2
+   Header global para páginas internas (ventas, clientes, etc.)
+   ============================================================ -->
+<link rel="stylesheet" href="theme.css">
+
+<style>
+  /* ── Header ── */
+  .app-header {
+    position: fixed; top: 0; left: 0; right: 0; height: 64px;
+    background: var(--header-bg);
+    border-bottom: 1px solid var(--header-border);
+    backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 24px; z-index: 1000;
+    box-shadow: var(--shadow-sm);
+    transition: background .35s, border-color .35s;
+  }
+
+  /* ── Noti panel ── */
+  #notiPanel {
+    position: fixed; top: 64px; right: 0; bottom: 0; width: 340px;
+    max-width: 92vw;
+    background: var(--sidebar-bg);
+    border-left: 1px solid var(--sidebar-border);
+    display: flex; flex-direction: column;
+    z-index: 3000;
+    transform: translateX(100%);
+    transition: transform .35s cubic-bezier(.23,1.01,.32,1);
+    box-shadow: var(--shadow-lg);
+  }
+  #notiPanel.active { transform: translateX(0); }
+
+  #notiOverlay {
+    display: none; position: fixed; inset: 0;
+    background: var(--modal-overlay);
+    z-index: 2999;
+    backdrop-filter: blur(2px);
+  }
+  #notiOverlay.active { display: block; }
+
+  /* ── Header buttons ── */
+  .h-btn {
+    width: 38px; height: 38px;
+    background: var(--bg3); border: 1px solid var(--border);
+    border-radius: 10px; color: var(--text-muted);
+    font-size: .95em; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all .2s; position: relative;
+  }
+  .h-btn:hover { background: var(--bg4); color: var(--primary); border-color: var(--primary); transform: translateY(-1px); }
+
+  .notif-dot {
+    position: absolute; top: 7px; right: 7px;
+    width: 7px; height: 7px;
+    background: var(--danger); border-radius: 50%;
+    border: 2px solid var(--header-bg);
+  }
+
+  /* ── Brand ── */
+  .brand { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+  .brand-icon {
+    width: 36px; height: 36px;
+    background: var(--gradient); border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; font-size: 1em; flex-shrink: 0;
+    box-shadow: 0 3px 10px var(--primary-glow);
+  }
+  .brand-name { font-size: 1em; font-weight: 800; color: var(--text); letter-spacing: .3px; }
+
+  /* ── User dropdown ── */
+  .user-dropdown {
+    position: absolute; top: calc(100% + 8px); right: 0;
+    background: var(--modal-bg); border: 1px solid var(--card-border);
+    border-radius: 14px; box-shadow: var(--shadow-lg);
+    min-width: 220px; overflow: hidden; z-index: 3100;
+    animation: dropIn .2s ease;
+    display: none;
+  }
+  .user-dropdown.open { display: block; }
+
+  @keyframes dropIn {
+    from { opacity: 0; transform: translateY(-8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .user-dropdown .ud-header {
+    padding: 14px 16px; border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 10px;
+  }
+  .user-dropdown .ud-avatar {
+    width: 34px; height: 34px; border-radius: 50%;
+    background: var(--gradient);
+    display: flex; align-items: center; justify-content: center;
+    font-size: .85em; font-weight: 700; color: #fff; flex-shrink: 0;
+  }
+  .user-dropdown .ud-name { font-size: .88em; font-weight: 700; color: var(--text); }
+  .user-dropdown .ud-role { font-size: .74em; color: var(--text-muted); }
+
+  .user-dropdown .ud-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 11px 16px; color: var(--text); font-size: .88em;
+    cursor: pointer; transition: background .15s;
+    border-bottom: 1px solid var(--border);
+  }
+  .user-dropdown .ud-item:last-child { border-bottom: none; }
+  .user-dropdown .ud-item:hover { background: var(--bg3); color: var(--primary); }
+  .user-dropdown .ud-item i { width: 16px; text-align: center; color: var(--text-muted); }
+  .user-dropdown .ud-item.danger { color: var(--danger); }
+  .user-dropdown .ud-item.danger i { color: var(--danger); }
+  .user-dropdown .ud-item.danger:hover { background: rgba(var(--danger-rgb),.08); }
+
+  /* ── Noti items ── */
+  .noti-item-h {
+    padding: 13px 18px; border-bottom: 1px solid var(--border);
+    transition: background .15s; cursor: default;
+  }
+  .noti-item-h:hover { background: var(--sidebar-hover); }
+  .noti-msg-h  { font-size: .84em; color: var(--text); margin-bottom: 3px; line-height: 1.5; }
+  .noti-date-h { font-size: .74em; color: var(--text-muted); }
+
+  /* ── Theme toggle spin on hover ── */
+  .theme-toggle { transition: transform .3s !important; }
+  .theme-toggle:hover { transform: rotate(22deg) !important; }
+</style>
+
+<!-- ===== HEADER ===== -->
+<header class="app-header">
+
+  <!-- Left: brand + back -->
+  <div style="display:flex;align-items:center;gap:8px;">
+    <button onclick="window.history.back()" class="h-btn" title="Volver" style="flex-shrink:0;">
+      <i class="fas fa-arrow-left"></i>
+    </button>
+    <a href="menu_principal.html" class="brand">
+      <div class="brand-icon"><i class="fas fa-cash-register"></i></div>
+      <span class="brand-name">JCT POS</span>
     </a>
-    <span style="font-size:1.25em;font-weight:bold;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#222;letter-spacing:0.5px;">Punto de Venta</span>
   </div>
-  <div style="display:flex;align-items:center;gap:10px;min-width:0;">
-    <div id="notificaciones-header" style="position:relative;">
-      <button onclick="toggleNotificaciones()" style="background:none;border:none;color:#00cc66;font-size:1.5em;cursor:pointer;position:relative;">
-        <i class="fas fa-bell"></i>
-        <span id="notiCount" style="position:absolute;top:-5px;right:-8px;background:#f44336;color:#fff;border-radius:50%;padding:2px 6px;font-size:0.6em;display:none;"></span>
-      </button>
-    </div>
-    <div id="usuario-header" style="position:relative;">
-      <button onclick="toggleUsuario()" style="background:none;border:none;color:#00cc66;font-size:1.5em;cursor:pointer;">
+
+  <!-- Right: theme + noti + user -->
+  <div style="display:flex;align-items:center;gap:6px;">
+
+    <!-- Toggle tema -->
+    <button class="h-btn theme-toggle" title="Cambiar tema">
+      <i class="fas fa-sun"></i>
+    </button>
+
+    <!-- Notificaciones -->
+    <button class="h-btn" onclick="toggleNotiPanel()" title="Notificaciones">
+      <i class="fas fa-bell"></i>
+      <span class="notif-dot" id="notiDot" style="display:none;"></span>
+    </button>
+
+    <!-- Usuario -->
+    <div style="position:relative;">
+      <button class="h-btn" onclick="toggleUserDropdown()" title="Mi cuenta" id="userBtn">
         <i class="fas fa-user"></i>
       </button>
+      <div class="user-dropdown" id="userDropdown">
+        <div class="ud-header">
+          <div class="ud-avatar" id="udAvatar">A</div>
+          <div>
+            <div class="ud-name" id="udName">Usuario</div>
+            <div class="ud-role" id="udRole">Sistema POS</div>
+          </div>
+        </div>
+        <div class="ud-item" onclick="location.href='config_general.html'">
+          <i class="fas fa-cog"></i> Configuración
+        </div>
+        <div class="ud-item danger" onclick="cerrarSesion()">
+          <i class="fas fa-sign-out-alt"></i> Cerrar sesión
+        </div>
+      </div>
     </div>
+
   </div>
 </header>
 
-<!-- Panel de usuario -->
-<div id="usuarioPanel" style="display:none;position:fixed;top:60px;right:20px;background:#fff;color:#333;min-width:180px;box-shadow:0 2px 8px rgba(0,0,0,0.2);border-radius:6px;overflow:hidden;z-index:3000;">
-  <div style="padding:12px;cursor:pointer;border-bottom:1px solid #eee;" onclick="window.location.href='configuracion_cajeros.html'">
-    <i class="fas fa-cog"></i> Configuración
+<!-- ===== PANEL NOTIFICACIONES ===== -->
+<div id="notiPanel">
+  <!-- Header del panel -->
+  <div style="padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;">
+    <span style="font-weight:700;font-size:1em;color:var(--text);">
+      <i class="fas fa-bell" style="color:var(--primary);margin-right:8px;"></i>Notificaciones
+    </span>
+    <button onclick="toggleNotiPanel()" class="h-btn" style="width:30px;height:30px;font-size:.9em;">&times;</button>
   </div>
-  <div style="padding:12px;cursor:pointer;border-bottom:1px solid #eee;" onclick="cerrarSesion()">
-    <i class="fas fa-sign-out-alt"></i> Cerrar sesión
+  <!-- Lista -->
+  <div id="notiPanelContent" style="flex:1;overflow-y:auto;"></div>
+  <!-- Footer -->
+  <div style="padding:12px 16px;border-top:1px solid var(--border);flex-shrink:0;">
+    <button onclick="limpiarNotificaciones()" class="btn btn-secondary btn-block" style="font-size:.82em;">
+      <i class="fas fa-broom"></i> Limpiar notificaciones
+    </button>
   </div>
 </div>
-
-<!-- Panel de notificaciones -->
-<div id="notiPanel" tabindex="-1" style="backdrop-filter: blur(12px) saturate(180%);-webkit-backdrop-filter: blur(12px) saturate(180%);background:rgba(255,255,255,0.82);border-radius:18px 0 0 18px;box-shadow:-8px 0 32px 0 rgba(31,38,135,0.13),0 2px 12px 0 rgba(0,0,0,0.10);border:1.5px solid #e0e0e0;">
-  <div style="padding:18px 24px 12px 24px;font-size:1.18em;font-weight:700;border-bottom:1px solid #e0e0e0;display:flex;align-items:center;justify-content:space-between;color:#00cc66;letter-spacing:0.5px;">
-    <span>Notificaciones</span>
-    <button onclick="toggleNotificaciones()" style="background:none;border:none;font-size:1.5em;cursor:pointer;line-height:1;color:#00cc66;">&times;</button>
-  </div>
-  <div id="notiPanelContent" style="max-height:calc(100vh - 140px);overflow-y:auto;padding:8px 0 0 0;"></div>
-  <button onclick="limpiarNotificaciones()" style="width:100%;background:linear-gradient(90deg,#00cc66 0%,#66ccff 100%);color:#fff;border:none;padding:12px 0;cursor:pointer;font-size:1em;border-radius:0 0 0 12px;font-weight:600;letter-spacing:0.5px;">Limpiar notificaciones</button>
-</div>
-<div id="notiPanelOverlay" onclick="toggleNotificaciones()"></div>
+<div id="notiOverlay" onclick="toggleNotiPanel()"></div>
 
 <script>
-function toggleUsuario() {
-  const usuarioPanel = document.getElementById('usuarioPanel');
-  usuarioPanel.style.display = usuarioPanel.style.display === 'block' ? 'none' : 'block';
-  // Cerrar notiPanel correctamente
-  const notiPanel = document.getElementById('notiPanel');
-  const overlay = document.getElementById('notiPanelOverlay');
-  if (notiPanel && overlay) {
-    notiPanel.classList.remove('active');
-    overlay.style.display = 'none';
-    document.body.style.overflow = '';
-  }
-}
-function toggleNotificaciones() {
-  const notiPanel = document.getElementById('notiPanel');
-  const overlay = document.getElementById('notiPanelOverlay');
-  const usuarioPanel = document.getElementById('usuarioPanel');
-  if (notiPanel.classList.contains('active')) {
-    notiPanel.classList.remove('active');
-    overlay.style.display = 'none';
-    document.body.style.overflow = '';
-  } else {
-    notiPanel.classList.add('active');
-    overlay.style.display = 'block';
-    document.body.style.overflow = 'hidden';
-    // Cerrar usuarioPanel si está abierto
-    if (usuarioPanel) usuarioPanel.style.display = 'none';
-    cargarNotificacionesPanel();
-  }
-}
+(function initHeaderGlobal() {
+  /* ── Datos usuario ── */
+  const user = JSON.parse(localStorage.getItem('user') || '{}');
+  const name = user.nombre || user.username || 'Usuario';
+  const role = user.rol || 'Sistema POS';
+  const el = document.getElementById('udName');
+  const av = document.getElementById('udAvatar');
+  const rl = document.getElementById('udRole');
+  if (el) el.textContent = name;
+  if (av) av.textContent = name.charAt(0).toUpperCase();
+  if (rl) rl.textContent = role;
 
-function cargarNotificacionesPanel() {
-  function formatFecha(fechaStr) {
-    const d = new Date(fechaStr);
-    const pad = n => n < 10 ? '0'+n : n;
-    return `${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
-  }
-  
-  // Usar el endpoint de acciones
-  fetch('http://localhost:5000/api/notifications/acciones')
-    .then(r => r.json())
-    .then(data => {
-      let html = '';
-      if (data.length === 0) {
-        html = '<div style="padding:20px;text-align:center;color:#999;"><i class="fas fa-bell" style="font-size:2em;display:block;margin-bottom:10px;color:#ddd;"></i>Sin notificaciones</div>';
-      } else {
-        data.forEach(n => {
-          html += `<div style='padding:12px 16px;border-bottom:1px solid #eee;transition:background 0.2s;' onmouseover='this.style.background="#f9f9f9"' onmouseout='this.style.background="transparent"'>
-            <div style='font-size:0.95em;color:#333;margin-bottom:4px;'>${n.mensaje}</div>
-            <span style='font-size:0.85em;color:#999;'>${formatFecha(n.fecha)}</span>
-          </div>`;
-        });
-      }
-      document.getElementById('notiPanelContent').innerHTML = html;
-      
-      // Actualizar contador
-      const count = data.length;
-      document.getElementById('notiCount').textContent = count;
-      document.getElementById('notiCount').style.display = count > 0 ? 'inline-block' : 'none';
-    })
-    .catch(err => {
-      console.error('Error al cargar notificaciones:', err);
-      document.getElementById('notiPanelContent').innerHTML = '<div style="padding:20px;text-align:center;color:#f44336;">Error al cargar notificaciones</div>';
+  /* ── Cerrar sesión ── */
+  window.cerrarSesion = function () {
+    const TOKEN = localStorage.getItem('token');
+    fetch('http://localhost:5000/api/auth/logout', {
+      method: 'POST', headers: { Authorization: `Bearer ${TOKEN}` }
+    }).finally(() => {
+      localStorage.clear(); sessionStorage.clear();
+      window.location.replace('login.html');
     });
-}
+  };
 
-function limpiarNotificaciones() {
-  if (!confirm('¿Estás seguro de que deseas limpiar todas las notificaciones?')) {
-    return;
+  /* ── User dropdown ── */
+  window.toggleUserDropdown = function () {
+    const d = document.getElementById('userDropdown');
+    d.classList.toggle('open');
+  };
+
+  document.addEventListener('click', e => {
+    if (!e.target.closest('#userBtn') && !e.target.closest('#userDropdown')) {
+      const d = document.getElementById('userDropdown');
+      if (d) d.classList.remove('open');
+    }
+  });
+
+  /* ── Noti panel ── */
+  let notiOpen = false;
+
+  window.toggleNotiPanel = function () {
+    notiOpen = !notiOpen;
+    const panel   = document.getElementById('notiPanel');
+    const overlay = document.getElementById('notiOverlay');
+    panel.classList.toggle('active', notiOpen);
+    overlay.classList.toggle('active', notiOpen);
+    document.body.style.overflow = notiOpen ? 'hidden' : '';
+    if (notiOpen) cargarNotiPanel();
+  };
+
+  function cargarNotiPanel() {
+    fetch('http://localhost:5000/api/notifications/acciones')
+      .then(r => r.json())
+      .then(data => {
+        const el  = document.getElementById('notiPanelContent');
+        const dot = document.getElementById('notiDot');
+        if (dot) dot.style.display = data.length ? 'block' : 'none';
+
+        if (!data.length) {
+          el.innerHTML = `<div style="text-align:center;padding:48px 20px;color:var(--text-muted);">
+            <i class="fas fa-bell" style="font-size:2.5em;color:var(--text-faint);display:block;margin-bottom:12px;"></i>
+            <p style="font-size:.88em;">Sin notificaciones</p></div>`;
+          return;
+        }
+
+        const fmt = s => {
+          const d = new Date(s), p = n => n < 10 ? '0' + n : n;
+          return `${p(d.getDate())}/${p(d.getMonth()+1)}/${d.getFullYear()} ${p(d.getHours())}:${p(d.getMinutes())}`;
+        };
+
+        el.innerHTML = data.map(n => `
+          <div class="noti-item-h">
+            <div class="noti-msg-h">${n.mensaje}</div>
+            <div class="noti-date-h">${fmt(n.fecha)}</div>
+          </div>`).join('');
+      })
+      .catch(() => {
+        document.getElementById('notiPanelContent').innerHTML =
+          `<div style="text-align:center;padding:30px;color:var(--danger);font-size:.85em;">Error al cargar notificaciones</div>`;
+      });
   }
-  
-  fetch('http://localhost:5000/api/notifications/clear', { method:'POST' })
-    .then(r => r.json())
-    .then(data => {
-      if (data.ok) {
-        cargarNotificacionesPanel();
-      }
-    })
-    .catch(err => {
-      console.error('Error al limpiar notificaciones:', err);
-    });
-}
 
-// Cargar notificaciones al inicio y cada 5 segundos
-setInterval(cargarNotificacionesPanel, 5000);
-cargarNotificacionesPanel();
+  window.limpiarNotificaciones = function () {
+    if (!confirm('¿Limpiar todas las notificaciones?')) return;
+    fetch('http://localhost:5000/api/notifications/clear', { method: 'POST' })
+      .then(r => r.json())
+      .then(d => { if (d.ok) cargarNotiPanel(); });
+  };
+
+  /* ── Auto refresh ── */
+  setInterval(cargarNotiPanel, 10000);
+  cargarNotiPanel();
+})();
 </script>
-
-<style>
-  #notiPanel {
-    position: fixed;
-    top: 80px;
-    right: 0;
-    height: calc(100vh - 90px);
-    width: 370px;
-    max-width: 90vw;
-    z-index: 3000;
-    overflow-y: auto;
-    border-radius: 18px 0 0 18px;
-    transition: transform 0.55s cubic-bezier(.23,1.01,.32,1), opacity 0.35s cubic-bezier(.23,1.01,.32,1);
-    transform: translateX(100%);
-    opacity: 0;
-    pointer-events: none;
-    box-shadow: -8px 0 32px 0 rgba(31,38,135,0.13),0 2px 12px 0 rgba(0,0,0,0.10);
-    border: 1.5px solid #e0e0e0;
-    background: rgba(255,255,255,0.82);
-    backdrop-filter: blur(12px) saturate(180%);
-    -webkit-backdrop-filter: blur(12px) saturate(180%);
-  }
-  #notiPanel.active {
-    transform: translateX(0);
-    opacity: 1;
-    pointer-events: auto;
-  }
-  #notiPanelOverlay {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background: rgba(0,0,0,0.25);
-    z-index: 2999;
-  }
-  #notiPanel.active ~ #notiPanelOverlay {
-    display: block;
-  }
-</style>

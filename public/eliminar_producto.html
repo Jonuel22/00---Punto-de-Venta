@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+  <link rel="stylesheet" href="theme.css">
+  <script src="theme-init.js"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Eliminar Producto</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800" rel="stylesheet">
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
 
 <style>
@@ -25,7 +27,7 @@ body {
   justify-content: space-between;
   align-items: center;
   padding: 10px 20px;
-  background-color: #333;
+  background-color: var(--text);
   color: #fff;
   position: fixed;
   top: 0;
@@ -46,7 +48,7 @@ body {
 
 .main-section h1 {
   margin-bottom: 24px;
-  color: #222;
+  color: var(--text);
   font-weight: 700;
   letter-spacing: 0.5px;
 }
@@ -85,7 +87,7 @@ form {
 
 .search-results {
   margin-top: 6px;
-  background: white;
+  background: var(--card-bg);
   border-radius: 10px;
   border: 1px solid #ccc;
   max-height: 200px;
@@ -107,7 +109,7 @@ label {
   margin-bottom: 6px;
   font-size: 1.1em;
   font-weight: 600;
-  color: #333;
+  color: var(--text);
 }
 
 /* ===== INPUTS ===== */
@@ -198,7 +200,7 @@ textarea:focus {
 
 /* ===== MODAL CARD ===== */
 .modal-card {
-  background: rgba(255,255,255,0.95);
+  background: var(--card-bg);
   max-width: 520px;
   margin: 80px auto;
   padding: 26px 24px 20px;

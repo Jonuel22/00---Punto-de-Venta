@@ -1,10 +1,12 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+  <link rel="stylesheet" href="theme.css">
+  <script src="theme-init.js"></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Inventario</title>
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
   <style>
 * {
@@ -15,7 +17,7 @@
 
 body {
   font-family: 'Roboto', sans-serif;
-  background: linear-gradient(135deg, #e8f5e9, #b2dfdb);
+  background: var(--bg);
   min-height: 100vh;
   padding-top: 80px;
   overflow-x: hidden;
@@ -32,7 +34,7 @@ body {
   text-align: center;
   font-size: 2.5em;
   font-weight: 700;
-  color: #222;
+  color: var(--text);
   margin-bottom: 16px;
   letter-spacing: 1px;
 }
@@ -54,18 +56,18 @@ body {
 
 /* ===== CARD ===== */
 .card {
-  background: rgba(255, 255, 255, 0.95);
+  background: var(--card-bg);
   backdrop-filter: blur(12px);
   border-radius: 16px;
   padding: 40px 28px;
   text-align: center;
   text-decoration: none;
-  color: #222;
+  color: var(--text);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-sm);
   border: 1px solid rgba(255, 255, 255, 0.5);
   cursor: pointer;
   transition: all 0.3s cubic-bezier(.23, 1.01, .32, 1);
@@ -114,12 +116,12 @@ body {
   font-weight: 700;
   margin: 0;
   letter-spacing: 0.5px;
-  color: #333;
+  color: var(--text);
 }
 
 .card p {
   font-size: 0.9em;
-  color: #666;
+  color: var(--text-muted);
   margin-top: 8px;
   line-height: 1.4;
 }
@@ -146,11 +148,11 @@ body {
 }
 
 .stat-card {
-  background: rgba(255, 255, 255, 0.95);
+  background: var(--card-bg);
   backdrop-filter: blur(12px);
   border-radius: 12px;
   padding: 24px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-sm);
   border: 1px solid rgba(255, 255, 255, 0.5);
   transition: transform 0.2s;
 }

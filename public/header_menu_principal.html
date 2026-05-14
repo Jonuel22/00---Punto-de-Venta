@@ -1,177 +1,147 @@
-<header class="header-global" style="position:fixed;top:0;left:0;width:100vw;min-width:100vw;max-width:100vw;background:rgba(255,255,255,0.92);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);color:#222;padding:14px 32px 14px 24px;z-index:1000;display:flex;align-items:center;justify-content:space-between;box-sizing:border-box;box-shadow:0 2px 12px 0 rgba(31,38,135,0.10);border-bottom:1px solid #e0e0e0;">
-  <div style="display:flex;align-items:center;min-width:0;">
-    <button onclick="window.history.back()" style="background:none;border:none;color:#00cc66;font-size:1.5em;cursor:pointer;margin-right:15px;">
-      <i class="fas fa-arrow-left" ></i>
+<!-- ============================================================
+   header_menu_principal.html — JCT POS v2
+   Header global para todas las páginas INTERNAS (excepto menu)
+   Incluir con: fetch('header_menu_principal.html')
+   ============================================================ -->
+<link rel="stylesheet" href="theme.css">
+
+<header class="app-header">
+  <!-- Brand + Back -->
+  <div style="display:flex;align-items:center;gap:8px;">
+    <button onclick="window.history.back()" class="h-btn" title="Volver">
+      <i class="fas fa-arrow-left"></i>
     </button>
-    <a href="menu_principal.html" class="home-icon" style="color:#00cc66;font-size:1.7em;margin-right:18px;">
-      <i class="fas fa-home"></i>
+    <a href="menu_principal.html" class="brand">
+      <div class="brand-icon"><i class="fas fa-cash-register"></i></div>
+      <span class="brand-name">JCT POS</span>
     </a>
-    <span style="font-size:1.25em;font-weight:bold;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#222;letter-spacing:0.5px;">Punto de Venta</span>
   </div>
-  <div style="display:flex;align-items:center;gap:10px;min-width:0;">
-    <div id="notificaciones-header" style="position:relative;">
-      <button onclick="toggleNotificaciones()" style="background:none;border:none;color:#00cc66;font-size:1.5em;cursor:pointer;position:relative;">
+
+  <!-- Actions -->
+  <div class="header-actions">
+    <!-- Toggle tema -->
+    <button class="theme-toggle h-btn" title="Cambiar tema">
+      <i class="fas fa-sun"></i>
+    </button>
+
+    <!-- Notificaciones -->
+    <div style="position:relative;">
+      <button class="h-btn" onclick="toggleNotiPanel()" title="Notificaciones" id="notiBell">
         <i class="fas fa-bell"></i>
-        <span id="notiCount" style="position:absolute;top:-5px;right:-8px;background:#f44336;color:#fff;border-radius:50%;padding:2px 6px;font-size:0.6em;display:none;"></span>
+        <span class="notif-dot" id="notiDot" style="display:none;"></span>
       </button>
     </div>
-    <div id="usuario-header" style="position:relative;">
-      <button onclick="toggleUsuario()" style="background:none;border:none;color:#00cc66;font-size:1.5em;cursor:pointer;">
+
+    <!-- Usuario -->
+    <div class="dropdown">
+      <button class="h-btn" onclick="toggleUserMenu()" title="Mi cuenta">
         <i class="fas fa-user"></i>
       </button>
+      <div class="dropdown-panel" id="userDropdown" style="display:none;">
+        <div class="dropdown-item" style="padding:14px 16px;border-bottom:1px solid var(--border);cursor:default;">
+          <i class="fas fa-user-circle" style="color:var(--primary);font-size:1.2em;"></i>
+          <span id="headerUserName" style="font-weight:600;"></span>
+        </div>
+        <div class="dropdown-item" onclick="location.href='config_general.html'">
+          <i class="fas fa-cog"></i> Configuración
+        </div>
+        <div class="dropdown-item danger" onclick="cerrarSesion()">
+          <i class="fas fa-sign-out-alt"></i> Cerrar sesión
+        </div>
+      </div>
     </div>
   </div>
 </header>
 
-<!-- Panel de usuario -->
-<div id="usuarioPanel" style="display:none;position:fixed;top:60px;right:20px;background:#fff;color:#333;min-width:180px;box-shadow:0 2px 8px rgba(0,0,0,0.2);border-radius:6px;overflow:hidden;z-index:3000;">
-  <div style="padding:12px;cursor:pointer;border-bottom:1px solid #eee;" onclick="window.location.href='configuracion_cajeros.html'">
-    <i class="fas fa-cog"></i> Configuración
+<!-- Panel de notificaciones lateral -->
+<div id="notiPanelHeader" style="
+  position:fixed;top:64px;right:0;bottom:0;width:340px;
+  background:var(--sidebar-bg);border-left:1px solid var(--sidebar-border);
+  display:flex;flex-direction:column;z-index:2000;
+  transform:translateX(100%);transition:transform .3s cubic-bezier(.23,1,.32,1);
+  box-shadow:var(--shadow-lg);
+">
+  <div style="padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
+    <span style="font-weight:700;color:var(--text);">Notificaciones</span>
+    <button onclick="toggleNotiPanel()" class="btn-close">&times;</button>
   </div>
-  <div style="padding:12px;cursor:pointer;border-bottom:1px solid #eee;" onclick="cerrarSesion()">
-    <i class="fas fa-sign-out-alt"></i> Cerrar sesión
+  <div id="notiPanelList" style="flex:1;overflow-y:auto;padding:8px 0;"></div>
+  <div style="padding:12px 20px;border-top:1px solid var(--border);">
+    <button onclick="limpiarNotificaciones()" class="btn btn-secondary btn-block" style="font-size:.82em;">
+      <i class="fas fa-broom"></i> Limpiar notificaciones
+    </button>
   </div>
 </div>
-
-<!-- Panel de notificaciones -->
-<div id="notiPanel" tabindex="-1" style="backdrop-filter: blur(12px) saturate(180%);-webkit-backdrop-filter: blur(12px) saturate(180%);background:rgba(255,255,255,0.82);border-radius:18px 0 0 18px;box-shadow:-8px 0 32px 0 rgba(31,38,135,0.13),0 2px 12px 0 rgba(0,0,0,0.10);border:1.5px solid #e0e0e0;">
-  <div style="padding:18px 24px 12px 24px;font-size:1.18em;font-weight:700;border-bottom:1px solid #e0e0e0;display:flex;align-items:center;justify-content:space-between;color:#00cc66;letter-spacing:0.5px;">
-    <span>Notificaciones</span>
-    <button onclick="toggleNotificaciones()" style="background:none;border:none;font-size:1.5em;cursor:pointer;line-height:1;color:#00cc66;">&times;</button>
-  </div>
-  <div id="notiPanelContent" style="max-height:calc(100vh - 140px);overflow-y:auto;padding:8px 0 0 0;"></div>
-  <button onclick="limpiarNotificaciones()" style="width:100%;background:linear-gradient(90deg,#00cc66 0%,#66ccff 100%);color:#fff;border:none;padding:12px 0;cursor:pointer;font-size:1em;border-radius:0 0 0 12px;font-weight:600;letter-spacing:0.5px;">Limpiar notificaciones</button>
-</div>
-<div id="notiPanelOverlay" onclick="toggleNotificaciones()"></div>
-
-<style>
-  #notiPanel {
-    position: fixed;
-    top: 60px;
-    right: 0;
-    height: calc(100vh - 60px);
-    width: 370px;
-    max-width: 90vw;
-    background: #fff;
-    box-shadow: -2px 0 18px 4px rgba(0,0,0,0.18);
-    z-index: 3000;
-    overflow-y: auto;
-    border-radius: 0 0 0 8px;
-    transition: transform 0.55s cubic-bezier(.23,1.01,.32,1), opacity 0.35s cubic-bezier(.23,1.01,.32,1);
-    transform: translateX(100%);
-    opacity: 0;
-    pointer-events: none;
-    /* Efecto espejo/reflejo */
-    -webkit-box-reflect: below 0 linear-gradient(transparent, rgba(0,0,0,0.08));
-  }
-  #notiPanel.active {
-    transform: translateX(0);
-    opacity: 1;
-    pointer-events: auto;
-  }
-  #notiPanelOverlay {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background: rgba(0,0,0,0.25);
-    z-index: 2999;
-  }
-  #notiPanel.active ~ #notiPanelOverlay {
-    display: block;
-  }
-</style>
+<div id="notiOverlay" onclick="toggleNotiPanel()" style="
+  display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:1999;
+  backdrop-filter:blur(2px);
+"></div>
 
 <script>
-// Funciones directas (como los otros botones)
-function toggleUsuario() {
-  const usuarioPanel = document.getElementById('usuarioPanel');
-  usuarioPanel.style.display = usuarioPanel.style.display === 'block' ? 'none' : 'block';
-  // Cerrar notiPanel correctamente
-  const notiPanel = document.getElementById('notiPanel');
-  const overlay = document.getElementById('notiPanelOverlay');
-  if (notiPanel && overlay) {
-    notiPanel.classList.remove('active');
-    overlay.style.display = 'none';
-    document.body.style.overflow = '';
-  }
-}
+(function initHeader(){
+  // Usuario
+  const user = JSON.parse(localStorage.getItem('user') || '{}');
+  const name = user.nombre || user.username || '';
+  const el   = document.getElementById('headerUserName');
+  if (el) el.textContent = name;
 
-function toggleNotificaciones() {
-  const notiPanel = document.getElementById('notiPanel');
-  const overlay = document.getElementById('notiPanelOverlay');
-  const usuarioPanel = document.getElementById('usuarioPanel');
-  if (notiPanel.classList.contains('active')) {
-    notiPanel.classList.remove('active');
-    overlay.style.display = 'none';
-    document.body.style.overflow = '';
-  } else {
-    notiPanel.classList.add('active');
-    overlay.style.display = 'block';
-    document.body.style.overflow = 'hidden';
-    // Cerrar usuarioPanel si está abierto
-    if (usuarioPanel) usuarioPanel.style.display = 'none';
-    cargarNotificacionesPanel();
-  }
-}
+  // Cerrar sesión
+  window.cerrarSesion = function() {
+    const TOKEN = localStorage.getItem('token');
+    fetch('http://localhost:5000/api/auth/logout',{method:'POST',headers:{Authorization:`Bearer ${TOKEN}`}})
+      .finally(()=>{ localStorage.clear(); sessionStorage.clear(); window.location.replace('login.html'); });
+  };
 
-// Cargar notificaciones desde el endpoint de acciones
-function cargarNotificacionesPanel() {
-  function formatFecha(fechaStr) {
-    const d = new Date(fechaStr);
-    const pad = n => n < 10 ? '0'+n : n;
-    return `${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
-  }
-  
-  // Usar el endpoint de acciones
-  fetch('http://localhost:5000/api/notifications/acciones')
-    .then(r => r.json())
-    .then(data => {
-      let html = '';
-      if (data.length === 0) {
-        html = '<div style="padding:20px;text-align:center;color:#999;"><i class="fas fa-bell" style="font-size:2em;display:block;margin-bottom:10px;color:#ddd;"></i>Sin notificaciones</div>';
-      } else {
-        data.forEach(n => {
-          html += `<div style='padding:12px 16px;border-bottom:1px solid #eee;transition:background 0.2s;' onmouseover='this.style.background="#f9f9f9"' onmouseout='this.style.background="transparent"'>
-            <div style='font-size:0.95em;color:#333;margin-bottom:4px;'>${n.mensaje}</div>
-            <span style='font-size:0.85em;color:#999;'>${formatFecha(n.fecha)}</span>
-          </div>`;
-        });
-      }
-      document.getElementById('notiPanelContent').innerHTML = html;
-      
-      // Actualizar contador
-      const count = data.length;
-      document.getElementById('notiCount').textContent = count;
-      document.getElementById('notiCount').style.display = count > 0 ? 'inline-block' : 'none';
-    })
-    .catch(err => {
-      console.error('Error al cargar notificaciones:', err);
-      document.getElementById('notiPanelContent').innerHTML = '<div style="padding:20px;text-align:center;color:#f44336;">Error al cargar notificaciones</div>';
-    });
-}
+  // User menu
+  window.toggleUserMenu = function() {
+    const m = document.getElementById('userDropdown');
+    if (m) m.style.display = m.style.display==='block'?'none':'block';
+  };
 
-// Limpiar notificaciones
-function limpiarNotificaciones() {
-  if (!confirm('¿Estás seguro de que deseas limpiar todas las notificaciones?')) {
-    return;
-  }
-  
-  fetch('http://localhost:5000/api/notifications/clear', { method:'POST' })
-    .then(r => r.json())
-    .then(data => {
-      if (data.ok) {
-        cargarNotificacionesPanel();
-      }
-    })
-    .catch(err => {
-      console.error('Error al limpiar notificaciones:', err);
-    });
-}
+  // Noti panel
+  let notiOpen = false;
+  window.toggleNotiPanel = function() {
+    notiOpen = !notiOpen;
+    const panel   = document.getElementById('notiPanelHeader');
+    const overlay = document.getElementById('notiOverlay');
+    panel.style.transform   = notiOpen ? 'translateX(0)' : 'translateX(100%)';
+    overlay.style.display   = notiOpen ? 'block' : 'none';
+    document.body.style.overflow = notiOpen ? 'hidden' : '';
+    if (notiOpen) cargarNotiPanel();
+  };
 
-// Auto refresco cada 5 segundos
-setInterval(cargarNotificacionesPanel, 5000);
-cargarNotificacionesPanel();
+  function cargarNotiPanel() {
+    fetch('http://localhost:5000/api/notifications/acciones')
+      .then(r=>r.json()).then(data=>{
+        const el = document.getElementById('notiPanelList');
+        const dot= document.getElementById('notiDot');
+        if (dot) dot.style.display = data.length ? 'block' : 'none';
+        if (!data.length) {
+          el.innerHTML='<div class="noti-empty"><i class="fas fa-bell"></i><p>Sin notificaciones</p></div>';
+          return;
+        }
+        const fmt=s=>{const d=new Date(s),p=n=>n<10?'0'+n:n;return`${p(d.getDate())}/${p(d.getMonth()+1)} ${p(d.getHours())}:${p(d.getMinutes())}`;};
+        el.innerHTML=data.map(n=>`<div class="noti-item"><div class="noti-msg">${n.mensaje}</div><div class="noti-date">${fmt(n.fecha)}</div></div>`).join('');
+      }).catch(()=>{});
+  }
+
+  window.limpiarNotificaciones = function() {
+    if (!confirm('¿Limpiar notificaciones?')) return;
+    const TOKEN = localStorage.getItem('token');
+    fetch('http://localhost:5000/api/notifications/clear',{method:'POST',headers:{Authorization:`Bearer ${TOKEN}`}})
+      .then(r=>r.json()).then(d=>{ if(d.ok) cargarNotiPanel(); });
+  };
+
+  // Cerrar menus al click fuera
+  document.addEventListener('click', e => {
+    if (!e.target.closest('.dropdown')) {
+      const m = document.getElementById('userDropdown');
+      if (m) m.style.display = 'none';
+    }
+  });
+
+  // Cargar count al inicio
+  cargarNotiPanel();
+  setInterval(cargarNotiPanel, 15000);
+})();
 </script>

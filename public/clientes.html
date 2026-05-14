@@ -1,21 +1,20 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+  <link rel="stylesheet" href="theme.css">
+  <script src="theme-init.js"></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Gestión de Clientes</title>
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
   <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
-      font-family: 'Roboto', sans-serif;
-      background: linear-gradient(135deg, #e8f5e9, #b2dfdb);
+      font-family: 'Poppins', sans-serif;
+      background: var(--bg);
+      color: var(--text);
       min-height: 100vh;
       padding-top: 80px;
     }
@@ -26,13 +25,14 @@
       padding: 24px;
     }
 
+    /* ── Page header ── */
     .page-header {
-      background: rgba(255, 255, 255, 0.95);
-      backdrop-filter: blur(12px);
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
       border-radius: 16px;
-      padding: 32px;
+      padding: 28px 32px;
       margin-bottom: 24px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      box-shadow: var(--shadow-sm);
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -41,417 +41,45 @@
     }
 
     .page-title {
-      font-size: 2.2em;
-      color: #222;
+      font-size: 2em;
+      color: var(--text);
       display: flex;
       align-items: center;
       gap: 12px;
     }
 
-    .page-title i {
-      color: #00cc66;
-    }
+    .page-title i { color: var(--primary); }
 
+    .page-subtitle { color: var(--text-muted); margin-top: 6px; font-size: .9em; }
+
+    /* ── Botones ── */
     .btn {
-      padding: 14px 28px;
+      padding: 12px 24px;
       border: none;
-      border-radius: 12px;
-      font-size: 1.1em;
+      border-radius: 10px;
+      font-size: 1em;
       font-weight: 700;
       cursor: pointer;
-      transition: all 0.3s;
+      transition: all .25s;
       display: inline-flex;
       align-items: center;
       gap: 8px;
+      font-family: 'Poppins', sans-serif;
     }
 
-    .btn-primary {
-      background: linear-gradient(90deg, #00cc66, #66ccff);
-      color: white;
-      box-shadow: 0 4px 12px rgba(0, 204, 102, 0.3);
-    }
+    .btn-primary  { background: var(--gradient); color: #fff; box-shadow: 0 4px 14px rgba(var(--primary-rgb),.3); }
+    .btn-primary:hover  { filter: brightness(1.1); transform: translateY(-1px); }
+    .btn-secondary{ background: rgba(var(--secondary-rgb),.15); color: var(--secondary); border: 1px solid rgba(var(--secondary-rgb),.25); }
+    .btn-secondary:hover{ background: var(--secondary); color:#fff; transform: translateY(-1px); }
+    .btn-danger   { background: rgba(var(--danger-rgb),.15); color: var(--danger); border: 1px solid rgba(var(--danger-rgb),.25); }
+    .btn-danger:hover   { background: var(--danger); color: #fff; transform: translateY(-1px); }
+    .btn-warning  { background: rgba(var(--warning-rgb),.15); color: var(--warning); border: 1px solid rgba(var(--warning-rgb),.25); }
+    .btn-warning:hover  { background: var(--warning); color: #fff; transform: translateY(-1px); }
+    .btn-success  { background: rgba(var(--primary-rgb),.15); color: var(--primary); border: 1px solid rgba(var(--primary-rgb),.25); }
+    .btn-success:hover  { background: var(--primary); color: #fff; transform: translateY(-1px); }
+    .btn-small    { padding: 7px 14px; font-size: .85em; }
 
-    .btn-primary:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 16px rgba(0, 204, 102, 0.4);
-    }
-
-    .btn-secondary {
-      background: linear-gradient(90deg, #2196f3, #64b5f6);
-      color: white;
-      box-shadow: 0 4px 12px rgba(33, 150, 243, 0.3);
-      padding: 10px 20px;
-      font-size: 0.95em;
-    }
-
-    .btn-secondary:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 16px rgba(33, 150, 243, 0.4);
-    }
-
-    .btn-danger {
-      background: linear-gradient(90deg, #f44336, #e91e63);
-      color: white;
-      box-shadow: 0 4px 12px rgba(244, 67, 54, 0.3);
-      padding: 10px 20px;
-      font-size: 0.95em;
-    }
-
-    .btn-danger:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 16px rgba(244, 67, 54, 0.4);
-    }
-
-    .btn-warning {
-      background: linear-gradient(90deg, #ff9800, #ffc107);
-      color: white;
-      box-shadow: 0 4px 12px rgba(255, 152, 0, 0.3);
-      padding: 10px 20px;
-      font-size: 0.95em;
-    }
-
-    .btn-warning:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 16px rgba(255, 152, 0, 0.4);
-    }
-
-    .btn-small {
-      padding: 8px 16px;
-      font-size: 0.9em;
-    }
-
-    .search-card {
-      background: rgba(255, 255, 255, 0.95);
-      backdrop-filter: blur(12px);
-      border-radius: 16px;
-      padding: 20px;
-      margin-bottom: 24px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    }
-
-    .search-box {
-      display: flex;
-      gap: 12px;
-    }
-
-    .search-box input {
-      flex: 1;
-      padding: 14px 16px;
-      border: 2px solid #e0e0e0;
-      border-radius: 12px;
-      font-size: 1em;
-      transition: all 0.3s;
-    }
-
-    .search-box input:focus {
-      outline: none;
-      border-color: #00cc66;
-      box-shadow: 0 0 0 3px rgba(0, 204, 102, 0.1);
-    }
-
-    .tabla-card {
-      background: rgba(255, 255, 255, 0.95);
-      backdrop-filter: blur(12px);
-      border-radius: 16px;
-      padding: 24px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    }
-
-    .tabla-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 16px;
-      padding-bottom: 12px;
-      border-bottom: 2px solid #e0e0e0;
-    }
-
-    .tabla-container {
-      overflow-x: auto;
-      overflow-y: auto;
-      max-height: 600px;
-      border-radius: 12px;
-      border: 1px solid #e0e0e0;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      min-width: 1200px;
-    }
-
-    thead {
-      position: sticky;
-      top: 0;
-      z-index: 10;
-      background: linear-gradient(135deg, #00cc66, #66ccff);
-    }
-
-    th {
-      padding: 14px 12px;
-      text-align: left;
-      color: white;
-      font-weight: 600;
-      font-size: 0.9em;
-      text-transform: uppercase;
-    }
-
-    td {
-      padding: 12px;
-      border-bottom: 1px solid #f0f0f0;
-      color: #333;
-      background: white;
-    }
-
-    tbody tr:hover {
-      background: #f0f8ff !important;
-    }
-
-    .badge {
-      display: inline-block;
-      padding: 4px 12px;
-      border-radius: 12px;
-      font-size: 0.85em;
-      font-weight: 600;
-    }
-
-    .badge-success {
-      background: #e8f5e9;
-      color: #00cc66;
-    }
-
-    .badge-danger {
-      background: #ffebee;
-      color: #f44336;
-    }
-
-    .badge-warning {
-      background: #fff3e0;
-      color: #ff9800;
-    }
-
-    .modal {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      background: rgba(0, 0, 0, 0.5);
-      z-index: 5000;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .modal.active {
-      display: flex;
-    }
-
-    .modal-content {
-      background: white;
-      max-width: 600px;
-      width: 90%;
-      max-height: 90vh;
-      overflow-y: auto;
-      border-radius: 16px;
-      padding: 32px;
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-      animation: modalFadeIn 0.3s;
-    }
-
-    .modal-content-large {
-      max-width: 900px;
-    }
-
-    @keyframes modalFadeIn {
-      from {
-        opacity: 0;
-        transform: scale(0.9) translateY(-20px);
-      }
-      to {
-        opacity: 1;
-        transform: scale(1) translateY(0);
-      }
-    }
-
-    .modal-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 24px;
-      padding-bottom: 16px;
-      border-bottom: 2px solid #e0e0e0;
-    }
-
-    .modal-title {
-      font-size: 1.5em;
-      color: #222;
-      font-weight: 700;
-    }
-
-    .btn-close {
-      background: none;
-      border: none;
-      font-size: 1.8em;
-      cursor: pointer;
-      color: #666;
-      width: 36px;
-      height: 36px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 50%;
-      transition: all 0.2s;
-    }
-
-    .btn-close:hover {
-      background: #f0f0f0;
-      color: #f44336;
-    }
-
-    .form-group {
-      margin-bottom: 20px;
-    }
-
-    .form-group label {
-      display: block;
-      margin-bottom: 8px;
-      font-weight: 600;
-      color: #333;
-    }
-
-    .form-group input,
-    .form-group select,
-    .form-group textarea {
-      width: 100%;
-      padding: 12px 16px;
-      border: 2px solid #e0e0e0;
-      border-radius: 8px;
-      font-size: 1em;
-      transition: all 0.2s;
-      font-family: 'Roboto', sans-serif;
-    }
-
-    .form-group input:focus,
-    .form-group select:focus,
-    .form-group textarea:focus {
-      outline: none;
-      border-color: #00cc66;
-      box-shadow: 0 0 0 3px rgba(0, 204, 102, 0.1);
-    }
-
-    .form-group textarea {
-      resize: vertical;
-      min-height: 80px;
-    }
-
-    .form-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 16px;
-    }
-
-    .info-cliente {
-      background: linear-gradient(135deg, rgba(0, 204, 102, 0.05), rgba(102, 204, 255, 0.05));
-      padding: 16px;
-      border-radius: 12px;
-      margin-bottom: 20px;
-    }
-
-    .info-cliente-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-      margin-top: 12px;
-    }
-
-    .info-cliente-item {
-      font-size: 0.95em;
-    }
-
-    .info-cliente-item strong {
-      color: #666;
-      display: block;
-      font-size: 0.85em;
-      margin-bottom: 4px;
-    }
-
-    .info-cliente-item span {
-      color: #222;
-      font-weight: 600;
-    }
-
-    .historial-item {
-      padding: 12px;
-      border-bottom: 1px solid #f0f0f0;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      transition: background 0.2s;
-    }
-
-    .historial-item:hover {
-      background: #f0f8ff;
-    }
-
-    .historial-item:last-child {
-      border-bottom: none;
-    }
-
-    .historial-fecha {
-      font-size: 0.85em;
-      color: #999;
-    }
-
-    .historial-monto {
-      font-weight: 700;
-      font-size: 1.1em;
-    }
-
-    .historial-monto.positivo {
-      color: #f44336;
-    }
-
-    .historial-monto.negativo {
-      color: #00cc66;
-    }
-
-    #mensajeExito, #mensajeError {
-      position: fixed;
-      top: 100px;
-      right: 30px;
-      background: white;
-      padding: 20px 32px;
-      border-radius: 12px;
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
-      font-size: 1.1em;
-      font-weight: 600;
-      z-index: 9999;
-      display: none;
-      animation: slideIn 0.3s;
-    }
-
-    #mensajeExito {
-      border-left: 6px solid #00cc66;
-      color: #00cc66;
-    }
-
-    #mensajeError {
-      border-left: 6px solid #f44336;
-      color: #f44336;
-    }
-
-    @keyframes slideIn {
-      from {
-        transform: translateX(400px);
-        opacity: 0;
-      }
-      to {
-        transform: translateX(0);
-        opacity: 1;
-      }
-    }
-
+    /* ── Stats ── */
     .stats-row {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -460,46 +88,371 @@
     }
 
     .stat-box {
-      background: rgba(255, 255, 255, 0.95);
-      backdrop-filter: blur(12px);
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
       border-radius: 12px;
       padding: 20px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      box-shadow: var(--shadow-xs);
       text-align: center;
-      transition: transform 0.2s;
+      transition: transform .2s;
     }
 
-    .stat-box:hover {
-      transform: translateY(-4px);
+    .stat-box:hover { transform: translateY(-3px); }
+    .stat-box h4 { color: var(--text-muted); font-size: .8em; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 10px; }
+    .stat-box span { font-size: 1.9em; font-weight: 800; color: var(--primary); }
+
+    /* ── Buscador ── */
+    .search-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 14px;
+      padding: 18px 20px;
+      margin-bottom: 16px;
+      box-shadow: var(--shadow-xs);
     }
 
-    .stat-box h4 {
-      color: #666;
-      font-size: 0.85em;
+    .search-box { display: flex; gap: 10px; }
+
+    .search-box input {
+      flex: 1;
+      padding: 12px 16px;
+      border: 1.5px solid var(--input-border);
+      border-radius: 10px;
+      font-size: .95em;
+      background: var(--input-bg);
+      color: var(--text);
+      font-family: 'Poppins', sans-serif;
+      transition: border-color .2s;
+    }
+
+    .search-box input::placeholder { color: var(--text-muted); }
+    .search-box input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-glow2); }
+
+    /* ── Barra de acciones (cliente seleccionado) ── */
+    .acciones-bar {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 14px;
+      padding: 14px 20px;
+      margin-bottom: 20px;
+      box-shadow: var(--shadow-xs);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .acciones-bar-label {
+      font-size: .82em;
+      color: var(--text-muted);
       font-weight: 600;
       text-transform: uppercase;
-      margin-bottom: 8px;
+      letter-spacing: .4px;
+      margin-right: 4px;
+      white-space: nowrap;
     }
 
-    .stat-box span {
-      font-size: 1.8em;
+    .acciones-bar-cliente {
+      flex: 1;
+      min-width: 160px;
+      padding: 8px 14px;
+      background: var(--primary-glow);
+      border: 1px solid rgba(var(--primary-rgb),.2);
+      border-radius: 8px;
+      font-size: .88em;
       font-weight: 700;
-      color: #00cc66;
+      color: var(--primary);
+      display: none;
+      align-items: center;
+      gap: 8px;
     }
 
+    .acciones-bar-cliente.visible { display: flex; }
+
+    .acciones-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      padding: 10px 18px;
+      border-radius: 10px;
+      border: none;
+      cursor: pointer;
+      font-family: 'Poppins', sans-serif;
+      font-size: .78em;
+      font-weight: 700;
+      transition: all .2s;
+      opacity: .35;
+      pointer-events: none;
+      min-width: 72px;
+    }
+
+    .acciones-btn i { font-size: 1.25em; }
+
+    .acciones-btn.habilitado {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .acciones-btn.habilitado:hover { transform: translateY(-2px); filter: brightness(1.1); }
+
+    .ab-ver      { background: rgba(var(--secondary-rgb),.15); color: var(--secondary); border: 1px solid rgba(var(--secondary-rgb),.25); }
+    .ab-editar   { background: rgba(var(--secondary-rgb),.12); color: var(--secondary); border: 1px solid rgba(var(--secondary-rgb),.2); }
+    .ab-historial{ background: var(--primary-glow); color: var(--primary); border: 1px solid rgba(var(--primary-rgb),.2); }
+    .ab-deuda    { background: rgba(var(--warning-rgb),.12); color: var(--warning); border: 1px solid rgba(var(--warning-rgb),.25); }
+    .ab-pago     { background: rgba(var(--danger-rgb),.12); color: var(--danger); border: 1px solid rgba(var(--danger-rgb),.25); }
+    .ab-pago.oculto { display: none; }
+
+    /* ── Tabla ── */
+    .tabla-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 14px;
+      padding: 22px;
+      box-shadow: var(--shadow-xs);
+    }
+
+    .tabla-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .tabla-header h3 { color: var(--text); font-size: 1.1em; }
+    .tabla-header span { color: var(--text-muted); font-size: .9em; font-weight: 600; }
+
+    .tabla-container {
+      overflow-x: auto;
+      overflow-y: auto;
+      max-height: 560px;
+      border-radius: 10px;
+      border: 1px solid var(--table-border);
+    }
+
+    table { width: 100%; border-collapse: collapse; min-width: 900px; }
+
+    thead {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: var(--gradient);
+    }
+
+    th {
+      padding: 13px 12px;
+      text-align: left;
+      color: #fff;
+      font-weight: 600;
+      font-size: .82em;
+      text-transform: uppercase;
+      letter-spacing: .4px;
+    }
+
+    td {
+      padding: 11px 12px;
+      border-bottom: 1px solid var(--table-border);
+      color: var(--text);
+      background: var(--table-row);
+      font-size: .9em;
+    }
+
+    tbody tr { cursor: pointer; transition: background .15s; }
+    tbody tr:nth-child(even) td { background: var(--table-row-alt); }
+    tbody tr:hover td { background: var(--table-hover) !important; }
+
+    tbody tr.fila-seleccionada td {
+      background: var(--primary-glow) !important;
+      border-bottom-color: rgba(var(--primary-rgb),.2);
+    }
+
+    /* ── Badges ── */
+    .badge {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 10px;
+      font-size: .8em;
+      font-weight: 700;
+    }
+
+    .badge-success { background: rgba(var(--primary-rgb),.15); color: var(--primary); }
+    .badge-danger  { background: rgba(var(--danger-rgb),.15);  color: var(--danger);  }
+    .badge-warning { background: rgba(var(--warning-rgb),.15); color: var(--warning); }
+
+    /* ── Modales ── */
+    .modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: var(--modal-overlay);
+      z-index: 5000;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal.active { display: flex; }
+
+    .modal-content {
+      background: var(--modal-bg);
+      border: 1px solid var(--card-border);
+      max-width: 600px;
+      width: 90%;
+      max-height: 90vh;
+      overflow-y: auto;
+      border-radius: 16px;
+      padding: 30px;
+      box-shadow: var(--shadow-xl);
+      animation: modalFadeIn .3s;
+    }
+
+    .modal-content-large { max-width: 900px; }
+
+    @keyframes modalFadeIn {
+      from { opacity: 0; transform: scale(.93) translateY(-16px); }
+      to   { opacity: 1; transform: scale(1) translateY(0); }
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 22px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .modal-title { font-size: 1.35em; color: var(--text); font-weight: 700; }
+
+    .btn-close {
+      background: none;
+      border: none;
+      font-size: 1.7em;
+      cursor: pointer;
+      color: var(--text-muted);
+      width: 36px; height: 36px;
+      display: flex; align-items: center; justify-content: center;
+      border-radius: 50%;
+      transition: all .2s;
+    }
+
+    .btn-close:hover { background: rgba(var(--danger-rgb),.12); color: var(--danger); }
+
+    /* ── Formulario ── */
+    .form-group { margin-bottom: 18px; }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 7px;
+      font-weight: 600;
+      color: var(--text);
+      font-size: .9em;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      width: 100%;
+      padding: 11px 14px;
+      border: 1.5px solid var(--input-border);
+      border-radius: 8px;
+      font-size: .95em;
+      background: var(--input-bg);
+      color: var(--text);
+      font-family: 'Poppins', sans-serif;
+      transition: border-color .2s;
+    }
+
+    .form-group input::placeholder,
+    .form-group textarea::placeholder { color: var(--text-muted); }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px var(--primary-glow2);
+    }
+
+    .form-group textarea { resize: vertical; min-height: 78px; }
+
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+    /* ── Info cliente (dentro modales) ── */
+    .info-cliente {
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      padding: 14px;
+      border-radius: 12px;
+      margin-bottom: 18px;
+    }
+
+    .info-cliente-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+    .info-cliente-item { font-size: .9em; }
+    .info-cliente-item strong { color: var(--text-muted); display: block; font-size: .82em; margin-bottom: 3px; }
+    .info-cliente-item span { color: var(--text); font-weight: 600; }
+
+    /* ── Historial ── */
+    .historial-item {
+      padding: 12px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      transition: background .15s;
+    }
+
+    .historial-item:hover { background: var(--table-hover); border-radius: 8px; }
+    .historial-item:last-child { border-bottom: none; }
+    .historial-monto.positivo { color: var(--danger); font-weight: 700; }
+    .historial-monto.negativo { color: var(--primary); font-weight: 700; }
+
+    /* ── Método de pago ── */
+    .metodo-btn {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      border: 1.5px solid var(--border); border-radius: 10px; padding: 10px 6px;
+      cursor: pointer; transition: all .2s;
+      background: var(--bg3); text-align: center;
+      font-size: .82em; font-weight: 600; color: var(--text-muted); gap: 4px;
+    }
+
+    .metodo-btn input[type="radio"] { display: none; }
+    .metodo-btn span { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+    .metodo-btn i { font-size: 1.2em; }
+    .metodo-btn:hover { border-color: var(--primary); color: var(--primary); background: var(--primary-glow2); }
+    .metodo-btn.activo { border-color: var(--primary); background: var(--primary-glow); color: var(--primary); box-shadow: 0 2px 8px var(--primary-glow); }
+
+    /* ── Resumen pago ── */
+    .resumen-pago-box {
+      background: var(--bg3);
+      border: 2px solid rgba(var(--primary-rgb),.3);
+      border-radius: 10px; padding: 12px 16px; margin-bottom: 16px;
+    }
+
+    /* ── Toasts / mensajes ── */
+    #mensajeExito, #mensajeError {
+      position: fixed; top: 100px; right: 30px;
+      padding: 18px 28px; border-radius: 12px;
+      box-shadow: var(--shadow-md); font-size: 1em; font-weight: 600;
+      z-index: 9999; display: none; animation: slideIn .3s;
+    }
+
+    #mensajeExito { background: var(--card-bg); border-left: 5px solid var(--primary); color: var(--primary); }
+    #mensajeError { background: var(--card-bg); border-left: 5px solid var(--danger); color: var(--danger); }
+
+    @keyframes slideIn {
+      from { transform: translateX(400px); opacity: 0; }
+      to   { transform: translateX(0); opacity: 1; }
+    }
+
+    /* ── Responsive ── */
     @media (max-width: 768px) {
-      .page-header {
-        flex-direction: column;
-        align-items: flex-start;
-      }
-
-      .form-row {
-        grid-template-columns: 1fr;
-      }
-
-      .stats-row {
-        grid-template-columns: 1fr;
-      }
+      .page-header { flex-direction: column; align-items: flex-start; }
+      .form-row { grid-template-columns: 1fr; }
+      .stats-row { grid-template-columns: 1fr; }
+      .acciones-bar { gap: 8px; }
+      .acciones-btn { padding: 8px 12px; min-width: 60px; font-size: .72em; }
     }
   </style>
 </head>
@@ -514,7 +467,7 @@
           <i class="fas fa-users"></i>
           Gestión de Clientes
         </h1>
-        <p style="color: #666; margin-top: 8px;">Administra tu cartera de clientes y créditos</p>
+        <p class="page-subtitle">Administra tu cartera de clientes y créditos</p>
       </div>
       <button onclick="abrirModalCliente()" class="btn btn-primary">
         <i class="fas fa-user-plus"></i>
@@ -530,11 +483,11 @@
       </div>
       <div class="stat-box">
         <h4>Clientes con Deuda</h4>
-        <span id="statClientesDeuda" style="color: #f44336;">0</span>
+        <span id="statClientesDeuda" style="color: var(--danger);">0</span>
       </div>
       <div class="stat-box">
         <h4>Total por Cobrar</h4>
-        <span id="statTotalPorCobrar" style="color: #f44336;">RD$ 0.00</span>
+        <span id="statTotalPorCobrar" style="color: var(--danger);">RD$ 0.00</span>
       </div>
     </div>
 
@@ -549,11 +502,38 @@
       </div>
     </div>
 
+    <!-- Barra de acciones -->
+    <div class="acciones-bar">
+      <span class="acciones-bar-label"><i class="fas fa-hand-pointer" style="margin-right:4px;"></i> Acciones:</span>
+      <div class="acciones-bar-cliente" id="accionesClienteNombre">
+        <i class="fas fa-user-check"></i>
+        <span id="accionesNombreTexto">—</span>
+      </div>
+
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-left:auto;">
+        <button class="acciones-btn ab-ver" id="btnAccVer" onclick="accionVer()">
+          <i class="fas fa-eye"></i>Ver
+        </button>
+        <button class="acciones-btn ab-editar" id="btnAccEditar" onclick="accionEditar()">
+          <i class="fas fa-edit"></i>Editar
+        </button>
+        <button class="acciones-btn ab-historial" id="btnAccHistorial" onclick="accionHistorial()">
+          <i class="fas fa-history"></i>Historial
+        </button>
+        <button class="acciones-btn ab-deuda" id="btnAccDeuda" onclick="accionDeuda()">
+          <i class="fas fa-plus-circle"></i>Deuda
+        </button>
+        <button class="acciones-btn ab-pago oculto" id="btnAccPago" onclick="accionPago()">
+          <i class="fas fa-dollar-sign"></i>Pago
+        </button>
+      </div>
+    </div>
+
     <!-- Tabla de Clientes -->
     <div class="tabla-card">
       <div class="tabla-header">
-        <h3 style="color: #333; font-size: 1.2em; margin: 0;">Listado de Clientes</h3>
-        <div id="contadorClientes" style="font-size: 0.95em; color: #666; font-weight: 600;">0 clientes</div>
+        <h3>Listado de Clientes</h3>
+        <span id="contadorClientes">0 clientes</span>
       </div>
       
       <div class="tabla-container">
@@ -569,7 +549,6 @@
               <th>Límite Crédito</th>
               <th>Disponible</th>
               <th>Estado</th>
-              <th style="width: 250px; text-align: center;">Acciones</th>
             </tr>
           </thead>
           <tbody>
@@ -678,51 +657,89 @@
 
   <!-- Modal Registrar Pago -->
   <div id="modalPago" class="modal">
-    <div class="modal-content">
+    <div class="modal-content" style="max-width: 520px;">
       <div class="modal-header">
-        <h3 class="modal-title">Registrar Pago</h3>
+        <h3 class="modal-title"><i class="fas fa-dollar-sign" style="color:#00cc66;"></i> Registrar Pago</h3>
         <button class="btn-close" onclick="cerrarModalPago()">&times;</button>
       </div>
-      
-      <div class="info-cliente" id="infoClientePago"></div>
-      
+
+      <div id="infoClientePago"></div>
+
       <form id="formPago" onsubmit="event.preventDefault(); registrarPago();">
         <input type="hidden" id="pagoClienteId">
-        
+        <input type="hidden" id="pagoDeudaMax">
+
+        <!-- Monto con botón "Pagar Todo" -->
         <div class="form-group">
-          <label>Monto a Pagar (RD$) <span style="color: #f44336;">*</span></label>
-          <input type="number" id="pagoMonto" step="0.01" min="0.01" required placeholder="0.00">
+          <label>Monto a Pagar (RD$) <span style="color:#f44336;">*</span></label>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <input type="number" id="pagoMonto" step="0.01" min="0.01" required placeholder="0.00"
+              oninput="validarMontoPago(this.value)" style="flex:1;">
+            <button type="button" onclick="pagarTodo()" class="btn btn-secondary" style="padding:10px 14px;font-size:0.9em;white-space:nowrap;">
+              <i class="fas fa-check-double"></i> Pagar todo
+            </button>
+          </div>
+          <div id="pagoMontoAviso" style="font-size:0.85em;margin-top:4px;color:#888;"></div>
         </div>
 
+        <!-- Método de pago -->
         <div class="form-group">
           <label>Método de Pago</label>
-          <select id="pagoMetodo">
-            <option value="efectivo">Efectivo</option>
-            <option value="tarjeta">Tarjeta de Crédito/Débito</option>
-            <option value="transferencia">Transferencia Bancaria</option>
-            <option value="cheque">Cheque</option>
-            <option value="otros">Otros</option>
-          </select>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:4px;">
+            <label class="metodo-btn" id="metodo-efectivo">
+              <input type="radio" name="metodoPago" value="efectivo" checked onchange="selMetodo('efectivo')">
+              <span><i class="fas fa-money-bill-wave"></i><br>Efectivo</span>
+            </label>
+            <label class="metodo-btn" id="metodo-tarjeta">
+              <input type="radio" name="metodoPago" value="tarjeta" onchange="selMetodo('tarjeta')">
+              <span><i class="fas fa-credit-card"></i><br>Tarjeta</span>
+            </label>
+            <label class="metodo-btn" id="metodo-transferencia">
+              <input type="radio" name="metodoPago" value="transferencia" onchange="selMetodo('transferencia')">
+              <span><i class="fas fa-university"></i><br>Transferencia</span>
+            </label>
+            <label class="metodo-btn" id="metodo-cheque">
+              <input type="radio" name="metodoPago" value="cheque" onchange="selMetodo('cheque')">
+              <span><i class="fas fa-money-check"></i><br>Cheque</span>
+            </label>
+            <label class="metodo-btn" id="metodo-otros">
+              <input type="radio" name="metodoPago" value="otros" onchange="selMetodo('otros')">
+              <span><i class="fas fa-ellipsis-h"></i><br>Otros</span>
+            </label>
+          </div>
         </div>
 
+        <!-- Referencia -->
         <div class="form-group">
-          <label>Referencia / No. Transacción (Opcional)</label>
-          <input type="text" id="pagoReferencia" placeholder="Núm. de transacción, cheque, etc.">
+          <label>Referencia / No. Transacción <span style="color:#aaa;font-weight:400;">(Opcional)</span></label>
+          <input type="text" id="pagoReferencia" placeholder="Ej: #TRX-00123, No. de cheque...">
         </div>
 
+        <!-- Descripción -->
         <div class="form-group">
-          <label>Descripción (Opcional)</label>
-          <textarea id="pagoDescripcion" placeholder="Detalles del pago..."></textarea>
+          <label>Nota <span style="color:#aaa;font-weight:400;">(Opcional)</span></label>
+          <textarea id="pagoDescripcion" placeholder="Observaciones del pago..." style="height:64px;"></textarea>
         </div>
 
-        <div style="display: flex; gap: 12px; margin-top: 24px;">
-          <button type="button" onclick="cerrarModalPago()" class="btn btn-danger" style="flex: 1;">
-            <i class="fas fa-times"></i>
-            Cancelar
+        <!-- Resumen del pago -->
+        <div id="resumenPago" class="resumen-pago-box" style="display:none;">
+          <div style="display:flex;justify-content:space-between;font-size:0.95em;">
+            <span style="color:var(--text-muted);">Deuda actual:</span><strong id="resumenDeuda" style="color:var(--danger);"></strong>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:0.95em;margin-top:4px;">
+            <span style="color:var(--text-muted);">Monto a pagar:</span><strong id="resumenMontoPagar" style="color:var(--secondary);"></strong>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:1em;margin-top:6px;border-top:1px solid var(--border);padding-top:6px;">
+            <span style="color:var(--text);"><strong>Saldo restante:</strong></span><strong id="resumenSaldo" style="font-size:1.1em;"></strong>
+          </div>
+        </div>
+
+        <div style="display:flex;gap:12px;margin-top:8px;">
+          <button type="button" onclick="cerrarModalPago()" class="btn btn-danger" style="flex:1;">
+            <i class="fas fa-times"></i> Cancelar
           </button>
-          <button type="submit" class="btn btn-primary" style="flex: 1;">
-            <i class="fas fa-check"></i>
-            Registrar Pago
+          <button type="submit" id="btnRegistrarPago" class="btn btn-primary" style="flex:1;">
+            <i class="fas fa-check"></i> Registrar Pago
           </button>
         </div>
       </form>
@@ -858,7 +875,7 @@
       tbody.innerHTML = '';
 
       if (clientes.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;padding:40px;color:#999;">No se encontraron clientes</td></tr>';
+        tbody.innerHTML = `<tr><td colspan="9" style="text-align:center;padding:40px;color:var(--text-muted);">No se encontraron clientes</td></tr>`;
         document.getElementById('contadorClientes').textContent = '0 clientes';
         return;
       }
@@ -866,46 +883,80 @@
       document.getElementById('contadorClientes').textContent = `${clientes.length} ${clientes.length === 1 ? 'cliente' : 'clientes'}`;
 
       clientes.forEach(cliente => {
-        const balanceColor = cliente.balance_actual > 0 ? '#f44336' : '#00cc66';
+        const balanceColor = cliente.balance_actual > 0 ? 'var(--danger)' : 'var(--primary)';
         const disponible = cliente.limite_credito - cliente.balance_actual;
-        const estadoBadge = cliente.activo ? 
-          '<span class="badge badge-success">Activo</span>' : 
+        const dispColor = disponible >= 0 ? 'var(--primary)' : 'var(--danger)';
+        const estadoBadge = cliente.activo ?
+          '<span class="badge badge-success">Activo</span>' :
           '<span class="badge badge-danger">Inactivo</span>';
 
-        tbody.innerHTML += `
-          <tr>
-            <td>${cliente.id}</td>
-            <td><strong>${cliente.nombre}</strong></td>
-            <td>${cliente.cedula || '-'}</td>
-            <td>${cliente.rnc || '-'}</td>
-            <td>${cliente.telefono || '-'}</td>
-            <td style="color:${balanceColor};font-weight:700;">RD$ ${cliente.balance_actual.toFixed(2)}</td>
-            <td>RD$ ${cliente.limite_credito.toFixed(2)}</td>
-            <td style="color:${disponible >= 0 ? '#00cc66' : '#f44336'};">RD$ ${disponible.toFixed(2)}</td>
-            <td>${estadoBadge}</td>
-            <td style="text-align:center;">
-              <button onclick='verDetalles(${cliente.id})' class="btn btn-secondary btn-small" title="Ver Detalles">
-                <i class="fas fa-eye"></i>
-              </button>
-              <button onclick='editarCliente(${JSON.stringify(cliente).replace(/'/g, "&apos;")})' class="btn btn-secondary btn-small" title="Editar">
-                <i class="fas fa-edit"></i>
-              </button>
-              <button onclick='verHistorial(${cliente.id})' class="btn btn-primary btn-small" title="Historial">
-                <i class="fas fa-history"></i>
-              </button>
-              ${cliente.balance_actual > 0 ? 
-                `<button onclick='abrirModalPago(${JSON.stringify(cliente).replace(/'/g, "&apos;")})' class="btn btn-primary btn-small" title="Registrar Pago">
-                  <i class="fas fa-dollar-sign"></i>
-                </button>` : 
-                `<button onclick='abrirModalDeuda(${JSON.stringify(cliente).replace(/'/g, "&apos;")})' class="btn btn-warning btn-small" title="Agregar Deuda">
-                  <i class="fas fa-plus"></i>
-                </button>`
-              }
-            </td>
-          </tr>
+        const tr = document.createElement('tr');
+        tr.dataset.clienteId = cliente.id;
+        tr.innerHTML = `
+          <td>${cliente.id}</td>
+          <td><strong style="color:var(--text);">${cliente.nombre}</strong></td>
+          <td style="color:var(--text-muted);">${cliente.cedula || '—'}</td>
+          <td style="color:var(--text-muted);">${cliente.rnc || '—'}</td>
+          <td style="color:var(--text-muted);">${cliente.telefono || '—'}</td>
+          <td style="color:${balanceColor};font-weight:700;">RD$ ${cliente.balance_actual.toFixed(2)}</td>
+          <td style="color:var(--text);">RD$ ${cliente.limite_credito.toFixed(2)}</td>
+          <td style="color:${dispColor};font-weight:600;">RD$ ${disponible.toFixed(2)}</td>
+          <td>${estadoBadge}</td>
         `;
+        tr.addEventListener('click', () => seleccionarCliente(cliente, tr));
+        tbody.appendChild(tr);
       });
     }
+
+    /* ── Selección de cliente y barra de acciones ── */
+    let clienteSeleccionado = null;
+
+    function seleccionarCliente(cliente, tr) {
+      // Deseleccionar fila anterior
+      document.querySelectorAll('#tablaClientes tbody tr.fila-seleccionada').forEach(r => r.classList.remove('fila-seleccionada'));
+
+      // Si se hace clic en el mismo cliente, deseleccionar
+      if (clienteSeleccionado && clienteSeleccionado.id === cliente.id) {
+        clienteSeleccionado = null;
+        deshabilitarAcciones();
+        return;
+      }
+
+      clienteSeleccionado = cliente;
+      tr.classList.add('fila-seleccionada');
+      habilitarAcciones(cliente);
+    }
+
+    function habilitarAcciones(cliente) {
+      const btns = document.querySelectorAll('.acciones-btn');
+      btns.forEach(b => b.classList.add('habilitado'));
+
+      const etiqueta = document.getElementById('accionesClienteNombre');
+      document.getElementById('accionesNombreTexto').textContent = cliente.nombre;
+      etiqueta.classList.add('visible');
+
+      // Botón pago: solo si tiene deuda
+      const btnPago = document.getElementById('btnAccPago');
+      if (cliente.balance_actual > 0) {
+        btnPago.classList.remove('oculto');
+      } else {
+        btnPago.classList.add('oculto');
+      }
+    }
+
+    function deshabilitarAcciones() {
+      const btns = document.querySelectorAll('.acciones-btn');
+      btns.forEach(b => b.classList.remove('habilitado'));
+      document.getElementById('accionesClienteNombre').classList.remove('visible');
+      document.getElementById('accionesNombreTexto').textContent = '—';
+      document.getElementById('btnAccPago').classList.add('oculto');
+    }
+
+    function accionVer()      { if (clienteSeleccionado) verDetalles(clienteSeleccionado.id); }
+    function accionEditar()   { if (clienteSeleccionado) editarCliente(clienteSeleccionado); }
+    function accionHistorial(){ if (clienteSeleccionado) verHistorial(clienteSeleccionado.id); }
+    function accionDeuda()    { if (clienteSeleccionado) abrirModalDeuda(clienteSeleccionado); }
+    function accionPago()     { if (clienteSeleccionado) abrirModalPago(clienteSeleccionado); }
 
     function actualizarEstadisticas(clientes) {
       const totalClientes = clientes.length;
@@ -1073,21 +1124,51 @@
     }
 
     function verHistorial(clienteId) {
+      // Guardar el id para poder recargar después de un pago
+      verHistorial._clienteId = clienteId;
+
       fetch(`${API}/api/clientes/${clienteId}`)
         .then(r => r.json())
         .then(cliente => {
+          const disponible = parseFloat(cliente.limite_credito) - parseFloat(cliente.balance_actual);
+          const bal = parseFloat(cliente.balance_actual);
+          const lim = parseFloat(cliente.limite_credito);
+          const pct = lim > 0 ? Math.min((bal / lim) * 100, 100).toFixed(0) : 0;
+
           const infoHTML = `
-            <h4 style="margin:0 0 12px 0;">${cliente.nombre}</h4>
-            <div class="info-cliente-grid">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;margin-bottom:16px;">
+              <div>
+                <h4 style="margin:0 0 4px 0;font-size:1.2em;">${cliente.nombre}</h4>
+                <span style="font-size:0.9em;color:#888;">${cliente.cedula || cliente.rnc || ''} ${cliente.telefono ? '· ' + cliente.telefono : ''}</span>
+              </div>
+              ${bal > 0 ? `
+              <button onclick="abrirModalPagoDesdeHistorial(${clienteId})" class="btn btn-primary btn-small" style="padding:8px 18px;">
+                <i class="fas fa-dollar-sign"></i> Registrar Pago
+              </button>` : ''}
+            </div>
+            <div class="info-cliente-grid" style="margin-bottom:12px;">
               <div class="info-cliente-item">
-                <strong>Balance Actual:</strong>
-                <span style="color:${cliente.balance_actual > 0 ? '#f44336' : '#00cc66'}; font-size: 1.2em;">
-                  RD$ ${cliente.balance_actual.toFixed(2)}
+                <strong>Deuda actual:</strong>
+                <span style="color:${bal > 0 ? '#f44336' : '#00cc66'};font-size:1.25em;font-weight:700;">
+                  RD$ ${bal.toFixed(2)}
                 </span>
               </div>
               <div class="info-cliente-item">
-                <strong>Límite de Crédito:</strong>
-                <span>RD$ ${cliente.limite_credito.toFixed(2)}</span>
+                <strong>Límite de crédito:</strong>
+                <span>RD$ ${lim.toFixed(2)}</span>
+              </div>
+              <div class="info-cliente-item">
+                <strong>Disponible:</strong>
+                <span style="color:#00cc66;font-weight:700;">RD$ ${disponible.toFixed(2)}</span>
+              </div>
+              <div class="info-cliente-item">
+                <strong>Uso del crédito:</strong>
+                <div style="display:flex;align-items:center;gap:8px;">
+                  <div style="flex:1;background:#e0e0e0;border-radius:4px;height:8px;overflow:hidden;">
+                    <div style="width:${pct}%;height:100%;background:${pct > 80 ? '#f44336' : '#00cc66'};border-radius:4px;"></div>
+                  </div>
+                  <span style="font-size:0.85em;color:#666;">${pct}%</span>
+                </div>
               </div>
             </div>
           `;
@@ -1098,45 +1179,50 @@
         .then(r => r.json())
         .then(historial => {
           const lista = document.getElementById('listaHistorial');
-          
+
           if (historial.length === 0) {
-            lista.innerHTML = '<div style="text-align:center;padding:40px;color:#999;"><i class="fas fa-inbox" style="font-size:3em;margin-bottom:16px;display:block;"></i>Sin movimientos registrados</div>';
+            lista.innerHTML = `<div style="text-align:center;padding:40px;color:#999;">
+              <i class="fas fa-inbox" style="font-size:3em;margin-bottom:16px;display:block;"></i>
+              Sin movimientos registrados
+            </div>`;
           } else {
             lista.innerHTML = '';
             historial.forEach(mov => {
               const fecha = new Date(mov.fecha).toLocaleString('es-DO');
+              const esPago  = mov.tipo === 'pago';
+              const esVenta = mov.tipo === 'venta';
+              const tipoIcon  = esPago ? 'fa-arrow-down-to-line' : esVenta ? 'fa-shopping-cart' : 'fa-pen-to-square';
+              const tipoColor = esPago ? '#00cc66' : esVenta ? '#2196f3' : '#ff9800';
+              const tipoLabel = esPago ? 'PAGO' : esVenta ? 'VENTA A CRÉDITO' : 'AJUSTE';
               const montoClass = mov.monto < 0 ? 'negativo' : 'positivo';
-              const tipoIcon = mov.tipo === 'pago' ? 'fa-dollar-sign' : 
-                              mov.tipo === 'venta' ? 'fa-shopping-cart' : 'fa-edit';
-              const tipoColor = mov.tipo === 'pago' ? '#00cc66' : 
-                               mov.tipo === 'venta' ? '#2196f3' : '#ff9800';
-              
+
               lista.innerHTML += `
                 <div class="historial-item">
-                  <div style="flex: 1;">
-                    <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
-                      <i class="fas ${tipoIcon}" style="color:${tipoColor};"></i>
-                      <strong>${mov.tipo.toUpperCase()}</strong>
-                      ${mov.metodo_pago ? `<span class="badge badge-success" style="font-size:0.75em;">${mov.metodo_pago}</span>` : ''}
-                    </div>
-                    <div style="font-size:0.9em;color:#666;">${mov.descripcion}</div>
-                    ${mov.referencia ? `<div style="font-size:0.85em;color:#999;">Ref: ${mov.referencia}</div>` : ''}
-                    <div class="historial-fecha">${fecha}</div>
-                    ${mov.cajero_nombre ? `<div style="font-size:0.85em;color:#999;">Cajero: ${mov.cajero_nombre}</div>` : ''}
+                  <div style="display:flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:50%;background:${tipoColor}20;margin-right:12px;flex-shrink:0;">
+                    <i class="fas ${tipoIcon}" style="color:${tipoColor};font-size:1.1em;"></i>
                   </div>
-                  <div style="text-align:right;">
-                    <div class="historial-monto ${montoClass}">
-                      ${mov.monto < 0 ? '-' : '+'}RD$ ${Math.abs(mov.monto).toFixed(2)}
+                  <div style="flex:1;">
+                    <div style="display:flex;align-items:center;gap:8px;margin-bottom:2px;">
+                      <strong style="color:${tipoColor};">${tipoLabel}</strong>
+                      ${mov.metodo_pago ? `<span class="badge badge-success" style="font-size:0.72em;">${mov.metodo_pago}</span>` : ''}
+                      ${mov.venta_id ? `<span style="font-size:0.8em;color:#999;">Venta #${mov.venta_id}</span>` : ''}
                     </div>
-                    <div style="font-size:0.85em;color:#999;margin-top:4px;">
-                      Balance: RD$ ${mov.balance_despues.toFixed(2)}
+                    <div style="font-size:0.9em;color:#555;">${mov.descripcion || '-'}</div>
+                    ${mov.referencia ? `<div style="font-size:0.82em;color:#999;">Ref: ${mov.referencia}</div>` : ''}
+                    <div style="font-size:0.82em;color:#aaa;margin-top:2px;">${fecha}${mov.cajero_nombre ? ' · Cajero: ' + mov.cajero_nombre : ''}</div>
+                  </div>
+                  <div style="text-align:right;flex-shrink:0;">
+                    <div class="historial-monto ${montoClass}" style="font-size:1.05em;">
+                      ${mov.monto < 0 ? '-' : '+'}RD$ ${Math.abs(parseFloat(mov.monto)).toFixed(2)}
+                    </div>
+                    <div style="font-size:0.82em;color:#aaa;margin-top:2px;">
+                      Saldo: RD$ ${parseFloat(mov.balance_despues).toFixed(2)}
                     </div>
                   </div>
                 </div>
               `;
             });
           }
-
           document.getElementById('modalHistorial').classList.add('active');
         })
         .catch(err => {
@@ -1150,23 +1236,30 @@
     }
 
     function abrirModalPago(cliente) {
-      const infoHTML = `
-        <h4 style="margin:0 0 12px 0;">${cliente.nombre}</h4>
-        <div class="info-cliente-grid">
-          <div class="info-cliente-item">
-            <strong>Deuda Actual:</strong>
-            <span style="color:#f44336; font-size: 1.3em;">RD$ ${cliente.balance_actual.toFixed(2)}</span>
-          </div>
-          <div class="info-cliente-item">
-            <strong>Límite de Crédito:</strong>
-            <span>RD$ ${cliente.limite_credito.toFixed(2)}</span>
+      const bal = parseFloat(cliente.balance_actual);
+      const lim = parseFloat(cliente.limite_credito);
+
+      document.getElementById('infoClientePago').innerHTML = `
+        <div style="background:var(--bg3);border:1px solid rgba(var(--danger-rgb),.2);border-radius:10px;padding:14px 16px;margin-bottom:16px;">
+          <div style="font-size:1.05em;font-weight:700;margin-bottom:8px;color:var(--text);">${cliente.nombre}</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:0.92em;">
+            <div><span style="color:var(--text-muted);">Deuda total:</span><br><strong style="color:var(--danger);font-size:1.2em;">RD$ ${bal.toFixed(2)}</strong></div>
+            <div><span style="color:var(--text-muted);">Límite crédito:</span><br><strong style="color:var(--text);">RD$ ${lim.toFixed(2)}</strong></div>
           </div>
         </div>
       `;
-      document.getElementById('infoClientePago').innerHTML = infoHTML;
+
       document.getElementById('pagoClienteId').value = cliente.id;
+      document.getElementById('pagoDeudaMax').value = bal;
       document.getElementById('formPago').reset();
-      document.getElementById('pagoMonto').max = cliente.balance_actual;
+      document.getElementById('pagoMonto').max = bal;
+      document.getElementById('pagoMontoAviso').textContent = `Máximo: RD$ ${bal.toFixed(2)}`;
+      document.getElementById('resumenPago').style.display = 'none';
+
+      // Resetear botones de método
+      document.querySelectorAll('.metodo-btn').forEach(b => b.classList.remove('activo'));
+      document.getElementById('metodo-efectivo').classList.add('activo');
+
       document.getElementById('modalPago').classList.add('active');
     }
 
@@ -1174,15 +1267,70 @@
       document.getElementById('modalPago').classList.remove('active');
     }
 
+    function selMetodo(valor) {
+      document.querySelectorAll('.metodo-btn').forEach(b => b.classList.remove('activo'));
+      document.getElementById(`metodo-${valor}`).classList.add('activo');
+    }
+
+    function pagarTodo() {
+      const max = parseFloat(document.getElementById('pagoDeudaMax').value) || 0;
+      document.getElementById('pagoMonto').value = max.toFixed(2);
+      validarMontoPago(max);
+    }
+
+    function validarMontoPago(valor) {
+      const monto = parseFloat(valor) || 0;
+      const max   = parseFloat(document.getElementById('pagoDeudaMax').value) || 0;
+      const aviso = document.getElementById('pagoMontoAviso');
+      const resumen = document.getElementById('resumenPago');
+
+      if (monto <= 0) {
+        aviso.textContent = `Máximo: RD$ ${max.toFixed(2)}`;
+        aviso.style.color = '#888';
+        resumen.style.display = 'none';
+        return;
+      }
+      if (monto > max) {
+        aviso.textContent = `⚠ El monto excede la deuda (RD$ ${max.toFixed(2)})`;
+        aviso.style.color = '#f44336';
+        resumen.style.display = 'none';
+        document.getElementById('btnRegistrarPago').disabled = true;
+        return;
+      }
+
+      document.getElementById('btnRegistrarPago').disabled = false;
+      aviso.textContent = `Máximo: RD$ ${max.toFixed(2)}`;
+      aviso.style.color = '#888';
+
+      const saldo = max - monto;
+      document.getElementById('resumenDeuda').textContent    = `RD$ ${max.toFixed(2)}`;
+      document.getElementById('resumenMontoPagar').textContent = `RD$ ${monto.toFixed(2)}`;
+      document.getElementById('resumenSaldo').textContent    = `RD$ ${saldo.toFixed(2)}`;
+      document.getElementById('resumenSaldo').style.color    = saldo === 0 ? '#00cc66' : '#ff9800';
+      resumen.style.display = 'block';
+    }
+
     function registrarPago() {
       const clienteId = document.getElementById('pagoClienteId').value;
+      const monto = parseFloat(document.getElementById('pagoMonto').value);
+      const max   = parseFloat(document.getElementById('pagoDeudaMax').value);
+
+      if (!monto || monto <= 0) return mostrarError('Ingresa un monto válido');
+      if (monto > max) return mostrarError(`El monto excede la deuda (RD$ ${max.toFixed(2)})`);
+
+      const metodoPago = document.querySelector('input[name="metodoPago"]:checked')?.value || 'efectivo';
+
       const datos = {
-        monto: parseFloat(document.getElementById('pagoMonto').value),
-        metodo_pago: document.getElementById('pagoMetodo').value,
+        monto,
+        metodo_pago: metodoPago,
         referencia: document.getElementById('pagoReferencia').value,
         descripcion: document.getElementById('pagoDescripcion').value || 'Pago recibido',
         cajero_id: cajeroActual?.id || null
       };
+
+      const btn = document.getElementById('btnRegistrarPago');
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Procesando...';
 
       fetch(`${API}/api/clientes/${clienteId}/pago`, {
         method: 'POST',
@@ -1191,15 +1339,22 @@
       })
       .then(r => r.json())
       .then(data => {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-check"></i> Registrar Pago';
         if (data.nuevoBalance !== undefined) {
-          mostrarExito(`¡Pago registrado! Nuevo balance: RD$ ${data.nuevoBalance.toFixed(2)}`);
+          mostrarExito(`¡Pago de RD$ ${monto.toFixed(2)} registrado! Saldo restante: RD$ ${data.nuevoBalance.toFixed(2)}`);
           cerrarModalPago();
           cargarClientes();
+          if (document.getElementById('modalHistorial').classList.contains('active')) {
+            verHistorial(clienteId);
+          }
         } else {
           mostrarError(data.message || 'Error al registrar pago');
         }
       })
       .catch(err => {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-check"></i> Registrar Pago';
         console.error('Error:', err);
         mostrarError('Error al registrar pago');
       });
@@ -1258,6 +1413,15 @@
         console.error('Error:', err);
         mostrarError('Error al agregar deuda');
       });
+    }
+
+    function abrirModalPagoDesdeHistorial(clienteId) {
+      fetch(`${API}/api/clientes/${clienteId}`)
+        .then(r => r.json())
+        .then(cliente => {
+          abrirModalPago(cliente);
+        })
+        .catch(() => mostrarError('Error al cargar datos del cliente'));
     }
 
     function mostrarExito(mensaje) {

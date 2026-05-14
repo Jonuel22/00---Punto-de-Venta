@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>JCT POS — Gestión de Roles</title>
+<script src="theme-init.js"></script>
+<link rel="stylesheet" href="theme.css">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+<style>
+  body { background: var(--bg); }
+
+  /* Fondo con glow verde igual al login */
+  body::before {
+    content: '';
+    position: fixed; inset: 0; pointer-events: none; z-index: 0;
+    background:
+      radial-gradient(ellipse 800px 600px at 20% 50%, rgba(0,204,102,0.07) 0%, transparent 70%),
+      radial-gradient(ellipse 600px 400px at 80% 20%, rgba(79,142,247,0.05) 0%, transparent 70%);
+  }
+
+  .page-wrapper { position: relative; z-index: 1; }
+
+  .roles-layout {
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    gap: 20px;
+  }
+
+  @media(max-width:900px) { .roles-layout { grid-template-columns: 1fr; } }
+
+  /* Lista de roles */
+  .rol-item {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 16px;
+    border: 1px solid var(--border);
+    border-radius: 12px; margin-bottom: 8px;
+    cursor: pointer; transition: all .2s;
+    background: var(--bg3);
+  }
+  .rol-item:hover  { border-color: var(--primary); background: var(--primary-glow2); }
+  .rol-item.active { border-color: var(--primary); background: var(--primary-glow); }
+  .rol-item .ri-name { font-weight: 700; font-size: .92em; }
+  .rol-item .ri-count { font-size: .75em; color: var(--text-muted); margin-top: 2px; }
+  .rol-item .ri-actions { display: flex; gap: 6px; }
+
+  /* Grupos de permisos */
+  .perm-group { margin-bottom: 20px; }
+  .perm-group-title {
+    font-size: .72em; font-weight: 700; color: var(--text-muted);
+    text-transform: uppercase; letter-spacing: .7px;
+    margin-bottom: 10px; display: flex; align-items: center; gap: 8px;
+  }
+  .perm-group-title::after {
+    content: ''; flex: 1; height: 1px; background: var(--border);
+  }
+
+  .perm-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+  }
+
+  .perm-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 12px;
+    border: 1px solid var(--border); border-radius: 10px;
+    cursor: pointer; transition: all .2s;
+    background: var(--bg3);
+  }
+  .perm-item:hover { border-color: var(--primary); }
+  .perm-item.checked {
+    border-color: var(--primary);
+    background: var(--primary-glow);
+  }
+  .perm-item input { display: none; }
+  .perm-check {
+    width: 18px; height: 18px; border-radius: 5px; flex-shrink: 0;
+    border: 2px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    transition: all .2s; font-size: .65em; color: #fff;
+  }
+  .perm-item.checked .perm-check {
+    background: var(--primary); border-color: var(--primary);
+  }
+  .perm-item.checked .perm-check::after { content: '✓'; }
+  .perm-label { font-size: .82em; font-weight: 500; color: var(--text); line-height: 1.3; }
+  .perm-label small { color: var(--text-muted); font-size: .85em; display: block; }
+
+  /* Contador de selección */
+  .perm-counter {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 14px; border-radius: 10px; margin-bottom: 16px;
+    background: var(--bg3); border: 1px solid var(--border);
+    font-size: .85em;
+  }
+
+  /* Empty state panel derecho */
+  .empty-panel {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    height: 300px; color: var(--text-muted);
+  }
+  .empty-panel i { font-size: 3em; color: var(--text-faint); margin-bottom: 14px; }
+
+  /* Search lista roles */
+  .roles-search {
+    position: relative; margin-bottom: 12px;
+  }
+  .roles-search input {
+    width: 100%; padding: 9px 14px 9px 36px;
+    background: var(--input-bg); border: 1px solid var(--input-border);
+    border-radius: 10px; color: var(--text);
+    font-family: 'Poppins',sans-serif; font-size: .85em; outline: none;
+    transition: all .2s;
+  }
+  .roles-search input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-glow); }
+  .roles-search i { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-faint); font-size: .8em; }
+</style>
+</head>
+<body>
+<div id="header-container"></div>
+<div class="page-wrapper">
+<div class="container">
+
+  <div class="page-header">
+    <div>
+      <h1 class="page-title"><i class="fas fa-shield-alt"></i> Gestión de Roles</h1>
+      <p class="page-subtitle">Crea roles personalizados y define los permisos de acceso a cada módulo</p>
+    </div>
+    <button class="btn btn-primary" onclick="abrirModalNuevoRol()">
+      <i class="fas fa-plus"></i> Nuevo Rol
+    </button>
+  </div>
+
+  <div class="roles-layout">
+    <!-- Panel izquierdo: lista de roles -->
+    <div>
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title"><i class="fas fa-list"></i> Roles del Sistema</div>
+          <span class="badge badge-info" id="rolesCount">0</span>
+        </div>
+        <div class="roles-search">
+          <i class="fas fa-search"></i>
+          <input type="text" id="searchRoles" placeholder="Buscar rol..." oninput="filtrarRoles(this.value)">
+        </div>
+        <div id="listaRoles">
+          <div class="empty-state" style="padding:30px 0;">
+            <i class="fas fa-spinner fa-spin" style="font-size:1.5em;"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Panel derecho: permisos del rol seleccionado -->
+    <div>
+      <div class="card" id="panelPermisos">
+        <div class="empty-panel">
+          <i class="fas fa-mouse-pointer"></i>
+          <p style="font-size:.9em;text-align:center;">Selecciona un rol de la lista<br>para ver y editar sus permisos</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- Modal Crear/Editar Rol -->
+<div class="modal" id="modalRol">
+  <div class="modal-content modal-content-sm">
+    <div class="modal-header">
+      <div class="modal-title" id="modalRolTitle"><i class="fas fa-shield-alt"></i> Nuevo Rol</div>
+      <button class="btn-close" onclick="cerrarModal()">&times;</button>
+    </div>
+    <input type="hidden" id="rolId">
+    <div class="form-group">
+      <label>Nombre del Rol <span style="color:var(--danger)">*</span></label>
+      <input type="text" class="form-control" id="rolNombre" placeholder="Ej: Vendedor, Bodeguero...">
+    </div>
+    <div class="form-group">
+      <label>Descripción</label>
+      <textarea class="form-control" id="rolDescripcion" placeholder="Describe las responsabilidades de este rol..." style="height:80px;"></textarea>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:8px;">
+      <button class="btn btn-ghost" style="flex:1;" onclick="cerrarModal()"><i class="fas fa-times"></i> Cancelar</button>
+      <button class="btn btn-primary" style="flex:1;" onclick="guardarRol()"><i class="fas fa-save"></i> Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast toast-success" id="toastOk"><i class="fas fa-check-circle"></i><span id="toastOkMsg"></span></div>
+<div class="toast toast-error"   id="toastErr"><i class="fas fa-exclamation-circle"></i><span id="toastErrMsg"></span></div>
+
+<script>
+const API   = 'http://localhost:5000';
+const TOKEN = localStorage.getItem('token');
+
+let todosRoles   = [];
+let todasPaginas = [];
+let rolActivo    = null;
+let permisosActivos = new Set();
+
+// Header
+fetch('header_menu_principal.html').then(r=>r.text()).then(h=>{
+  document.getElementById('header-container').innerHTML=h;
+  document.querySelectorAll('#header-container script').forEach(s=>{
+    const ns=document.createElement('script');ns.textContent=s.textContent;document.body.appendChild(ns);
+  });
+});
+
+function ok(m){const t=document.getElementById('toastOk');document.getElementById('toastOkMsg').textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3000);}
+function err(m){const t=document.getElementById('toastErr');document.getElementById('toastErrMsg').textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3500);}
+
+// Cargar todo
+async function cargar() {
+  const [rolesRes, paginasRes] = await Promise.all([
+    fetch(`${API}/api/roles/all`, { headers:{Authorization:`Bearer ${TOKEN}`} }).then(r=>r.json()),
+    fetch(`${API}/api/roles/paginas`, { headers:{Authorization:`Bearer ${TOKEN}`} }).then(r=>r.json())
+  ]);
+  todosRoles   = rolesRes;
+  todasPaginas = paginasRes;
+  renderRoles(todosRoles);
+}
+
+function renderRoles(lista) {
+  document.getElementById('rolesCount').textContent = lista.length;
+  const el = document.getElementById('listaRoles');
+  if (!lista.length) {
+    el.innerHTML = `<div class="empty-state" style="padding:30px 0;"><i class="fas fa-shield-alt"></i><p style="font-size:.85em;">Sin roles creados</p></div>`;
+    return;
+  }
+  el.innerHTML = lista.map(r => `
+    <div class="rol-item ${rolActivo?.id===r.id?'active':''}" onclick="seleccionarRol(${r.id})">
+      <div>
+        <div class="ri-name">${r.nombre}</div>
+        <div class="ri-count">${r.total_permisos} permisos asignados</div>
+      </div>
+      <div class="ri-actions">
+        <button class="btn btn-sm btn-secondary" onclick="event.stopPropagation();editarRol(${r.id})" title="Editar"><i class="fas fa-edit"></i></button>
+        <button class="btn btn-sm btn-danger"    onclick="event.stopPropagation();eliminarRol(${r.id},'${r.nombre}')" title="Eliminar"><i class="fas fa-trash"></i></button>
+      </div>
+    </div>`).join('');
+}
+
+function filtrarRoles(q) {
+  renderRoles(todosRoles.filter(r => r.nombre.toLowerCase().includes(q.toLowerCase())));
+}
+
+async function seleccionarRol(id) {
+  const data = await fetch(`${API}/api/roles/${id}`, { headers:{Authorization:`Bearer ${TOKEN}`} }).then(r=>r.json());
+  rolActivo   = data;
+  permisosActivos = new Set(data.permisos || []);
+  renderPermisos();
+  renderRoles(todosRoles); // re-render para marcar activo
+}
+
+function renderPermisos() {
+  if (!rolActivo) return;
+  const grupos = {};
+  todasPaginas.forEach(p => {
+    if (!grupos[p.grupo]) grupos[p.grupo] = [];
+    grupos[p.grupo].push(p);
+  });
+
+  const totalPags = todasPaginas.length;
+  const totalSel  = permisosActivos.size;
+
+  let html = `
+    <div class="card-header">
+      <div class="card-title"><i class="fas fa-key"></i> Permisos: <span class="text-primary">${rolActivo.nombre}</span></div>
+      <button class="btn btn-primary btn-sm" onclick="guardarPermisos()"><i class="fas fa-save"></i> Guardar</button>
+    </div>
+    <div class="perm-counter">
+      <span><strong>${totalSel}</strong> de <strong>${totalPags}</strong> páginas habilitadas</span>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-sm btn-secondary" onclick="seleccionarTodos(true)"><i class="fas fa-check-double"></i> Todos</button>
+        <button class="btn btn-sm btn-ghost"     onclick="seleccionarTodos(false)"><i class="fas fa-times"></i> Ninguno</button>
+      </div>
+    </div>`;
+
+  Object.entries(grupos).forEach(([grupo, paginas]) => {
+    html += `<div class="perm-group">
+      <div class="perm-group-title"><i class="fas fa-folder" style="color:var(--primary);"></i>${grupo}</div>
+      <div class="perm-grid">`;
+    paginas.forEach(p => {
+      const on = permisosActivos.has(p.pagina);
+      html += `
+        <div class="perm-item ${on?'checked':''}" onclick="togglePerm('${p.pagina}',this)">
+          <div class="perm-check"></div>
+          <div class="perm-label">
+            <i class="fas ${p.icono}" style="color:var(--primary);margin-right:5px;font-size:.85em;"></i>${p.label}
+            <small>${p.pagina}</small>
+          </div>
+        </div>`;
+    });
+    html += `</div></div>`;
+  });
+
+  document.getElementById('panelPermisos').innerHTML = html;
+}
+
+window.togglePerm = function(pagina, el) {
+  if (permisosActivos.has(pagina)) { permisosActivos.delete(pagina); el.classList.remove('checked'); }
+  else                             { permisosActivos.add(pagina);    el.classList.add('checked');    }
+  // Actualizar contador
+  const total = todasPaginas.length;
+  const sel   = permisosActivos.size;
+  document.querySelector('.perm-counter strong:first-child').textContent = sel;
+};
+
+function seleccionarTodos(val) {
+  if (val) { todasPaginas.forEach(p => permisosActivos.add(p.pagina)); }
+  else     { permisosActivos.clear(); }
+  renderPermisos();
+}
+
+async function guardarPermisos() {
+  if (!rolActivo) return;
+  const res = await fetch(`${API}/api/roles/${rolActivo.id}`, {
+    method: 'PUT',
+    headers: {'Content-Type':'application/json', Authorization:`Bearer ${TOKEN}`},
+    body: JSON.stringify({ nombre: rolActivo.nombre, descripcion: rolActivo.descripcion, permisos: [...permisosActivos] })
+  }).then(r=>r.json());
+
+  if (res.message?.includes('exitosamente')) {
+    ok('Permisos guardados correctamente');
+    await cargar();
+    // Re-seleccionar el rol para actualizar conteo
+    seleccionarRol(rolActivo.id);
+  } else {
+    err(res.message || 'Error al guardar');
+  }
+}
+
+// Modal nuevo rol
+function abrirModalNuevoRol() {
+  document.getElementById('rolId').value = '';
+  document.getElementById('rolNombre').value = '';
+  document.getElementById('rolDescripcion').value = '';
+  document.getElementById('modalRolTitle').innerHTML = '<i class="fas fa-shield-alt"></i> Nuevo Rol';
+  document.getElementById('modalRol').classList.add('active');
+}
+
+async function editarRol(id) {
+  const data = await fetch(`${API}/api/roles/${id}`, { headers:{Authorization:`Bearer ${TOKEN}`} }).then(r=>r.json());
+  document.getElementById('rolId').value         = data.id;
+  document.getElementById('rolNombre').value     = data.nombre;
+  document.getElementById('rolDescripcion').value= data.descripcion || '';
+  document.getElementById('modalRolTitle').innerHTML = '<i class="fas fa-edit"></i> Editar Rol';
+  document.getElementById('modalRol').classList.add('active');
+}
+
+function cerrarModal() { document.getElementById('modalRol').classList.remove('active'); }
+
+async function guardarRol() {
+  const id   = document.getElementById('rolId').value;
+  const nombre = document.getElementById('rolNombre').value.trim();
+  const desc   = document.getElementById('rolDescripcion').value.trim();
+  if (!nombre) { err('El nombre del rol es requerido'); return; }
+
+  const method = id ? 'PUT' : 'POST';
+  const url    = id ? `${API}/api/roles/${id}` : `${API}/api/roles/create`;
+  const body   = id ? { nombre, descripcion: desc, permisos: [...permisosActivos] } : { nombre, descripcion: desc, permisos: [] };
+
+  const res = await fetch(url, {
+    method,
+    headers: {'Content-Type':'application/json', Authorization:`Bearer ${TOKEN}`},
+    body: JSON.stringify(body)
+  }).then(r=>r.json());
+
+  if (res.rolId || res.message?.includes('exitosamente')) {
+    ok(id ? 'Rol actualizado' : 'Rol creado exitosamente');
+    cerrarModal();
+    await cargar();
+    if (res.rolId) seleccionarRol(res.rolId);
+    else if (id)   seleccionarRol(parseInt(id));
+  } else {
+    err(res.message || 'Error al guardar');
+  }
+}
+
+async function eliminarRol(id, nombre) {
+  if (!confirm(`¿Eliminar el rol "${nombre}"?\nLos usuarios con este rol quedarán sin rol asignado.`)) return;
+  const res = await fetch(`${API}/api/roles/${id}`, {
+    method: 'DELETE',
+    headers: { Authorization: `Bearer ${TOKEN}` }
+  }).then(r=>r.json());
+
+  if (res.message?.includes('exitosamente')) {
+    ok('Rol eliminado');
+    if (rolActivo?.id === id) {
+      rolActivo = null;
+      document.getElementById('panelPermisos').innerHTML = `
+        <div class="empty-panel"><i class="fas fa-mouse-pointer"></i>
+        <p style="font-size:.9em;text-align:center;">Selecciona un rol de la lista<br>para ver y editar sus permisos</p></div>`;
+    }
+    await cargar();
+  } else {
+    err(res.message || 'Error al eliminar');
+  }
+}
+
+cargar();
+</script>
+</body>
+</html>

@@ -1,10 +1,12 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+  <link rel="stylesheet" href="theme.css">
+  <script src="theme-init.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Reporte de Ventas</title>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -18,7 +20,7 @@
 
 body {
     font-family: 'Roboto', sans-serif;
-    background: linear-gradient(135deg, #e8f5e9, #b2dfdb);
+    background: var(--bg);
     min-height: 100vh;
     padding-top: 80px;
     overflow-x: hidden;
@@ -33,18 +35,18 @@ body {
 
 /* ===== HEADER CARD ===== */
 .reporte-header {
-    background: rgba(255, 255, 255, 0.95);
+    background: var(--card-bg);
     backdrop-filter: blur(12px);
     border-radius: 16px;
     padding: 32px;
     margin-bottom: 24px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--shadow-sm);
     border: 1px solid rgba(255, 255, 255, 0.5);
 }
 
 .reporte-title {
     font-size: 2.2em;
-    color: #222;
+    color: var(--text);
     font-weight: 700;
     letter-spacing: 0.5px;
     display: flex;
@@ -59,7 +61,7 @@ body {
 }
 
 .reporte-subtitle {
-    color: #666;
+    color: var(--text-muted);
     font-size: 1em;
     margin-bottom: 24px;
 }
@@ -80,7 +82,7 @@ body {
 
 .filtro-group label {
     font-weight: 600;
-    color: #333;
+    color: var(--text);
     font-size: 0.9em;
     letter-spacing: 0.3px;
 }
@@ -91,7 +93,7 @@ body {
     border: 2px solid #e0e0e0;
     font-size: 1em;
     transition: all 0.2s;
-    background: white;
+    background: var(--card-bg);
 }
 
 .filtro-group input:focus {
@@ -191,11 +193,11 @@ body {
 
 /* ===== TABLA CARD ===== */
 .tabla-card {
-    background: rgba(255, 255, 255, 0.95);
+    background: var(--card-bg);
     backdrop-filter: blur(12px);
     border-radius: 16px;
     padding: 24px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--shadow-sm);
     border: 1px solid rgba(255, 255, 255, 0.5);
     margin-bottom: 24px;
 }
@@ -211,7 +213,7 @@ body {
 
 .tabla-info {
     font-size: 0.95em;
-    color: #666;
+    color: var(--text-muted);
     font-weight: 600;
 }
 
@@ -250,9 +252,9 @@ body {
 .tabla-reporte td {
     padding: 12px;
     border-bottom: 1px solid #f0f0f0;
-    color: #333;
+    color: var(--text);
     font-size: 0.95em;
-    background: white;
+    background: var(--card-bg);
 }
 
 .tabla-reporte tbody tr:hover {
@@ -277,11 +279,11 @@ body {
 }
 
 .stat-box {
-    background: rgba(255, 255, 255, 0.95);
+    background: var(--card-bg);
     backdrop-filter: blur(12px);
     border-radius: 12px;
     padding: 20px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--shadow-sm);
     border: 1px solid rgba(255, 255, 255, 0.5);
     transition: transform 0.2s;
 }
@@ -291,7 +293,7 @@ body {
 }
 
 .stat-box h4 {
-    color: #666;
+    color: var(--text-muted);
     font-size: 0.85em;
     font-weight: 600;
     text-transform: uppercase;
@@ -434,7 +436,7 @@ body {
         <!-- Tabla de Resultados -->
         <div class="tabla-card">
             <div class="tabla-header">
-                <h3 style="color: #333; font-size: 1.2em; margin: 0;">Detalle de Ventas</h3>
+                <h3 style="color: var(--text); font-size: 1.2em; margin: 0;">Detalle de Ventas</h3>
                 <div id="contador-filas" class="tabla-info">0 registros</div>
             </div>
             

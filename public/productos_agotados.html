@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>JCT POS — Productos Agotados</title>
+<script src="theme-init.js"></script>
+<link rel="stylesheet" href="theme.css">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+<style>
+  body::before {
+    content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+    background:radial-gradient(ellipse 700px 500px at 15% 40%, rgba(244,67,54,0.05) 0%, transparent 70%),
+               radial-gradient(ellipse 500px 400px at 85% 70%, rgba(255,152,0,0.04) 0%, transparent 70%);
+  }
+  .page-wrapper{position:relative;z-index:1;}
+
+  .stock-badge {
+    display:inline-flex;align-items:center;gap:4px;
+    padding:3px 10px;border-radius:20px;font-size:.72em;font-weight:700;
+  }
+  .stock-0    { background:rgba(244,67,54,.12);color:var(--danger);border:1px solid rgba(244,67,54,.2); }
+  .stock-bajo { background:rgba(255,152,0,.12);color:var(--warning);border:1px solid rgba(255,152,0,.2); }
+
+  .filter-bar {
+    display:flex;align-items:center;gap:12px;flex-wrap:wrap;
+    background:var(--card-bg);border:1px solid var(--card-border);
+    border-radius:14px;padding:16px 20px;margin-bottom:20px;
+    box-shadow:var(--shadow-sm);
+  }
+
+  .reorder-input {
+    width:80px;padding:5px 8px;
+    background:var(--input-bg);border:1px solid var(--input-border);
+    border-radius:8px;color:var(--text);font-family:'Poppins',sans-serif;
+    font-size:.82em;outline:none;
+  }
+  .reorder-input:focus { border-color:var(--primary); }
+</style>
+</head>
+<body>
+<div id="header-container"></div>
+<div class="page-wrapper">
+<div class="container">
+
+  <div class="page-header">
+    <div>
+      <h1 class="page-title"><i class="fas fa-box-open"></i> Productos Agotados</h1>
+      <p class="page-subtitle">Productos sin stock o con inventario bajo el mínimo</p>
+    </div>
+    <div style="display:flex;gap:8px;">
+      <button class="btn btn-secondary" onclick="exportarCSV()"><i class="fas fa-file-csv"></i> Exportar</button>
+      <button class="btn btn-primary"   onclick="cargarProductos()"><i class="fas fa-sync"></i> Actualizar</button>
+    </div>
+  </div>
+
+  <!-- KPIs -->
+  <div class="stats-grid stagger mb-20">
+    <div class="stat-card">
+      <div class="stat-icon danger"><i class="fas fa-exclamation-triangle"></i></div>
+      <div><div class="stat-label">Sin Stock (0)</div><div class="stat-value text-danger" id="kpiSinStock">0</div></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon warning"><i class="fas fa-exclamation-circle"></i></div>
+      <div><div class="stat-label">Stock Bajo (1-5)</div><div class="stat-value text-warning" id="kpiStockBajo">0</div></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon info"><i class="fas fa-boxes"></i></div>
+      <div><div class="stat-label">Total Afectados</div><div class="stat-value" id="kpiTotal">0</div></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon secondary"><i class="fas fa-dollar-sign"></i></div>
+      <div><div class="stat-label">Valor en Riesgo</div><div class="stat-value text-primary" id="kpiValor">RD$ 0</div></div>
+    </div>
+  </div>
+
+  <!-- Filtros -->
+  <div class="filter-bar">
+    <div class="search-wrapper" style="flex:1;min-width:220px;">
+      <i class="fas fa-search search-icon"></i>
+      <input type="text" class="search-input" id="searchProd" placeholder="Buscar producto..." oninput="filtrar()">
+    </div>
+    <label style="font-size:.78em;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.4px;">Mostrar</label>
+    <select class="form-control" id="filtroStock" style="width:180px;" onchange="filtrar()">
+      <option value="todos">Todos los agotados</option>
+      <option value="cero">Solo sin stock (0)</option>
+      <option value="bajo">Solo stock bajo (1-5)</option>
+    </select>
+  </div>
+
+  <!-- Tabla -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title"><i class="fas fa-table"></i> Listado de Productos</div>
+      <span class="badge badge-danger" id="tablaBadge">0 productos</span>
+    </div>
+    <div class="table-wrapper">
+      <table>
+        <thead><tr>
+          <th>Producto</th><th>Código</th><th>Stock Actual</th>
+          <th>Precio</th><th>Stock Mínimo Sugerido</th><th>Acción</th>
+        </tr></thead>
+        <tbody id="tablaAgotados">
+          <tr><td colspan="6" style="text-align:center;padding:40px;color:var(--text-muted);">
+            <i class="fas fa-spinner fa-spin"></i> Cargando...
+          </td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<!-- Modal Reabastecer -->
+<div class="modal" id="modalRea">
+  <div class="modal-content modal-content-sm">
+    <div class="modal-header">
+      <div class="modal-title"><i class="fas fa-plus-circle" style="color:var(--success);"></i> Reabastecer Producto</div>
+      <button class="btn-close" onclick="document.getElementById('modalRea').classList.remove('active')">&times;</button>
+    </div>
+    <input type="hidden" id="reaId">
+    <div style="background:var(--bg3);border-radius:12px;padding:14px;margin-bottom:16px;">
+      <div style="font-weight:700;margin-bottom:4px;" id="reaName"></div>
+      <div style="font-size:.82em;color:var(--text-muted);">Stock actual: <strong id="reaStock" class="text-danger"></strong></div>
+    </div>
+    <div class="form-group">
+      <label>Cantidad a Agregar</label>
+      <input type="number" class="form-control" id="reaCantidad" min="1" placeholder="0">
+    </div>
+    <div id="reaPreview" style="display:none;padding:10px 14px;border-radius:10px;background:var(--primary-glow);border:1px solid rgba(var(--primary-rgb),.2);font-size:.85em;font-weight:600;color:var(--primary);margin-bottom:14px;"></div>
+    <div style="display:flex;gap:10px;">
+      <button class="btn btn-ghost" style="flex:1;" onclick="document.getElementById('modalRea').classList.remove('active')"><i class="fas fa-times"></i> Cancelar</button>
+      <button class="btn btn-primary" style="flex:1;" onclick="reabastecer()"><i class="fas fa-plus"></i> Agregar Stock</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast toast-success" id="toastOk"><i class="fas fa-check-circle"></i><span id="toastOkMsg"></span></div>
+<div class="toast toast-error"   id="toastErr"><i class="fas fa-exclamation-circle"></i><span id="toastErrMsg"></span></div>
+
+<script>
+const API   = 'http://localhost:5000';
+const TOKEN = localStorage.getItem('token');
+let todosProds = [];
+
+fetch('header_menu_principal.html').then(r=>r.text()).then(h=>{
+  document.getElementById('header-container').innerHTML=h;
+  document.querySelectorAll('#header-container script').forEach(s=>{const ns=document.createElement('script');ns.textContent=s.textContent;document.body.appendChild(ns);});
+});
+
+function ok(m){const t=document.getElementById('toastOk');document.getElementById('toastOkMsg').textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3000);}
+function err(m){const t=document.getElementById('toastErr');document.getElementById('toastErrMsg').textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3500);}
+function fmtRD(n){return'RD$ '+parseFloat(n||0).toLocaleString('es-DO',{minimumFractionDigits:2,maximumFractionDigits:2});}
+
+async function cargarProductos(){
+  const data=await fetch(`${API}/api/inventory/all`,{headers:{Authorization:`Bearer ${TOKEN}`}}).then(r=>r.json()).catch(()=>[]);
+  todosProds=data.filter(p=>p.cantidad<=5);
+  actualizarKPIs();
+  filtrar();
+}
+
+function actualizarKPIs(){
+  const sinStock = todosProds.filter(p=>p.cantidad<=0).length;
+  const bajStock = todosProds.filter(p=>p.cantidad>0&&p.cantidad<=5).length;
+  const valor    = todosProds.reduce((s,p)=>s+parseFloat(p.precio||0)*5,0); // valor de 5 unidades como referencia
+  document.getElementById('kpiSinStock').textContent=sinStock;
+  document.getElementById('kpiStockBajo').textContent=bajStock;
+  document.getElementById('kpiTotal').textContent=todosProds.length;
+  document.getElementById('kpiValor').textContent=fmtRD(valor);
+}
+
+function filtrar(){
+  const q=document.getElementById('searchProd').value.toLowerCase();
+  const f=document.getElementById('filtroStock').value;
+  let lista=todosProds;
+  if(f==='cero')  lista=lista.filter(p=>p.cantidad<=0);
+  if(f==='bajo')  lista=lista.filter(p=>p.cantidad>0&&p.cantidad<=5);
+  if(q)           lista=lista.filter(p=>p.nombre.toLowerCase().includes(q));
+  renderTabla(lista);
+}
+
+function renderTabla(lista){
+  document.getElementById('tablaBadge').textContent=`${lista.length} productos`;
+  const tbody=document.getElementById('tablaAgotados');
+  if(!lista.length){
+    tbody.innerHTML=`<tr><td colspan="6"><div class="empty-state"><i class="fas fa-check-circle" style="color:var(--success);"></i><h3>¡Sin productos agotados!</h3><p>Todos los productos tienen stock suficiente</p></div></td></tr>`;
+    return;
+  }
+  tbody.innerHTML=lista.map(p=>{
+    const badgeClass=p.cantidad<=0?'stock-0':'stock-bajo';
+    const badgeText =p.cantidad<=0?'Sin stock':`${p.cantidad} uds`;
+    return`<tr>
+      <td><strong style="font-size:.9em;">${p.nombre}</strong>${p.descripcion?`<br><small style="color:var(--text-muted);">${p.descripcion.substring(0,50)}...</small>`:''}</td>
+      <td style="font-size:.82em;color:var(--text-muted);">${p.codigo_barras||'—'}</td>
+      <td><span class="stock-badge ${badgeClass}"><i class="fas fa-${p.cantidad<=0?'times':'exclamation'}"></i>${badgeText}</span></td>
+      <td><strong>${fmtRD(p.precio)}</strong></td>
+      <td><input type="number" class="reorder-input" value="10" min="1" id="min_${p.id}" placeholder="Mín."></td>
+      <td>
+        <button class="btn btn-sm btn-primary" onclick="abrirRea(${p.id},'${p.nombre.replace(/'/g,'\\\'')  }',${p.cantidad})">
+          <i class="fas fa-plus"></i> Reabastecer
+        </button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function abrirRea(id,nombre,stock){
+  document.getElementById('reaId').value=id;
+  document.getElementById('reaName').textContent=nombre;
+  document.getElementById('reaStock').textContent=stock+' unidades';
+  document.getElementById('reaCantidad').value='';
+  document.getElementById('reaPreview').style.display='none';
+  document.getElementById('reaPreview').textContent='';
+
+  // Preview en tiempo real
+  document.getElementById('reaCantidad').oninput=function(){
+    const v=parseInt(this.value)||0;
+    if(v>0){
+      const nuevo=stock+v;
+      const el=document.getElementById('reaPreview');
+      el.style.display='block';
+      el.innerHTML=`<i class="fas fa-check-circle"></i> Stock resultante: <strong>${nuevo} unidades</strong>`;
+    } else {
+      document.getElementById('reaPreview').style.display='none';
+    }
+  };
+
+  document.getElementById('modalRea').classList.add('active');
+}
+
+async function reabastecer(){
+  const id=parseInt(document.getElementById('reaId').value);
+  const cant=parseInt(document.getElementById('reaCantidad').value)||0;
+  if(cant<=0){err('Ingresa una cantidad válida');return;}
+
+  const prod=todosProds.find(p=>p.id===id);
+  const nuevaCant=(prod?.cantidad||0)+cant;
+
+  const res=await fetch(`${API}/api/inventory/update/${id}`,{
+    method:'PUT',
+    headers:{'Content-Type':'application/json',Authorization:`Bearer ${TOKEN}`},
+    body:JSON.stringify({...prod,cantidad:nuevaCant})
+  }).then(r=>r.json()).catch(()=>({message:'Error de conexión'}));
+
+  if(res.message?.includes('actualiz')||res.id||res.ok){
+    ok(`Stock actualizado: +${cant} unidades`);
+    document.getElementById('modalRea').classList.remove('active');
+    cargarProductos();
+  } else {
+    err(res.message||'Error al actualizar stock');
+  }
+}
+
+function exportarCSV(){
+  const headers=['ID','Nombre','Código','Stock','Precio'];
+  const rows=todosProds.map(p=>[p.id,`"${p.nombre}"`,p.codigo_barras||'',p.cantidad,p.precio]);
+  const csv=[headers,...rows].map(r=>r.join(',')).join('\n');
+  const a=document.createElement('a');
+  a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);
+  a.download='productos_agotados_'+new Date().toISOString().split('T')[0]+'.csv';
+  a.click();
+}
+
+cargarProductos();
+</script>
+</body>
+</html>

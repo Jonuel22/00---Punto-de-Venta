@@ -203,55 +203,104 @@ router.get('/productos', (req, res) => {
 
 // ===== CREAR VENTA CON CAJERO =====
 router.post('/crear', (req, res) => {
-  const { productos, cliente, cajero_id } = req.body;
-  
-  if (!productos || productos.length === 0) {
+  const { productos, cliente, cajero_id, forma_pago } = req.body;
+
+  if (!productos || productos.length === 0)
     return res.status(400).json({ message: 'No hay productos en la venta' });
-  }
-  
-  if (!cajero_id) {
+  if (!cajero_id)
     return res.status(400).json({ message: 'Debe especificar el cajero' });
-  }
-  
+
   let subtotal = 0;
-  productos.forEach(p => {
-    subtotal += p.precio * p.cantidad;
-  });
-  const itbis = +(subtotal * 0.18).toFixed(2);
-  const total = +(subtotal + itbis).toFixed(2);
+  productos.forEach(p => { subtotal += parseFloat(p.precio) * parseInt(p.cantidad); });
+  const itbis      = +(subtotal * 0.18).toFixed(2);
+  const total      = +(subtotal + itbis).toFixed(2);
+  const metodoPago = forma_pago || 'efectivo';
+  const clienteId  = cliente?.id ? parseInt(cliente.id) : null;
+  const cajeroIdInt = parseInt(cajero_id);
 
-  const ventaQuery = 'INSERT INTO ventas (fecha, cliente_nombre, cliente_rnc, subtotal, itbis, total, cajero_id) VALUES (NOW(), ?, ?, ?, ?, ?, ?)';
-  db.query(ventaQuery, [cliente?.nombre || '', cliente?.rnc || '', subtotal, itbis, total, cajero_id], (err, ventaResult) => {
-    if (err) {
-      console.error('Error al crear venta:', err);
-      return res.status(500).json({ message: 'Error al crear la venta' });
-    }
-    const ventaId = ventaResult.insertId;
-    
-    const detalleQuery = 'INSERT INTO detalle_ventas (venta_id, producto_id, cantidad, precio_unitario) VALUES ?';
-    const detalleValues = productos.map(p => [ventaId, p.id, p.cantidad, p.precio]);
-    db.query(detalleQuery, [detalleValues], (err) => {
-      if (err) {
-        console.error('Error al guardar detalle:', err);
-        return res.status(500).json({ message: 'Error al guardar el detalle de venta' });
-      }
-      
-      productos.forEach(p => {
-        db.query('UPDATE inventario SET cantidad = cantidad - ? WHERE id = ?', [p.cantidad, p.id], (err) => {
-          if (err) console.error('Error al actualizar inventario:', err);
-        });
-      });
-      
-      const mensajeNotificacion = `Venta realizada - Total: RD$ ${total.toLocaleString('es-DO', {
-  minimumFractionDigits: 2,
-  maximumFractionDigits: 2
-})}`;
+  console.log(`[VENTA] cajero=${cajeroIdInt} cliente=${clienteId} forma=${metodoPago} total=${total}`);
 
-      
-      // ⚡ EMITIR ACTUALIZACIÓN DE KPIs VÍA WEBSOCKET
-      emitirKPIActualizados();
-      
-      res.json({ message: 'Venta realizada exitosamente', ventaId });
+  db.beginTransaction(err => {
+    if (err) return res.status(500).json({ message: 'Error al iniciar transacción' });
+
+    const rollback = (msg) => {
+      console.error(`[VENTA ROLLBACK] ${msg}`);
+      db.rollback(() => res.status(400).json({ message: msg }));
+    };
+
+    // 1. Si es crédito: validar límite con FOR UPDATE
+    const validarCredito = (next) => {
+      if (metodoPago !== 'credito' || !clienteId) return next(null, null);
+      db.query(
+        'SELECT balance_actual, limite_credito FROM clientes WHERE id = ? AND activo = 1 FOR UPDATE',
+        [clienteId],
+        (err, rows) => {
+          if (err) { console.error('[CREDITO] Error query:', err); return rollback('Error al verificar crédito'); }
+          if (!rows.length) return rollback('Cliente no encontrado');
+          const disponible = parseFloat(rows[0].limite_credito) - parseFloat(rows[0].balance_actual);
+          console.log(`[CREDITO] disponible=${disponible} total=${total}`);
+          if (total > disponible) return rollback(`Crédito insuficiente. Disponible: RD$ ${disponible.toFixed(2)}`);
+          next(null, parseFloat(rows[0].balance_actual));
+        }
+      );
+    };
+
+    validarCredito((_, balanceActual) => {
+      // 2. Insertar venta
+      db.query(
+        'INSERT INTO ventas (fecha, cliente_nombre, cliente_rnc, subtotal, itbis, total, cajero_id, cliente_id, forma_pago) VALUES (NOW(), ?, ?, ?, ?, ?, ?, ?, ?)',
+        [cliente?.nombre || '', cliente?.rnc || '', subtotal, itbis, total, cajeroIdInt, clienteId, metodoPago],
+        (err, ventaResult) => {
+          if (err) { console.error('[VENTA] Error insert:', err); return rollback('Error al crear la venta'); }
+          const ventaId = ventaResult.insertId;
+          console.log(`[VENTA] Creada id=${ventaId}`);
+
+          // 3. Detalle
+          const detalleValues = productos.map(p => [ventaId, parseInt(p.id), parseInt(p.cantidad), parseFloat(p.precio)]);
+          db.query('INSERT INTO detalle_ventas (venta_id, producto_id, cantidad, precio_unitario) VALUES ?',
+            [detalleValues],
+            (err) => {
+              if (err) { console.error('[DETALLE] Error:', err); return rollback('Error al guardar detalle'); }
+
+              // 4. Actualizar inventario (no bloqueante)
+              productos.forEach(p => {
+                db.query('UPDATE inventario SET cantidad = cantidad - ? WHERE id = ?', [parseInt(p.cantidad), parseInt(p.id)]);
+              });
+
+              // 5. Crédito: actualizar balance y registrar CxC
+              if (metodoPago === 'credito' && clienteId) {
+                const nuevoBalance = +(balanceActual + total).toFixed(2);
+                console.log(`[CREDITO] Actualizando balance: ${balanceActual} + ${total} = ${nuevoBalance}`);
+
+                db.query('UPDATE clientes SET balance_actual = ? WHERE id = ?', [nuevoBalance, clienteId], (err) => {
+                  if (err) { console.error('[CREDITO] Error update balance:', err); return rollback('Error al actualizar balance'); }
+
+                  db.query(
+                    `INSERT INTO cuentas_por_cobrar (cliente_id, venta_id, tipo, monto, balance_despues, descripcion, cajero_id)
+                     VALUES (?, ?, 'venta', ?, ?, ?, ?)`,
+                    [clienteId, ventaId, total, nuevoBalance, `Venta #${ventaId} a crédito`, cajeroIdInt],
+                    (err) => {
+                      if (err) { console.error('[CXC] Error insert:', err); return rollback('Error al registrar cuenta por cobrar'); }
+                      console.log(`[CREDITO] CxC registrada. Balance nuevo: ${nuevoBalance}`);
+                      db.commit(err => {
+                        if (err) return rollback('Error al confirmar transacción');
+                        emitirKPIActualizados();
+                        res.json({ message: 'Venta a crédito registrada', ventaId });
+                      });
+                    }
+                  );
+                });
+              } else {
+                db.commit(err => {
+                  if (err) return rollback('Error al confirmar transacción');
+                  emitirKPIActualizados();
+                  res.json({ message: 'Venta realizada exitosamente', ventaId });
+                });
+              }
+            }
+          );
+        }
+      );
     });
   });
 });

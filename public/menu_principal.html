@@ -2,1028 +2,315 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Menú Principal - Punto de Venta</title>
-
-<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>JCT POS — Dashboard</title>
+<script src="theme-init.js"></script>
+<link rel="stylesheet" href="theme.css">
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
 <style>
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
+  .dashboard-layout{display:flex;padding-top:64px;min-height:100vh;}
+  .main-content{flex:1;padding:24px;overflow-y:auto;margin-right:320px;transition:margin .3s;}
+  @media(max-width:1024px){.main-content{margin-right:0;}}
+  @media(max-width:768px){.main-content{padding:14px;}}
 
-body {
-  font-family: 'Roboto', sans-serif;
-  background: #f5f5f5;
-  overflow-x: hidden;
-}
+  .user-chip{display:flex;align-items:center;gap:8px;padding:6px 12px 6px 6px;background:var(--bg3);border:1px solid var(--border);border-radius:20px;cursor:pointer;transition:all .2s;text-decoration:none;}
+  .user-chip:hover{background:var(--bg4);border-color:var(--primary);}
+  .user-avatar{width:28px;height:28px;border-radius:50%;background:var(--gradient);display:flex;align-items:center;justify-content:center;font-size:.75em;font-weight:700;color:#fff;flex-shrink:0;}
+  .user-name{font-size:.82em;font-weight:600;color:var(--text);}
 
-/* ===== HEADER GLOBAL ===== */
-.header-global {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  background: #fff;
-  color: #222;
-  padding: 14px 24px;
-  z-index: 1000;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  border-bottom: 1px solid #e0e0e0;
-  height: 60px;
-}
+  .greeting{margin-bottom:24px;animation:fadeUp .4s ease both;}
+  .greeting h2{font-size:1.5em;font-weight:800;margin-bottom:4px;}
+  .greeting p {font-size:.88em;color:var(--text-muted);}
 
-.header-left {
-  display: flex;
-  align-items: center;
-  min-width: 0;
-}
+  .charts-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:24px;}
+  @media(max-width:900px){.charts-grid{grid-template-columns:1fr;}}
 
-.home-icon {
-  color: #00cc66;
-  font-size: 1.5em;
-  margin-right: 16px;
-  text-decoration: none;
-  transition: transform 0.2s;
-}
-
-.home-icon:hover {
-  transform: scale(1.1);
-}
-
-.header-title {
-  font-size: 1.15em;
-  font-weight: bold;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  color: #222;
-}
-
-.header-right {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.icon-btn {
-  background: none;
-  border: none;
-  color: #00cc66;
-  font-size: 1.4em;
-  cursor: pointer;
-  position: relative;
-  transition: transform 0.2s;
-}
-
-.icon-btn:hover {
-  transform: scale(1.1);
-}
-
-/* ===== PANEL DE USUARIO ===== */
-#usuarioPanel {
-  display: none;
-  position: fixed;
-  top: 60px;
-  right: 20px;
-  background: #fff;
-  color: #333;
-  min-width: 180px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
-  border-radius: 8px;
-  overflow: hidden;
-  z-index: 3000;
-}
-
-#usuarioPanel div {
-  padding: 12px 16px;
-  cursor: pointer;
-  border-bottom: 1px solid #eee;
-  transition: background 0.2s;
-}
-
-#usuarioPanel div:hover {
-  background: #f5f5f5;
-}
-
-#usuarioPanel div:last-child {
-  border-bottom: none;
-}
-
-/* ===== LAYOUT PRINCIPAL ===== */
-.dashboard {
-  display: flex;
-  padding-top: 60px;
-  min-height: 100vh;
-}
-
-/* ===== CONTENIDO PRINCIPAL ===== */
-.main {
-  flex: 1;
-  padding: 24px;
-  overflow-y: auto;
-  background: linear-gradient(135deg, #e8f5e9, #b2dfdb);
-  margin-right: 350px; /* Espacio para el panel de notificaciones */
-}
-
-/* ===== PANEL DE NOTIFICACIONES FIJO ===== */
-.noti-sidebar {
-  position: fixed;
-  top: 60px;
-  right: 0;
-  width: 350px;
-  height: calc(100vh - 60px);
-  background: #fff;
-  border-left: 1px solid #e0e0e0;
-  display: flex;
-  flex-direction: column;
-  z-index: 999;
-  box-shadow: -2px 0 8px rgba(0, 0, 0, 0.05);
-}
-
-.noti-header {
-  padding: 16px 20px;
-  border-bottom: 1px solid #e0e0e0;
-  background: #fafafa;
-}
-
-.noti-tabs {
-  display: flex;
-  gap: 8px;
-}
-
-.noti-tab {
-  flex: 1;
-  padding: 8px 12px;
-  border: 1px solid #00cc66;
-  background: white;
-  color: #00cc66;
-  cursor: pointer;
-  border-radius: 4px;
-  font-size: 0.9em;
-  font-weight: 600;
-  transition: all 0.2s;
-}
-
-.noti-tab.active {
-  background: #00cc66;
-  color: white;
-}
-
-.noti-tab:hover:not(.active) {
-  background: #e8f5e9;
-}
-
-.noti-content {
-  flex: 1;
-  overflow-y: auto;
-  padding: 12px 0;
-}
-
-.noti-empty {
-  padding: 40px 20px;
-  text-align: center;
-  color: #999;
-}
-
-.noti-empty i {
-  font-size: 3em;
-  margin-bottom: 12px;
-  display: block;
-  color: #ddd;
-}
-
-.noti-item {
-  padding: 14px 20px;
-  border-bottom: 1px solid #f0f0f0;
-  transition: background 0.2s;
-}
-
-.noti-item:hover {
-  background: #fafafa;
-}
-
-.noti-mensaje {
-  font-size: 0.9em;
-  color: #333;
-  margin-bottom: 6px;
-  line-height: 1.4;
-}
-
-.noti-fecha {
-  font-size: 0.8em;
-  color: #999;
-}
-
-/* ===== KPI SECTION EN SIDEBAR ===== */
-.kpi-sidebar {
-  padding: 16px 20px;
-  border-top: 1px solid #e0e0e0;
-  background: #fafafa;
-}
-
-.kpi-sidebar-title {
-  font-size: 0.85em;
-  font-weight: 700;
-  color: #666;
-  margin-bottom: 12px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.kpi-card {
-  background: linear-gradient(135deg, #e8f5e9, #b2dfdb);
-  padding: 12px;
-  border-radius: 8px;
-  margin-bottom: 10px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-}
-
-.kpi-card h4 {
-  margin: 0 0 6px 0;
-  color: #555;
-  font-size: 0.8em;
-  font-weight: 600;
-}
-
-.kpi-card span {
-  font-size: 1.3em;
-  font-weight: 700;
-  color: #00cc66;
-}
-
-.btn-limpiar {
-  width: 100%;
-  background: linear-gradient(90deg, #00cc66 0%, #66ccff 100%);
-  color: #fff;
-  border: none;
-  padding: 10px 0;
-  cursor: pointer;
-  font-size: 0.9em;
-  font-weight: 600;
-  letter-spacing: 0.5px;
-  transition: opacity 0.2s;
-  margin-top: 12px;
-  border-radius: 6px;
-}
-
-.btn-limpiar:hover {
-  opacity: 0.9;
-}
-
-/* ===== KPI ROW PRINCIPAL ===== */
-.kpi-row {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 20px;
-  margin-bottom: 32px;
-}
-
-.kpi {
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(12px);
-  border-radius: 12px;
-  padding: 24px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  transition: transform 0.2s;
-  border: 1px solid rgba(255, 255, 255, 0.5);
-}
-
-.kpi:hover {
-  transform: translateY(0px);
-}
-
-.kpi h4 {
-  margin: 0 0 8px 0;
-  color: #555;
-  font-size: 0.85em;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.kpi span {
-  font-size: 1.8em;
-  font-weight: 700;
-  color: #00cc66;
-}
-
-/* ===== TILES ===== */
-.tiles {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 20px;
-  margin-bottom: 32px;
-}
-
-.tile {
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(12px);
-  border-radius: 12px;
-  padding: 32px 24px;
-  text-align: center;
-  cursor: pointer;
-  transition: all 0.3s cubic-bezier(.23, 1.01, .32, 1);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.5);
-}
-
-.tile:hover {
-  transform: translateY(-6px) scale(1.02);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
-}
-
-.tile i {
-  font-size: 2.8em;
-  color: #00cc66;
-  margin-bottom: 12px;
-  display: block;
-}
-
-.tile div {
-  font-size: 1.05em;
-  font-weight: 600;
-  color: #333;
-}
-
-/* ===== CHARTS SECTION ===== */
-.charts-section {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-  gap: 24px;
-  margin-bottom: 32px;
-}
-
-.chart-container {
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(12px);
-  border-radius: 12px;
-  padding: 24px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.5);
-}
-
-.chart-title {
-  font-size: 1em;
-  font-weight: 700;
-  color: #333;
-  margin-bottom: 20px;
-  text-align: center;
-}
-
-.chart-canvas {
-  position: relative;
-  height: 300px;
-}
-
-/* ===== RESPONSIVE ===== */
-@media (max-width: 1024px) {
-  .main {
-    margin-right: 0;
-  }
-
-  .noti-sidebar {
-    display: none;
-  }
-
-  .charts-section {
-    grid-template-columns: 1fr;
-  }
-}
-
-@media (max-width: 768px) {
-  .header-global {
-    padding: 12px 16px;
-  }
-
-  .header-title {
-    font-size: 1em;
-  }
-
-  .kpi-row {
-    grid-template-columns: 1fr;
-  }
-
-  .tiles {
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-    gap: 16px;
-  }
-
-  .charts-section {
-    grid-template-columns: 1fr;
-  }
-
-  .chart-container {
-    padding: 16px;
-  }
-}
+  /* Tile disabled */
+  .tile.disabled{opacity:.35;cursor:not-allowed;pointer-events:none;}
+  .tile.disabled:hover{transform:none;box-shadow:var(--shadow-sm);}
 </style>
 </head>
-
 <body>
 
-<!-- ===== HEADER GLOBAL ===== -->
-<header class="header-global">
-  <div class="header-left">
-    <a href="menu_principal.html" class="home-icon">
-      <i class="fas fa-home"></i>
-    </a>
-    <span class="header-title">Punto de Venta</span>
-  </div>
-  <div class="header-right">
-    <button onclick="toggleUsuario()" class="icon-btn">
-      <i class="fas fa-user"></i>
-    </button>
+<!-- HEADER -->
+<header class="app-header">
+  <a href="menu_principal.html" class="brand">
+    <div class="brand-icon"><i class="fas fa-cash-register"></i></div>
+    <span class="brand-name">JCT POS</span>
+  </a>
+  <div class="header-actions">
+    <button class="theme-toggle h-btn" title="Cambiar tema"><i class="fas fa-sun"></i></button>
+    <div style="position:relative;">
+      <div class="user-chip" onclick="toggleUserMenu()">
+        <div class="user-avatar" id="userInitial">A</div>
+        <span class="user-name" id="userName">Usuario</span>
+        <i class="fas fa-chevron-down" style="font-size:.65em;color:var(--text-muted);margin-left:2px;"></i>
+      </div>
+      <div class="dropdown-panel" id="userMenu" style="display:none;">
+        <div style="padding:14px 16px;border-bottom:1px solid var(--border);">
+          <div style="font-weight:700;font-size:.9em;color:var(--text);" id="userMenuName"></div>
+          <div style="font-size:.76em;color:var(--text-muted);margin-top:2px;" id="userMenuRol"></div>
+        </div>
+        <div class="dropdown-item" onclick="location.href='config_general.html'">
+          <i class="fas fa-cog"></i> Configuración
+        </div>
+        <div class="dropdown-item danger" onclick="cerrarSesion()">
+          <i class="fas fa-sign-out-alt"></i> Cerrar sesión
+        </div>
+      </div>
+    </div>
   </div>
 </header>
 
-<!-- ===== PANEL DE USUARIO ===== -->
-<div id="usuarioPanel">
-  <div onclick="cerrarSesion()">
-    <i class="fas fa-sign-out-alt"></i> Cerrar sesión
-  </div>
-   <div style="padding:12px;cursor:pointer;border-bottom:1px solid #eee;" onclick="window.location.href='config_general.html'">
-    <i class="fas fa-cog"></i> Configuración
-  </div>
-</div>
+<div class="dashboard-layout">
+  <!-- MAIN -->
+  <main class="main-content">
 
-<!-- ===== DASHBOARD ===== -->
-<div class="dashboard">
-  
-  <!-- ===== CONTENIDO PRINCIPAL ===== -->
-  <main class="main">
-    
-    <!-- KPIs Principales -->
-    <div class="kpi-row">
-      <div class="kpi">
-        <h4>Productos en Stock</h4>
-        <span id="kpiProductosStock">0</span>
+    <!-- Greeting -->
+    <div class="greeting">
+      <h2>Bienvenido, <span class="gradient-text" id="greetName">Admin</span> 👋</h2>
+      <p id="greetDate">Cargando fecha...</p>
+    </div>
+
+    <!-- KPIs -->
+    <div class="stats-grid stagger mb-24">
+      <div class="stat-card">
+        <div class="stat-icon"><i class="fas fa-boxes"></i></div>
+        <div><div class="stat-label">Productos en Stock</div><div class="stat-value" id="kpiStock">—</div></div>
       </div>
-      <div class="kpi">
-        <h4>Productos Agotados</h4>
-        <span id="kpiProductosAgotados" style="color: #f44336;">0</span>
+      <div class="stat-card">
+        <div class="stat-icon danger"><i class="fas fa-exclamation-triangle"></i></div>
+        <div><div class="stat-label">Productos Agotados</div><div class="stat-value text-danger" id="kpiAgotados">—</div></div>
       </div>
-      <div class="kpi">
-        <h4>Ventas del Mes</h4>
-        <span id="kpiVentasMes">RD$ 0</span>
+      <div class="stat-card">
+        <div class="stat-icon info"><i class="fas fa-chart-line"></i></div>
+        <div><div class="stat-label">Ventas del Mes</div><div class="stat-value" id="kpiMes">—</div></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon secondary"><i class="fas fa-shopping-cart"></i></div>
+        <div><div class="stat-label">Ventas Hoy</div><div class="stat-value text-primary" id="kpiHoy">—</div></div>
       </div>
     </div>
 
-    <!-- Tiles de navegación -->
-    <div class="tiles">
-      <div class="tile" onclick="go('ventas.html')">
-        <i class="fas fa-cash-register"></i>
-        <div>Ventas</div>
-      </div>
-      <div class="tile" onclick="go('inventario.html')">
-        <i class="fas fa-boxes"></i>
-        <div>Inventario</div>
-      </div>
-      <div class="tile" onclick="go('clientes.html')">
-        <i class="fas fa-users"></i>
-        <div>Clientes</div>
-      </div>
-      <div class="tile" onclick="go('reportes.html')">
-        <i class="fas fa-chart-line"></i>
-        <div>Reportes</div>
-      </div>
+    <!-- Navegación por tiles — se filtran por permisos -->
+    <div class="tiles-grid stagger mb-24" id="tilesGrid">
+      <!-- Se renderizan dinámicamente según permisos -->
     </div>
 
-    <!-- Sección de Gráficos -->
-    <div class="charts-section">
-      <!-- Gráfico de Productos Más Vendidos -->
-      <div class="chart-container">
-        <h3 class="chart-title">Top 5 Productos Más Vendidos</h3>
-        <div class="chart-canvas">
-          <canvas id="chartProductos"></canvas>
-        </div>
+    <!-- Gráficos -->
+    <div class="charts-grid">
+      <div class="chart-card">
+        <div class="chart-title"><i class="fas fa-trophy"></i> Top Productos Vendidos</div>
+        <div class="chart-body"><canvas id="chartProductos"></canvas></div>
       </div>
-
-      <!-- Gráfico de Ventas Diarias del Mes -->
-      <div class="chart-container">
-        <h3 class="chart-title">Ventas Diarias del Mes</h3>
-        <div class="chart-canvas">
-          <canvas id="chartVentasDiarias"></canvas>
-        </div>
+      <div class="chart-card">
+        <div class="chart-title"><i class="fas fa-chart-area"></i> Ventas Diarias del Mes</div>
+        <div class="chart-body"><canvas id="chartVentas"></canvas></div>
       </div>
     </div>
 
   </main>
 
-  <!-- ===== SIDEBAR DE NOTIFICACIONES (SIEMPRE VISIBLE) ===== -->
+  <!-- SIDEBAR NOTIFICACIONES -->
   <aside class="noti-sidebar">
-    
-    <!-- Header con tabs -->
-    <div class="noti-header">
+    <div style="padding:16px 20px;border-bottom:1px solid var(--border);">
       <div class="noti-tabs">
-        <button class="noti-tab active" onclick="cambiarTab('acciones')">Acciones</button>
-        <button class="noti-tab" onclick="cambiarTab('alertas')">Alertas</button>
+        <button class="noti-tab active" onclick="cambiarTab('acciones',this)">Acciones</button>
+        <button class="noti-tab" onclick="cambiarTab('alertas',this)">Alertas</button>
       </div>
     </div>
-
-    <!-- Contenido de notificaciones -->
-    <div class="noti-content" id="notiContent">
-      <div class="noti-empty">
-        <i class="fas fa-bell"></i>
-        <div>Sin acciones</div>
-        <div style="font-size: 0.85em; margin-top: 8px;">Cuando lleguen nuevas notificaciones, el botón Actualizar mostrará una identificación</div>
-      </div>
+    <div class="noti-list" id="notiContent" style="flex:1;overflow-y:auto;">
+      <div class="noti-empty"><i class="fas fa-bell"></i><p style="font-size:.85em;">Sin notificaciones</p></div>
     </div>
-
-    <!-- KPIs en sidebar -->
-    <div class="kpi-sidebar">
-      <div class="kpi-sidebar-title">Resumen del Día</div>
-      
-      <div class="kpi-card">
-        <h4>Ventas Hoy</h4>
-        <span id="kpiVentasSide">RD$ 0</span>
-      </div>
-      
-      <div class="kpi-card">
-        <h4>Transacciones</h4>
-        <span id="kpiTransSide">0</span>
-      </div>
-      
-      <div class="kpi-card">
-        <h4>Ticket Promedio</h4>
-        <span id="kpiTicketSide">RD$ 0</span>
-      </div>
-
-      <button onclick="limpiarNotificaciones()" class="btn-limpiar" id="btnLimpiar">
-        <i class="fas fa-broom"></i> <span id="btnLimpiarTexto">Limpiar acciones</span>
+    <div class="noti-kpi-section">
+      <div class="noti-kpi-title">Resumen del Día</div>
+      <div class="noti-kpi-card"><div class="nk-label">Ventas</div><div class="nk-value" id="kpiVentasSide">RD$ 0.00</div></div>
+      <div class="noti-kpi-card"><div class="nk-label">Transacciones</div><div class="nk-value" id="kpiTransSide">0</div></div>
+      <div class="noti-kpi-card"><div class="nk-label">Ticket Promedio</div><div class="nk-value" id="kpiTicketSide">RD$ 0.00</div></div>
+      <button onclick="limpiarNotificaciones()" class="btn btn-secondary btn-block mt-16" style="font-size:.82em;">
+        <i class="fas fa-broom"></i> <span id="btnLimpiarTxt">Limpiar acciones</span>
       </button>
     </div>
-
   </aside>
-
 </div>
 
 <script>
-const API = 'http://localhost:5000';
+const API   = 'http://localhost:5000';
 const TOKEN = localStorage.getItem('token');
+let chartP=null, chartV=null, tabActual='acciones';
 
-// Variables globales para los gráficos
-let chartProductos = null;
-let chartVentasDiarias = null;
+/* ── Definición de todas las tiles ── */
+const TODAS_TILES = [
+  { pagina:'ventas.html',         label:'Ventas',          icono:'fa-cash-register', grupo:'operaciones' },
+  { pagina:'inventario.html',     label:'Inventario',      icono:'fa-boxes',         grupo:'operaciones' },
+  { pagina:'clientes.html',       label:'Clientes',        icono:'fa-users',         grupo:'operaciones' },
+  { pagina:'reportes.html',       label:'Reportes',        icono:'fa-chart-bar',     grupo:'reportes'    },
+  { pagina:'config_general.html', label:'Configuración',   icono:'fa-cog',           grupo:'config'      },
+];
 
-function go(url) {
-  location.href = url;
-}
+/* ── Greeting ── */
+(function initGreeting(){
+  const user=JSON.parse(localStorage.getItem('user')||'{}');
+  const name=user.nombre||user.username||'Usuario';
+  const rol =user.rol||'';
+  document.getElementById('greetName').textContent=name;
+  document.getElementById('userName').textContent=name;
+  document.getElementById('userInitial').textContent=name.charAt(0).toUpperCase();
+  document.getElementById('userMenuName').textContent=name;
+  document.getElementById('userMenuRol').textContent=rol.charAt(0).toUpperCase()+rol.slice(1);
+  const days=['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+  const months=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+  const now=new Date();
+  document.getElementById('greetDate').textContent=`${days[now.getDay()]}, ${now.getDate()} de ${months[now.getMonth()]} ${now.getFullYear()}`;
+})();
 
-// ===== TOGGLE USUARIO =====
-function toggleUsuario() {
-  const usuarioPanel = document.getElementById('usuarioPanel');
-  const isOpen = usuarioPanel.style.display === 'block';
-  usuarioPanel.style.display = isOpen ? 'none' : 'block';
-}
+/* ── Renderizar tiles según permisos ── */
+function renderTiles(){
+  const user=JSON.parse(localStorage.getItem('user')||'{}');
+  const permisos=user.permisos||[];
+  const esAdmin=user.rol==='admin';
 
-// ===== CAMBIAR TAB =====
-function cambiarTab(tab) {
-  const tabs = document.querySelectorAll('.noti-tab');
-  tabs.forEach(t => t.classList.remove('active'));
-  event.target.classList.add('active');
-  
-  // Guardar el tab actual
-  tabActual = tab;
-  
-  // Cambiar el texto del botón de limpiar
-  const btnTexto = document.getElementById('btnLimpiarTexto');
-  btnTexto.textContent = tab === 'acciones' ? 'Limpiar acciones' : 'Limpiar alertas';
-  
-  // Cargar notificaciones del tipo seleccionado
-  cargarNotificaciones(tab);
-}
+  const grid=document.getElementById('tilesGrid');
 
-// ===== CARGAR NOTIFICACIONES =====
-function cargarNotificaciones(tipo = 'acciones') {
-  function formatFecha(fechaStr) {
-    const d = new Date(fechaStr);
-    const pad = n => n < 10 ? '0' + n : n;
-    return `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
-  }
+  const tilesVisibles=TODAS_TILES.filter(t=>{
+    if(esAdmin && !user.rol_id) return true;   // admin sin rol_id → acceso total
+    return permisos.includes(t.pagina);
+  });
 
-  // Determinar el endpoint según el tipo
-  const endpoint = tipo === 'acciones' 
-    ? `${API}/api/notifications/acciones` 
-    : `${API}/api/notifications/alertas`;
-
-  fetch(endpoint)
-    .then(r => r.json())
-    .then(data => {
-      const notiContent = document.getElementById('notiContent');
-      
-      if (data.length === 0) {
-        const mensajeVacio = tipo === 'acciones' 
-          ? 'Sin acciones recientes' 
-          : 'No hay productos sin stock';
-        
-        notiContent.innerHTML = `
-          <div class="noti-empty">
-            <i class="fas ${tipo === 'acciones' ? 'fa-bell' : 'fa-exclamation-triangle'}"></i>
-            <div>${mensajeVacio}</div>
-            <div style="font-size: 0.85em; margin-top: 8px; color: #999;">
-              ${tipo === 'acciones' 
-                ? 'Las ventas realizadas aparecerán aquí' 
-                : 'Los productos con 0 unidades aparecerán aquí'}
-            </div>
-          </div>
-        `;
-      } else {
-        let html = '';
-        data.forEach(n => {
-          html += `
-            <div class="noti-item">
-              <div class="noti-mensaje">${n.mensaje}</div>
-              <div class="noti-fecha">${formatFecha(n.fecha)}</div>
-            </div>
-          `;
-        });
-        notiContent.innerHTML = html;
-      }
-    })
-    .catch(err => {
-      console.error('Error al cargar notificaciones:', err);
-      const notiContent = document.getElementById('notiContent');
-      notiContent.innerHTML = `
-        <div class="noti-empty">
-          <i class="fas fa-exclamation-circle" style="color: #ff5252;"></i>
-          <div style="color: #ff5252;">Error al cargar ${tipo}</div>
-          <div style="font-size: 0.85em; margin-top: 8px;">
-            Intenta nuevamente más tarde
-          </div>
-        </div>
-      `;
-    });
-}
-
-// ===== LIMPIAR NOTIFICACIONES =====
-function limpiarNotificaciones() {
-  // Si está en alertas, mostrar mensaje informativo
-  if (tabActual === 'alertas') {
-    alert('Las alertas son dinámicas y se generan automáticamente cuando un producto tiene 0 unidades en stock. Para eliminar una alerta, debes reabastecer el producto desde el módulo de Inventario.');
+  if(!tilesVisibles.length){
+    grid.innerHTML=`<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--text-muted);">
+      <i class="fas fa-lock" style="font-size:2em;color:var(--text-faint);display:block;margin-bottom:12px;"></i>
+      <p>Sin módulos asignados. Contacta al administrador.</p></div>`;
     return;
   }
-  
-  // Confirmar la acción solo para acciones
-  if (!confirm('¿Estás seguro de que deseas limpiar todas las acciones?')) {
-    return;
-  }
-  
-  fetch(`${API}/api/notifications/clear`, { 
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${TOKEN}`
-    }
-  })
-  .then(r => r.json())
-  .then(data => {
-    if (data.ok) {
-      // Recargar las notificaciones del tab actual
-      cargarNotificaciones(tabActual);
-      
-      // Mostrar mensaje de éxito
-      console.log('Acciones limpiadas exitosamente');
-    } else {
-      console.error('Error al limpiar notificaciones');
-    }
-  })
-  .catch(err => {
-    console.error('Error al limpiar notificaciones:', err);
-  });
+
+  grid.innerHTML=tilesVisibles.map((t,i)=>`
+    <a href="${t.pagina}" class="tile" style="animation-delay:${i*.05}s;">
+      <div class="tile-icon"><i class="fas ${t.icono}"></i></div>
+      <div class="tile-label">${t.label}</div>
+    </a>`).join('');
 }
 
-// ===== CARGAR KPIs =====
-function cargarKPIs() {
-  // Cargar KPIs del día (para sidebar)
-  fetch('http://localhost:5000/api/sales/kpi', {
-    headers: { Authorization: `Bearer ${TOKEN}` }
-  })
-  .then(r => r.json())
-  .then(data => {
-    // Extraer datos del backend
-    const totalVentas = parseFloat(data.total || 0);
-    const transacciones = parseInt(data.transacciones || 0);
-    
-    // Calcular ticket promedio
-    const ticketPromedio = transacciones > 0 ? totalVentas / transacciones : 0;
-    
-    // Formatear valores con formato dominicano
-    const ventasTotalFormateado = 'RD$ ' + totalVentas.toLocaleString('es-DO', {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2
-    });
-    
-    const ticketPromedioFormateado = 'RD$ ' + ticketPromedio.toLocaleString('es-DO', {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2
-    });
-    
-    // Actualizar KPIs del panel lateral de notificaciones
-    document.getElementById('kpiVentasSide').textContent = ventasTotalFormateado;
-    document.getElementById('kpiTransSide').textContent = transacciones;
-    document.getElementById('kpiTicketSide').textContent = ticketPromedioFormateado;
-  })
-  .catch(err => {
-    console.error('Error al cargar KPIs del día:', err);
-    
-    // Mostrar valores por defecto en caso de error
-    const kpisDefault = {
-      ventas: 'RD$ 0.00',
-      trans: '0',
-      ticket: 'RD$ 0.00'
-    };
-    
-    document.getElementById('kpiVentasSide').textContent = kpisDefault.ventas;
-    document.getElementById('kpiTransSide').textContent = kpisDefault.trans;
-    document.getElementById('kpiTicketSide').textContent = kpisDefault.ticket;
-  });
-
-  // Cargar KPIs generales (para sección principal)
-  cargarKPIsGenerales();
+/* ── User menu ── */
+function toggleUserMenu(){
+  const m=document.getElementById('userMenu');
+  m.style.display=m.style.display==='block'?'none':'block';
 }
-
-// ===== CARGAR KPIs GENERALES (Productos y Ventas del Mes) =====
-function cargarKPIsGenerales() {
-  // Obtener estadísticas de productos
-  fetch('http://localhost:5000/api/inventory/all', {
-    headers: { Authorization: `Bearer ${TOKEN}` }
-  })
-  .then(r => r.json())
-  .then(productos => {
-    const totalProductos = productos.length;
-    const productosAgotados = productos.filter(p => p.cantidad <= 0).length;
-    const productosEnStock = totalProductos - productosAgotados;
-    
-    document.getElementById('kpiProductosStock').textContent = productosEnStock;
-    document.getElementById('kpiProductosAgotados').textContent = productosAgotados;
-  })
-  .catch(err => {
-    console.error('Error al cargar estadísticas de productos:', err);
-    document.getElementById('kpiProductosStock').textContent = '0';
-    document.getElementById('kpiProductosAgotados').textContent = '0';
-  });
-
-  // Obtener ventas del mes
-  fetch('http://localhost:5000/api/sales/daily-month', {
-    headers: { Authorization: `Bearer ${TOKEN}` }
-  })
-  .then(r => r.json())
-  .then(data => {
-    const totalMes = data.reduce((sum, d) => sum + parseFloat(d.total), 0);
-    
-    const ventasMesFormateado = 'RD$ ' + totalMes.toLocaleString('es-DO', {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2
-    });
-    
-    document.getElementById('kpiVentasMes').textContent = ventasMesFormateado;
-  })
-  .catch(err => {
-    console.error('Error al cargar ventas del mes:', err);
-    document.getElementById('kpiVentasMes').textContent = 'RD$ 0.00';
-  });
-}
-
-// ===== CARGAR GRÁFICO DE PRODUCTOS MÁS VENDIDOS =====
-function cargarGraficoProductos() {
-  fetch(`${API}/api/sales/top-selling`, {
-    headers: { Authorization: `Bearer ${TOKEN}` }
-  })
-  .then(r => r.json())
-  .then(data => {
-    const ctx = document.getElementById('chartProductos').getContext('2d');
-    
-    // Destruir gráfico anterior si existe
-    if (chartProductos) {
-      chartProductos.destroy();
-    }
-    
-    // Extraer datos
-    const productos = data.map(p => p.nombre);
-    const cantidades = data.map(p => p.cantidad);
-    
-    // Crear gráfico
-    chartProductos = new Chart(ctx, {
-      type: 'bar',
-      data: {
-        labels: productos,
-        datasets: [{
-          label: 'Cantidad Vendida',
-          data: cantidades,
-          backgroundColor: 'rgba(0, 204, 102, 0.7)',
-          borderColor: 'rgba(0, 204, 102, 1)',
-          borderWidth: 2
-        }]
-      },
-      options: {
-        indexAxis: 'y',
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: {
-            display: false
-          },
-          tooltip: {
-            callbacks: {
-              label: function(context) {
-                return 'Vendidos: ' + context.parsed.x;
-              }
-            }
-          }
-        },
-        scales: {
-          x: {
-            beginAtZero: true,
-            grid: {
-              color: 'rgba(0, 0, 0, 0.05)'
-            },
-            ticks: {
-              precision: 0
-            }
-          },
-          y: {
-            grid: {
-              display: false
-            }
-          }
-        }
-      }
-    });
-  })
-  .catch(err => {
-    console.error('Error al cargar productos más vendidos:', err);
-  });
-}
-
-// ===== CARGAR GRÁFICO DE VENTAS DIARIAS DEL MES =====
-function cargarGraficoVentasDiarias() {
-  fetch(`${API}/api/sales/daily-month`, {
-    headers: { Authorization: `Bearer ${TOKEN}` }
-  })
-  .then(r => r.json())
-  .then(data => {
-    const ctx = document.getElementById('chartVentasDiarias').getContext('2d');
-    
-    // Destruir gráfico anterior si existe
-    if (chartVentasDiarias) {
-      chartVentasDiarias.destroy();
-    }
-    
-    // Obtener el número de días del mes actual
-    const hoy = new Date();
-    const year = hoy.getFullYear();
-    const month = hoy.getMonth();
-    const diasDelMes = new Date(year, month + 1, 0).getDate();
-    
-    // Crear un mapa con los datos de ventas
-    const ventasMap = {};
-    data.forEach(d => {
-      ventasMap[d.dia] = parseFloat(d.total);
-    });
-    
-    // Crear arrays con todos los días del mes
-    const dias = [];
-    const ventas = [];
-    
-    for (let i = 1; i <= diasDelMes; i++) {
-      dias.push(i);
-      ventas.push(ventasMap[i] || 0);
-    }
-    
-    // Crear gráfico
-    chartVentasDiarias = new Chart(ctx, {
-      type: 'line',
-      data: {
-        labels: dias,
-        datasets: [{
-          label: 'Ventas (RD$)',
-          data: ventas,
-          backgroundColor: 'rgba(0, 204, 102, 0.1)',
-          borderColor: 'rgba(0, 204, 102, 1)',
-          borderWidth: 3,
-          fill: true,
-          tension: 0.4,
-          pointRadius: 3,
-          pointBackgroundColor: 'rgba(0, 204, 102, 1)',
-          pointBorderColor: '#fff',
-          pointBorderWidth: 2,
-          pointHoverRadius: 6
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: {
-            display: false
-          },
-          tooltip: {
-            callbacks: {
-              title: function(context) {
-                return 'Día ' + context[0].label;
-              },
-              label: function(context) {
-                return 'RD$ ' + context.parsed.y.toLocaleString('es-DO', {
-                  minimumFractionDigits: 2,
-                  maximumFractionDigits: 2
-                });
-              }
-            }
-          }
-        },
-        scales: {
-          x: {
-            grid: {
-              color: 'rgba(0, 0, 0, 0.05)'
-            },
-            ticks: {
-              maxTicksLimit: 15,
-              callback: function(value, index) {
-                // Mostrar solo algunos días para no saturar
-                const dia = dias[index];
-                if (dia === 1 || dia === 5 || dia === 10 || dia === 15 || dia === 20 || dia === 25 || dia === diasDelMes) {
-                  return dia;
-                }
-                return '';
-              }
-            }
-          },
-          y: {
-            beginAtZero: true,
-            grid: {
-              color: 'rgba(0, 0, 0, 0.05)'
-            },
-            ticks: {
-              callback: function(value) {
-                return 'RD$ ' + value.toLocaleString('es-DO');
-              }
-            }
-          }
-        }
-      }
-    });
-  })
-  .catch(err => {
-    console.error('Error al cargar ventas diarias:', err);
-  });
-}
-
-// ===== CERRAR SESIÓN =====
-function cerrarSesion() {
-  fetch(`${API}/api/auth/logout`, {
-    method: 'POST',
-    headers: { Authorization: `Bearer ${TOKEN}` }
-  })
-  .finally(() => {
-    // Limpiar todo el almacenamiento
-    localStorage.clear();
-    sessionStorage.clear();
-    
-    // Redirigir y reemplazar el historial
-    window.location.replace('login.html');
-    
-    // Prevenir navegación hacia atrás
-    window.history.pushState(null, '', window.location.href);
-  });
-}
-
-// ===== CERRAR PANELES AL HACER CLICK FUERA =====
-document.addEventListener('click', (e) => {
-  const usuarioPanel = document.getElementById('usuarioPanel');
-  const usuarioBtn = document.querySelector('.header-right');
-  
-  if (!usuarioBtn.contains(e.target) && !usuarioPanel.contains(e.target)) {
-    usuarioPanel.style.display = 'none';
+document.addEventListener('click',e=>{
+  if(!e.target.closest('.user-chip')&&!e.target.closest('#userMenu')){
+    const m=document.getElementById('userMenu');
+    if(m)m.style.display='none';
   }
 });
 
-// ===== INICIALIZACIÓN =====
-// Variable global para recordar el tab actual
-let tabActual = 'acciones';
+/* ── Cerrar sesión ── */
+function cerrarSesion(){
+  fetch(`${API}/api/auth/logout`,{method:'POST',headers:{Authorization:`Bearer ${TOKEN}`}})
+    .finally(()=>{localStorage.clear();sessionStorage.clear();window.location.replace('login.html');});
+}
 
-// Inicializar la aplicación
+/* ── Helpers ── */
+function fmtRD(n){return'RD$ '+parseFloat(n||0).toLocaleString('es-DO',{minimumFractionDigits:2,maximumFractionDigits:2});}
+
+/* ── KPIs ── */
+function cargarKPIs(){
+  fetch(`${API}/api/sales/kpi`,{headers:{Authorization:`Bearer ${TOKEN}`}})
+    .then(r=>r.json()).then(d=>{
+      const v=parseFloat(d.total||0),t=parseInt(d.transacciones||0);
+      document.getElementById('kpiHoy').textContent=fmtRD(v);
+      document.getElementById('kpiVentasSide').textContent=fmtRD(v);
+      document.getElementById('kpiTransSide').textContent=t;
+      document.getElementById('kpiTicketSide').textContent=fmtRD(t>0?v/t:0);
+    }).catch(()=>{});
+
+  fetch(`${API}/api/inventory/all`,{headers:{Authorization:`Bearer ${TOKEN}`}})
+    .then(r=>r.json()).then(ps=>{
+      document.getElementById('kpiStock').textContent=ps.filter(p=>p.cantidad>0).length;
+      document.getElementById('kpiAgotados').textContent=ps.filter(p=>p.cantidad<=0).length;
+    }).catch(()=>{});
+
+  fetch(`${API}/api/sales/daily-month`,{headers:{Authorization:`Bearer ${TOKEN}`}})
+    .then(r=>r.json()).then(d=>{
+      document.getElementById('kpiMes').textContent=fmtRD(d.reduce((s,x)=>s+parseFloat(x.total),0));
+    }).catch(()=>{});
+}
+
+/* ── Notificaciones ── */
+function cambiarTab(tab,btn){
+  tabActual=tab;
+  document.querySelectorAll('.noti-tab').forEach(t=>t.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('btnLimpiarTxt').textContent=tab==='acciones'?'Limpiar acciones':'Limpiar alertas';
+  cargarNotis(tab);
+}
+
+function cargarNotis(tipo='acciones'){
+  const ep=tipo==='acciones'?`${API}/api/notifications/acciones`:`${API}/api/notifications/alertas`;
+  fetch(ep).then(r=>r.json()).then(data=>{
+    const el=document.getElementById('notiContent');
+    if(!data.length){
+      el.innerHTML=`<div class="noti-empty"><i class="fas fa-bell"></i><p style="font-size:.85em;">Sin ${tipo==='acciones'?'acciones':'alertas'}</p></div>`;
+      return;
+    }
+    const fmt=s=>{const d=new Date(s),p=n=>n<10?'0'+n:n;return`${p(d.getDate())}/${p(d.getMonth()+1)} ${p(d.getHours())}:${p(d.getMinutes())}`;};
+    el.innerHTML=data.map(n=>`<div class="noti-item"><div class="noti-msg">${n.mensaje}</div><div class="noti-date">${fmt(n.fecha)}</div></div>`).join('');
+  }).catch(()=>{});
+}
+
+function limpiarNotificaciones(){
+  if(tabActual==='alertas'){alert('Las alertas se generan automáticamente.');return;}
+  if(!confirm('¿Limpiar todas las acciones?'))return;
+  fetch(`${API}/api/notifications/clear`,{method:'POST',headers:{Authorization:`Bearer ${TOKEN}`}})
+    .then(r=>r.json()).then(d=>{if(d.ok)cargarNotis(tabActual);});
+}
+
+/* ── Gráficos ── */
+function chartColors(){
+  const dark=document.documentElement.getAttribute('data-theme')==='dark';
+  return{
+    grid:dark?'rgba(255,255,255,0.05)':'rgba(0,0,0,0.05)',
+    tick:dark?'#8b949e':'#4b5563',
+    green:'rgba(0,204,102,0.8)',greenB:'#00cc66',
+    fill:dark?'rgba(0,204,102,0.08)':'rgba(0,204,102,0.06)'
+  };
+}
+
+function cargarGraficoProductos(){
+  fetch(`${API}/api/sales/top-selling`,{headers:{Authorization:`Bearer ${TOKEN}`}})
+    .then(r=>r.json()).then(data=>{
+      const ctx=document.getElementById('chartProductos').getContext('2d');
+      if(chartP)chartP.destroy();
+      const c=chartColors();
+      chartP=new Chart(ctx,{type:'bar',data:{labels:data.map(p=>p.nombre),datasets:[{label:'Vendidos',data:data.map(p=>p.cantidad),backgroundColor:c.green,borderColor:c.greenB,borderWidth:2,borderRadius:6}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{beginAtZero:true,grid:{color:c.grid},ticks:{color:c.tick,precision:0}},y:{grid:{display:false},ticks:{color:c.tick}}}}});
+    }).catch(()=>{});
+}
+
+function cargarGraficoVentas(){
+  fetch(`${API}/api/sales/daily-month`,{headers:{Authorization:`Bearer ${TOKEN}`}})
+    .then(r=>r.json()).then(data=>{
+      const ctx=document.getElementById('chartVentas').getContext('2d');
+      if(chartV)chartV.destroy();
+      const hoy=new Date(),dias=new Date(hoy.getFullYear(),hoy.getMonth()+1,0).getDate();
+      const map={};data.forEach(d=>map[d.dia]=parseFloat(d.total));
+      const labels=[],vals=[];
+      for(let i=1;i<=dias;i++){labels.push(i);vals.push(map[i]||0);}
+      const c=chartColors();
+      chartV=new Chart(ctx,{type:'line',data:{labels,datasets:[{label:'RD$',data:vals,backgroundColor:c.fill,borderColor:c.greenB,borderWidth:2.5,fill:true,tension:.4,pointRadius:3,pointBackgroundColor:c.greenB,pointBorderColor:'var(--bg)',pointBorderWidth:2,pointHoverRadius:6}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{title:ctx=>`Día ${ctx[0].label}`,label:ctx=>'RD$ '+ctx.parsed.y.toLocaleString('es-DO',{minimumFractionDigits:2})}}},scales:{x:{grid:{color:c.grid},ticks:{color:c.tick,maxTicksLimit:10}},y:{beginAtZero:true,grid:{color:c.grid},ticks:{color:c.tick,callback:v=>'$'+v.toLocaleString('es-DO')}}}}});
+    }).catch(()=>{});
+}
+
+window.addEventListener('themechange',()=>{
+  cargarGraficoProductos();cargarGraficoVentas();
+});
+
+/* ── Iniciar ── */
+renderTiles();
 cargarKPIs();
-cargarNotificaciones(tabActual);
+cargarNotis();
 cargarGraficoProductos();
-cargarGraficoVentasDiarias();
-
-// Actualizar cada 30 segundos
-setInterval(() => {
-  cargarNotificaciones(tabActual);
-  cargarKPIs();
-  cargarGraficoProductos();
-  cargarGraficoVentasDiarias();
-}, 30000);
-
+cargarGraficoVentas();
+setInterval(()=>{cargarKPIs();cargarNotis(tabActual);},30000);
 </script>
-
 </body>
 </html>

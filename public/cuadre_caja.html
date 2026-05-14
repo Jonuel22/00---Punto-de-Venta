@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>JCT POS — Cuadre de Caja</title>
+<script src="theme-init.js"></script>
+<link rel="stylesheet" href="theme.css">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+<style>
+  body::before {
+    content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+    background:radial-gradient(ellipse 700px 500px at 15% 40%, rgba(0,204,102,0.06) 0%, transparent 70%),
+               radial-gradient(ellipse 500px 400px at 85% 70%, rgba(79,142,247,0.04) 0%, transparent 70%);
+  }
+  .page-wrapper{position:relative;z-index:1;}
+
+  .estado-badge {
+    padding:5px 14px;border-radius:20px;font-size:.78em;font-weight:700;
+    text-transform:uppercase;letter-spacing:.5px;
+  }
+  .estado-abierto { background:rgba(0,204,102,.12);color:var(--success);border:1px solid rgba(0,204,102,.2); }
+  .estado-cerrado { background:var(--bg3);color:var(--text-muted);border:1px solid var(--border); }
+
+  .diferencia-pos { color:var(--success);font-weight:700; }
+  .diferencia-neg { color:var(--danger);font-weight:700; }
+  .diferencia-neu { color:var(--text-muted);font-weight:700; }
+
+  .cuadre-action-row { display:flex;align-items:center;gap:8px;flex-wrap:wrap; }
+
+  .filter-bar {
+    display:flex;align-items:center;gap:12px;flex-wrap:wrap;
+    background:var(--card-bg);border:1px solid var(--card-border);
+    border-radius:14px;padding:16px 20px;margin-bottom:20px;
+    box-shadow:var(--shadow-sm);
+  }
+  .filter-bar label { font-size:.78em;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.4px;white-space:nowrap; }
+</style>
+</head>
+<body>
+<div id="header-container"></div>
+<div class="page-wrapper">
+<div class="container">
+
+  <div class="page-header">
+    <div>
+      <h1 class="page-title"><i class="fas fa-cash-register"></i> Cuadre de Caja</h1>
+      <p class="page-subtitle">Apertura, cierre y control de cajas por cajero</p>
+    </div>
+    <button class="btn btn-primary" onclick="abrirModalAbrirCaja()">
+      <i class="fas fa-lock-open"></i> Abrir Caja
+    </button>
+  </div>
+
+  <!-- Filtros -->
+  <div class="filter-bar">
+    <label><i class="fas fa-calendar" style="color:var(--primary);margin-right:5px;"></i>Desde</label>
+    <input type="date" class="form-control" id="filtroDesde" style="width:160px;" onchange="cargarCuadres()">
+    <label>Hasta</label>
+    <input type="date" class="form-control" id="filtroHasta" style="width:160px;" onchange="cargarCuadres()">
+    <label>Estado</label>
+    <select class="form-control" id="filtroEstado" style="width:140px;" onchange="cargarCuadres()">
+      <option value="">Todos</option>
+      <option value="abierto">Abierto</option>
+      <option value="cerrado">Cerrado</option>
+    </select>
+    <div class="search-wrapper" style="flex:1;min-width:200px;">
+      <i class="fas fa-search search-icon"></i>
+      <input type="text" class="search-input" id="searchCuadre" placeholder="Buscar cajero..." oninput="cargarCuadres()">
+    </div>
+    <button class="btn btn-secondary" onclick="limpiarFiltros()"><i class="fas fa-undo"></i> Limpiar</button>
+  </div>
+
+  <!-- KPIs resumen -->
+  <div class="stats-grid stagger mb-20">
+    <div class="stat-card">
+      <div class="stat-icon"><i class="fas fa-door-open"></i></div>
+      <div><div class="stat-label">Cajas Abiertas</div><div class="stat-value text-success" id="kpiAbiertas">0</div></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon info"><i class="fas fa-door-closed"></i></div>
+      <div><div class="stat-label">Cuadres Hoy</div><div class="stat-value" id="kpiCuadresHoy">0</div></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon secondary"><i class="fas fa-chart-line"></i></div>
+      <div><div class="stat-label">Total Ventas Hoy</div><div class="stat-value text-primary" id="kpiVentasHoy">RD$ 0</div></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon danger"><i class="fas fa-balance-scale"></i></div>
+      <div><div class="stat-label">Diferencia Total</div><div class="stat-value" id="kpiDiferencia">RD$ 0</div></div>
+    </div>
+  </div>
+
+  <!-- Tabla -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title"><i class="fas fa-table"></i> Historial de Cuadres</div>
+      <span class="badge badge-info" id="totalCuadres">0 registros</span>
+    </div>
+    <div class="table-wrapper">
+      <table>
+        <thead><tr>
+          <th>#</th><th>Cajero</th><th>Apertura</th><th>Cierre</th>
+          <th>Monto Apertura</th><th>Total Ventas</th><th>Monto Real</th>
+          <th>Diferencia</th><th>Estado</th><th>Acciones</th>
+        </tr></thead>
+        <tbody id="tablaCuadres">
+          <tr><td colspan="10" style="text-align:center;padding:40px;color:var(--text-muted);">
+            <i class="fas fa-spinner fa-spin"></i> Cargando...
+          </td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- Modal Abrir Caja -->
+<div class="modal" id="modalAbrir">
+  <div class="modal-content modal-content-sm">
+    <div class="modal-header">
+      <div class="modal-title"><i class="fas fa-lock-open" style="color:var(--success);"></i> Abrir Caja</div>
+      <button class="btn-close" onclick="cerrarModal('modalAbrir')">&times;</button>
+    </div>
+    <div class="form-group">
+      <label>Cajero</label>
+      <select class="form-control" id="abrirCajero"></select>
+    </div>
+    <div class="form-group">
+      <label>Monto de Apertura (RD$)</label>
+      <input type="number" class="form-control" id="abrirMonto" placeholder="0.00" step="0.01" min="0">
+    </div>
+    <div style="display:flex;gap:10px;margin-top:8px;">
+      <button class="btn btn-ghost" style="flex:1;" onclick="cerrarModal('modalAbrir')"><i class="fas fa-times"></i> Cancelar</button>
+      <button class="btn btn-primary" style="flex:1;" onclick="abrirCaja()"><i class="fas fa-lock-open"></i> Abrir</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Cerrar Caja -->
+<div class="modal" id="modalCerrar">
+  <div class="modal-content modal-content-sm">
+    <div class="modal-header">
+      <div class="modal-title"><i class="fas fa-lock" style="color:var(--danger);"></i> Cerrar Caja</div>
+      <button class="btn-close" onclick="cerrarModal('modalCerrar')">&times;</button>
+    </div>
+    <input type="hidden" id="cerrarCuadreId">
+    <div id="resumenCierre" style="background:var(--bg3);border-radius:12px;padding:16px;margin-bottom:16px;font-size:.88em;"></div>
+    <div class="form-group">
+      <label>Monto Real en Caja (RD$)</label>
+      <input type="number" class="form-control" id="cerrarMontoReal" placeholder="0.00" step="0.01" min="0" oninput="calcularDiferencia()">
+    </div>
+    <div id="diferenciaPreview" style="display:none;padding:10px 14px;border-radius:10px;margin-bottom:14px;font-size:.88em;font-weight:600;"></div>
+    <div class="form-group">
+      <label>Observaciones</label>
+      <textarea class="form-control" id="cerrarObs" placeholder="Notas del cierre..." style="height:70px;"></textarea>
+    </div>
+    <div style="display:flex;gap:10px;">
+      <button class="btn btn-ghost" style="flex:1;" onclick="cerrarModal('modalCerrar')"><i class="fas fa-times"></i> Cancelar</button>
+      <button class="btn btn-danger" style="flex:1;" onclick="cerrarCaja()"><i class="fas fa-lock"></i> Cerrar Caja</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Detalle -->
+<div class="modal" id="modalDetalle">
+  <div class="modal-content">
+    <div class="modal-header">
+      <div class="modal-title"><i class="fas fa-info-circle"></i> Detalle del Cuadre</div>
+      <button class="btn-close" onclick="cerrarModal('modalDetalle')">&times;</button>
+    </div>
+    <div id="detalleContent"></div>
+  </div>
+</div>
+
+<div class="toast toast-success" id="toastOk"><i class="fas fa-check-circle"></i><span id="toastOkMsg"></span></div>
+<div class="toast toast-error"   id="toastErr"><i class="fas fa-exclamation-circle"></i><span id="toastErrMsg"></span></div>
+
+<script>
+const API   = 'http://localhost:5000';
+const TOKEN = localStorage.getItem('token');
+let cuadresData = [];
+
+fetch('header_menu_principal.html').then(r=>r.text()).then(h=>{
+  document.getElementById('header-container').innerHTML=h;
+  document.querySelectorAll('#header-container script').forEach(s=>{const ns=document.createElement('script');ns.textContent=s.textContent;document.body.appendChild(ns);});
+});
+
+function ok(m){const t=document.getElementById('toastOk');document.getElementById('toastOkMsg').textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3000);}
+function err(m){const t=document.getElementById('toastErr');document.getElementById('toastErrMsg').textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3500);}
+function fmtRD(n){return'RD$ '+parseFloat(n||0).toLocaleString('es-DO',{minimumFractionDigits:2,maximumFractionDigits:2});}
+function fmtFecha(s){const d=new Date(s),p=n=>n<10?'0'+n:n;return`${p(d.getDate())}/${p(d.getMonth()+1)}/${d.getFullYear()} ${p(d.getHours())}:${p(d.getMinutes())}`;}
+function cerrarModal(id){document.getElementById(id).classList.remove('active');}
+
+// Inicializar fechas
+(function(){
+  const hoy=new Date().toISOString().split('T')[0];
+  const hace30=new Date(Date.now()-30*24*60*60*1000).toISOString().split('T')[0];
+  document.getElementById('filtroDesde').value=hace30;
+  document.getElementById('filtroHasta').value=hoy;
+})();
+
+function limpiarFiltros(){
+  const hoy=new Date().toISOString().split('T')[0];
+  const hace30=new Date(Date.now()-30*24*60*60*1000).toISOString().split('T')[0];
+  document.getElementById('filtroDesde').value=hace30;
+  document.getElementById('filtroHasta').value=hoy;
+  document.getElementById('filtroEstado').value='';
+  document.getElementById('searchCuadre').value='';
+  cargarCuadres();
+}
+
+async function cargarCuadres(){
+  const desde  = document.getElementById('filtroDesde').value;
+  const hasta  = document.getElementById('filtroHasta').value;
+  const estado = document.getElementById('filtroEstado').value;
+  const q      = document.getElementById('searchCuadre').value.toLowerCase();
+
+  let url = `${API}/api/cuadre-caja/historial?`;
+  if(desde) url+=`desde=${desde}&`;
+  if(hasta) url+=`hasta=${hasta}&`;
+  if(estado)url+=`estado=${estado}`;
+
+  const data = await fetch(url,{headers:{Authorization:`Bearer ${TOKEN}`}}).then(r=>r.json()).catch(()=>[]);
+  cuadresData = Array.isArray(data)?data:[];
+
+  let filtrado = cuadresData;
+  if(q) filtrado=filtrado.filter(c=>c.cajero_nombre?.toLowerCase().includes(q));
+
+  renderTabla(filtrado);
+  actualizarKPIs(filtrado);
+}
+
+function renderTabla(lista){
+  const tbody=document.getElementById('tablaCuadres');
+  document.getElementById('totalCuadres').textContent=`${lista.length} registros`;
+  if(!lista.length){
+    tbody.innerHTML=`<tr><td colspan="10"><div class="empty-state"><i class="fas fa-inbox"></i><p>Sin cuadres en el período</p></div></td></tr>`;
+    return;
+  }
+  tbody.innerHTML=lista.map(c=>{
+    const dif=parseFloat(c.diferencia||0);
+    const difClass=dif>0?'diferencia-pos':dif<0?'diferencia-neg':'diferencia-neu';
+    const difIcon =dif>0?'fa-arrow-up':dif<0?'fa-arrow-down':'fa-minus';
+    return`<tr>
+      <td style="color:var(--text-muted);font-size:.8em;">#${c.id}</td>
+      <td><strong>${c.cajero_nombre||'N/A'}</strong><br><small style="color:var(--text-muted);">${c.cajero_usuario||''}</small></td>
+      <td style="font-size:.82em;">${fmtFecha(c.fecha_apertura)}</td>
+      <td style="font-size:.82em;">${c.fecha_cierre?fmtFecha(c.fecha_cierre):'<span style="color:var(--success);">En curso</span>'}</td>
+      <td>${fmtRD(c.monto_apertura)}</td>
+      <td><strong>${fmtRD(c.total_ventas)}</strong></td>
+      <td>${c.monto_real?fmtRD(c.monto_real):'—'}</td>
+      <td class="${difClass}"><i class="fas ${difIcon}" style="font-size:.75em;"></i> ${fmtRD(Math.abs(dif))}</td>
+      <td><span class="estado-badge estado-${c.estado}">${c.estado}</span></td>
+      <td>
+        <button class="btn btn-sm btn-secondary" onclick="verDetalle(${c.id})" title="Ver detalle"><i class="fas fa-eye"></i></button>
+        ${c.estado==='abierto'?`<button class="btn btn-sm btn-danger" onclick="abrirModalCerrar(${c.id})" title="Cerrar caja"><i class="fas fa-lock"></i></button>`:''}
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function actualizarKPIs(lista){
+  const abiertas=lista.filter(c=>c.estado==='abierto').length;
+  const hoy=new Date().toISOString().split('T')[0];
+  const hoyList=lista.filter(c=>c.fecha_apertura?.startsWith(hoy));
+  const totalVentas=hoyList.reduce((s,c)=>s+parseFloat(c.total_ventas||0),0);
+  const totalDif=lista.reduce((s,c)=>s+parseFloat(c.diferencia||0),0);
+  document.getElementById('kpiAbiertas').textContent=abiertas;
+  document.getElementById('kpiCuadresHoy').textContent=hoyList.length;
+  document.getElementById('kpiVentasHoy').textContent=fmtRD(totalVentas);
+  const dEl=document.getElementById('kpiDiferencia');
+  dEl.textContent=fmtRD(Math.abs(totalDif));
+  dEl.className='stat-value '+(totalDif<0?'text-danger':totalDif>0?'text-success':'');
+}
+
+async function abrirModalAbrirCaja(){
+  const cajeros=await fetch(`${API}/api/cajeros/activos`,{headers:{Authorization:`Bearer ${TOKEN}`}}).then(r=>r.json()).catch(()=>[]);
+  const sel=document.getElementById('abrirCajero');
+  sel.innerHTML=cajeros.map(c=>`<option value="${c.id}">${c.nombre}</option>`).join('');
+  document.getElementById('abrirMonto').value='';
+  document.getElementById('modalAbrir').classList.add('active');
+}
+
+async function abrirCaja(){
+  const cajero_id=parseInt(document.getElementById('abrirCajero').value);
+  const monto=parseFloat(document.getElementById('abrirMonto').value)||0;
+  const res=await fetch(`${API}/api/cuadre-caja/abrir`,{method:'POST',headers:{'Content-Type':'application/json',Authorization:`Bearer ${TOKEN}`},body:JSON.stringify({cajero_id,monto_apertura:monto})}).then(r=>r.json());
+  if(res.cuadreId){ok('Caja abierta exitosamente');cerrarModal('modalAbrir');cargarCuadres();}
+  else err(res.message||'Error al abrir caja');
+}
+
+function abrirModalCerrar(id){
+  const c=cuadresData.find(x=>x.id===id);
+  if(!c)return;
+  document.getElementById('cerrarCuadreId').value=id;
+  document.getElementById('cerrarMontoReal').value='';
+  document.getElementById('cerrarObs').value='';
+  document.getElementById('diferenciaPreview').style.display='none';
+  document.getElementById('resumenCierre').innerHTML=`
+    <div style="display:flex;justify-content:space-between;margin-bottom:6px;"><span>Cajero:</span><strong>${c.cajero_nombre}</strong></div>
+    <div style="display:flex;justify-content:space-between;margin-bottom:6px;"><span>Apertura:</span><strong>${fmtFecha(c.fecha_apertura)}</strong></div>
+    <div style="display:flex;justify-content:space-between;margin-bottom:6px;"><span>Total Ventas:</span><strong class="text-primary">${fmtRD(c.total_ventas)}</strong></div>
+    <div style="display:flex;justify-content:space-between;"><span>Monto Apertura:</span><strong>${fmtRD(c.monto_apertura)}</strong></div>`;
+  document.getElementById('modalCerrar').classList.add('active');
+}
+
+function calcularDiferencia(){
+  const id=parseInt(document.getElementById('cerrarCuadreId').value);
+  const c=cuadresData.find(x=>x.id===id);
+  const real=parseFloat(document.getElementById('cerrarMontoReal').value)||0;
+  const esperado=parseFloat(c?.monto_apertura||0)+parseFloat(c?.total_ventas||0);
+  const dif=real-esperado;
+  const el=document.getElementById('diferenciaPreview');
+  el.style.display='block';
+  el.style.background=dif>=0?'rgba(0,204,102,.08)':'rgba(244,67,54,.08)';
+  el.style.border=dif>=0?'1px solid rgba(0,204,102,.2)':'1px solid rgba(244,67,54,.2)';
+  el.style.color=dif>=0?'var(--success)':'var(--danger)';
+  el.innerHTML=`<i class="fas fa-balance-scale"></i> Esperado: ${fmtRD(esperado)} · Real: ${fmtRD(real)} · Diferencia: <strong>${dif>=0?'+':''}${fmtRD(dif)}</strong>`;
+}
+
+async function cerrarCaja(){
+  const id=parseInt(document.getElementById('cerrarCuadreId').value);
+  const monto_real=parseFloat(document.getElementById('cerrarMontoReal').value)||0;
+  const obs=document.getElementById('cerrarObs').value;
+  const res=await fetch(`${API}/api/cuadre-caja/cerrar/${id}`,{method:'POST',headers:{'Content-Type':'application/json',Authorization:`Bearer ${TOKEN}`},body:JSON.stringify({monto_real,observaciones:obs})}).then(r=>r.json());
+  if(res.message?.includes('cerrada')||res.cuadreId||res.ok){ok('Caja cerrada');cerrarModal('modalCerrar');cargarCuadres();}
+  else err(res.message||'Error al cerrar caja');
+}
+
+async function verDetalle(id){
+  const res=await fetch(`${API}/api/cuadre-caja/detalle/${id}`,{headers:{Authorization:`Bearer ${TOKEN}`}}).then(r=>r.json()).catch(()=>null);
+  if(!res){err('Error al cargar detalle');return;}
+  const c=res.cuadre||res;
+  const ventas=res.ventas||[];
+  const dif=parseFloat(c.diferencia||0);
+  document.getElementById('detalleContent').innerHTML=`
+    <div class="form-row mb-16">
+      <div class="info-cliente-item"><strong style="font-size:.72em;text-transform:uppercase;color:var(--text-muted);">Cajero</strong><span>${c.cajero_nombre}</span></div>
+      <div class="info-cliente-item"><strong style="font-size:.72em;text-transform:uppercase;color:var(--text-muted);">Estado</strong><span class="estado-badge estado-${c.estado}">${c.estado}</span></div>
+      <div class="info-cliente-item"><strong style="font-size:.72em;text-transform:uppercase;color:var(--text-muted);">Apertura</strong><span>${fmtFecha(c.fecha_apertura)}</span></div>
+      <div class="info-cliente-item"><strong style="font-size:.72em;text-transform:uppercase;color:var(--text-muted);">Cierre</strong><span>${c.fecha_cierre?fmtFecha(c.fecha_cierre):'En curso'}</span></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px;margin-bottom:16px;text-align:center;">
+      <div class="stat-card" style="flex-direction:column;gap:4px;padding:14px;">
+        <div class="stat-label">Apertura</div><div style="font-size:1.1em;font-weight:800;">${fmtRD(c.monto_apertura)}</div>
+      </div>
+      <div class="stat-card" style="flex-direction:column;gap:4px;padding:14px;">
+        <div class="stat-label">Ventas</div><div class="text-primary" style="font-size:1.1em;font-weight:800;">${fmtRD(c.total_ventas)}</div>
+      </div>
+      <div class="stat-card" style="flex-direction:column;gap:4px;padding:14px;">
+        <div class="stat-label">Real</div><div style="font-size:1.1em;font-weight:800;">${c.monto_real?fmtRD(c.monto_real):'—'}</div>
+      </div>
+      <div class="stat-card" style="flex-direction:column;gap:4px;padding:14px;">
+        <div class="stat-label">Diferencia</div>
+        <div class="${dif>0?'diferencia-pos':dif<0?'diferencia-neg':'diferencia-neu'}" style="font-size:1.1em;">${dif>=0?'+':''}${fmtRD(dif)}</div>
+      </div>
+    </div>
+    ${ventas.length?`<div class="card-title mb-8"><i class="fas fa-shopping-cart"></i> Ventas del período (${ventas.length})</div>
+    <div class="table-wrapper"><table>
+      <thead><tr><th>#</th><th>Fecha</th><th>Cliente</th><th>Forma Pago</th><th>Total</th></tr></thead>
+      <tbody>${ventas.map(v=>`<tr><td>#${v.id}</td><td style="font-size:.8em;">${fmtFecha(v.fecha)}</td><td>${v.cliente_nombre||'N/A'}</td>
+        <td><span class="badge badge-info">${v.forma_pago||'efectivo'}</span></td><td><strong>${fmtRD(v.total)}</strong></td></tr>`).join('')}
+      </tbody></table></div>`:'<p style="text-align:center;padding:20px;color:var(--text-muted);">Sin ventas en este período</p>'}
+    ${c.observaciones?`<div class="info-cliente mt-16"><strong style="font-size:.78em;text-transform:uppercase;color:var(--text-muted);">Observaciones</strong><p style="margin-top:6px;">${c.observaciones}</p></div>`:''}`;
+  document.getElementById('modalDetalle').classList.add('active');
+}
+
+cargarCuadres();
+</script>
+</body>
+</html>

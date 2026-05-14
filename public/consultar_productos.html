@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+  <link rel="stylesheet" href="theme.css">
+  <script src="theme-init.js"></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Consultar Productos</title>
 
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
 
   <style>
@@ -28,7 +30,7 @@ body {
 
 .main-section h1 {
   margin-bottom: 24px;
-  color: #222;
+  color: var(--text);
   font-weight: 700;
   letter-spacing: 0.5px;
 }
@@ -85,7 +87,7 @@ body {
   position: absolute;
   top: 54px;
   width: 100%;
-  background: white;
+  background: var(--card-bg);
   border-radius: 12px;
   box-shadow: 0 6px 18px rgba(0,0,0,0.15);
   max-height: 220px;
@@ -165,7 +167,7 @@ td {
           <i class="fas fa-boxes" style="margin-right: 8px;"></i>
           Total de Productos: <span id="totalProductos" style="color: #00cc66; font-size: 1.3em;">0</span>
         </div>
-        <div style="font-size: 0.9em; color: #666;">
+        <div style="font-size: 0.9em; color: var(--text-muted);">
           Mostrando <span id="productosVisibles" style="font-weight: 600;">0</span> productos
         </div>
       </div>
