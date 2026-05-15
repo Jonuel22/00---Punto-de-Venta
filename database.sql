@@ -34,7 +34,7 @@ CREATE TABLE `cajeros` (
   PRIMARY KEY (`id`),
   KEY `idx_cajeros_usuario` (`usuario_id`),
   CONSTRAINT `fk_cajeros_usuario` FOREIGN KEY (`usuario_id`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -43,7 +43,7 @@ CREATE TABLE `cajeros` (
 
 LOCK TABLES `cajeros` WRITE;
 /*!40000 ALTER TABLE `cajeros` DISABLE KEYS */;
-INSERT INTO `cajeros` VALUES (1,'Administrador','admin@puntoventa.com','',1,'2026-01-28 18:48:53','2026-01-30 18:49:22',1),(2,'Juan Pérez','jperez@puntoventa.com','',1,'2026-01-28 18:48:53','2026-01-29 20:53:03',4),(3,'fede','','',1,'2026-01-29 12:57:09','2026-01-29 12:57:09',3);
+INSERT INTO `cajeros` VALUES (1,'Administrador','admin@puntoventa.com','',1,'2026-01-28 18:48:53','2026-01-30 18:49:22',1),(2,'Juan Pérez','jperez@puntoventa.com','',1,'2026-01-28 18:48:53','2026-01-29 20:53:03',4),(3,'fede','','',1,'2026-01-29 12:57:09','2026-01-29 12:57:09',3),(4,'Jonuel Collado','jonuelcollado@gmail.com','8296609165',1,'2026-05-13 19:56:09','2026-05-13 19:56:09',5),(5,'JCOLLADO','JCOLLADO@ITEPROF.COM','',1,'2026-05-15 13:52:23','2026-05-15 13:52:23',6);
 /*!40000 ALTER TABLE `cajeros` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -71,7 +71,7 @@ CREATE TABLE `clientes` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `cedula` (`cedula`),
   UNIQUE KEY `rnc` (`rnc`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -80,7 +80,7 @@ CREATE TABLE `clientes` (
 
 LOCK TABLES `clientes` WRITE;
 /*!40000 ALTER TABLE `clientes` DISABLE KEYS */;
-INSERT INTO `clientes` VALUES (1,'Cliente General','000-0000000-0',NULL,'(809) 000-0000',NULL,NULL,0.00,0.00,1,'Cliente predeterminado para ventas sin cliente específico','2026-02-05 13:33:32','2026-02-05 13:33:32');
+INSERT INTO `clientes` VALUES (1,'Cliente General','000-0000000-0',NULL,'(809) 000-0000',NULL,NULL,0.00,0.00,1,'Cliente predeterminado para ventas sin cliente específico','2026-02-05 13:33:32','2026-02-05 13:33:32'),(2,'Jonuel Collado','40237396748',NULL,'8296609165','jcollado@iteprof.com','8342 NW 66TH ST  GIS-7007',30000.00,7986.00,1,NULL,'2026-05-13 18:32:23','2026-05-14 18:40:28');
 /*!40000 ALTER TABLE `clientes` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -109,7 +109,7 @@ CREATE TABLE `cuadre_caja` (
   KEY `idx_cuadre_cajero` (`cajero_id`),
   KEY `idx_cuadre_fecha` (`fecha_apertura`,`fecha_cierre`),
   CONSTRAINT `cuadre_caja_ibfk_1` FOREIGN KEY (`cajero_id`) REFERENCES `cajeros` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -118,6 +118,7 @@ CREATE TABLE `cuadre_caja` (
 
 LOCK TABLES `cuadre_caja` WRITE;
 /*!40000 ALTER TABLE `cuadre_caja` DISABLE KEYS */;
+INSERT INTO `cuadre_caja` VALUES (1,1,'2026-05-15 11:16:25',NULL,500.00,0.00,0.00,0.00,0.00,0,'abierto',NULL,'2026-05-15 15:16:25');
 /*!40000 ALTER TABLE `cuadre_caja` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -149,7 +150,7 @@ CREATE TABLE `cuentas_por_cobrar` (
   CONSTRAINT `fk_cxc_cajero` FOREIGN KEY (`cajero_id`) REFERENCES `cajeros` (`id`) ON DELETE SET NULL,
   CONSTRAINT `fk_cxc_cliente` FOREIGN KEY (`cliente_id`) REFERENCES `clientes` (`id`) ON DELETE CASCADE,
   CONSTRAINT `fk_cxc_venta` FOREIGN KEY (`venta_id`) REFERENCES `ventas` (`id`) ON DELETE SET NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -158,6 +159,7 @@ CREATE TABLE `cuentas_por_cobrar` (
 
 LOCK TABLES `cuentas_por_cobrar` WRITE;
 /*!40000 ALTER TABLE `cuentas_por_cobrar` DISABLE KEYS */;
+INSERT INTO `cuentas_por_cobrar` VALUES (1,2,52,'venta',3186.00,3186.00,'Venta #52 a crédito',NULL,NULL,1,'2026-05-13 18:44:05'),(2,2,NULL,'pago',-100.00,3086.00,'Pago recibido','efectivo',NULL,1,'2026-05-13 18:46:59'),(3,2,NULL,'pago',-1000.00,2086.00,'Pago recibido','efectivo',NULL,1,'2026-05-14 18:39:48'),(4,2,55,'venta',5900.00,7986.00,'Venta #55 a crédito',NULL,NULL,1,'2026-05-14 18:40:28');
 /*!40000 ALTER TABLE `cuentas_por_cobrar` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -179,7 +181,7 @@ CREATE TABLE `detalle_ventas` (
   KEY `producto_id` (`producto_id`),
   CONSTRAINT `detalle_ventas_ibfk_1` FOREIGN KEY (`venta_id`) REFERENCES `ventas` (`id`),
   CONSTRAINT `detalle_ventas_ibfk_2` FOREIGN KEY (`producto_id`) REFERENCES `inventario` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=60 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=68 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -188,7 +190,7 @@ CREATE TABLE `detalle_ventas` (
 
 LOCK TABLES `detalle_ventas` WRITE;
 /*!40000 ALTER TABLE `detalle_ventas` DISABLE KEYS */;
-INSERT INTO `detalle_ventas` VALUES (1,1,1,5,2.75),(2,2,1,15,2.75),(3,3,3,1,250.00),(4,4,3,1,250.00),(5,5,3,1,250.00),(6,6,4,1,120.00),(7,7,4,5,120.00),(8,8,5,1,110.00),(9,9,7,1,320.00),(10,10,6,1,180.00),(11,11,6,1,180.00),(12,12,6,1,180.00),(13,13,9,1,150.00),(14,14,6,1,180.00),(15,15,6,1,180.00),(16,16,8,1,500.00),(17,17,6,1,180.00),(18,17,9,5,150.00),(19,18,8,4,500.00),(20,19,31,5,500.00),(21,20,9,5,150.00),(22,21,5,10,110.00),(23,22,6,2,180.00),(24,23,3,4,250.00),(25,24,4,1,120.00),(26,25,1,1,5.00),(27,26,1,1,5.00),(28,27,7,1,320.00),(29,28,45,8,800.00),(30,28,48,1,100.00),(31,28,50,1,500.00),(32,28,44,1,1500.00),(33,28,42,1,3200.00),(34,28,28,1,200.00),(35,28,8,1,500.00),(36,29,7,1,320.00),(37,30,1,1,5.00),(38,31,1,1,5.00),(39,31,26,1,450.00),(40,32,10,1,200.00),(41,33,8,1,500.00),(42,34,1,1,5.00),(43,35,3,1,250.00),(44,36,31,5,500.00),(45,37,9,1,150.00),(46,38,3,2,250.00),(47,39,1,1,5.00),(48,40,7,1,320.00),(49,41,9,8,150.00),(50,42,10,3,200.00),(51,43,10,1,200.00),(52,44,7,3,320.00),(53,44,22,3,50.00),(54,44,35,5,6500.00),(55,45,1,1,5.00),(56,46,4,5,120.00),(57,47,1,1,5.00),(58,48,1,1,5.00),(59,49,4,1,120.00);
+INSERT INTO `detalle_ventas` VALUES (1,1,1,5,2.75),(2,2,1,15,2.75),(3,3,3,1,250.00),(4,4,3,1,250.00),(5,5,3,1,250.00),(6,6,4,1,120.00),(7,7,4,5,120.00),(8,8,5,1,110.00),(9,9,7,1,320.00),(10,10,6,1,180.00),(11,11,6,1,180.00),(12,12,6,1,180.00),(13,13,9,1,150.00),(14,14,6,1,180.00),(15,15,6,1,180.00),(16,16,8,1,500.00),(17,17,6,1,180.00),(18,17,9,5,150.00),(19,18,8,4,500.00),(20,19,31,5,500.00),(21,20,9,5,150.00),(22,21,5,10,110.00),(23,22,6,2,180.00),(24,23,3,4,250.00),(25,24,4,1,120.00),(26,25,1,1,5.00),(27,26,1,1,5.00),(28,27,7,1,320.00),(29,28,45,8,800.00),(30,28,48,1,100.00),(31,28,50,1,500.00),(32,28,44,1,1500.00),(33,28,42,1,3200.00),(34,28,28,1,200.00),(35,28,8,1,500.00),(36,29,7,1,320.00),(37,30,1,1,5.00),(38,31,1,1,5.00),(39,31,26,1,450.00),(40,32,10,1,200.00),(41,33,8,1,500.00),(42,34,1,1,5.00),(43,35,3,1,250.00),(44,36,31,5,500.00),(45,37,9,1,150.00),(46,38,3,2,250.00),(47,39,1,1,5.00),(48,40,7,1,320.00),(49,41,9,8,150.00),(50,42,10,3,200.00),(51,43,10,1,200.00),(52,44,7,3,320.00),(53,44,22,3,50.00),(54,44,35,5,6500.00),(55,45,1,1,5.00),(56,46,4,5,120.00),(57,47,1,1,5.00),(58,48,1,1,5.00),(59,49,4,1,120.00),(60,50,4,2,120.00),(61,51,5,1,110.00),(62,52,6,15,180.00),(63,53,1,16,5.00),(64,54,5,3,110.00),(65,55,17,10,500.00),(66,56,7,5,320.00),(67,57,16,1,400.00);
 /*!40000 ALTER TABLE `detalle_ventas` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -216,7 +218,7 @@ CREATE TABLE `inventario` (
 
 LOCK TABLES `inventario` WRITE;
 /*!40000 ALTER TABLE `inventario` DISABLE KEYS */;
-INSERT INTO `inventario` VALUES (1,'Sierra Circular 7 1/4\"','Sierra Electrica',16,5.00,''),(3,'Martillo','Martillo de acero con mango de goma',0,250.00,NULL),(4,'Destornillador Phillips','Destornillador de estrella de 6 pulgadas',2,120.00,NULL),(5,'Destornillador Plano','Destornillador plano de 6 pulgadas',4,110.00,NULL),(6,'Alicate de Corte','Alicate de acero inoxidable con mango ergonómico',0,180.00,NULL),(7,'Llave Inglesa','Llave ajustable de 10 pulgadas',5,320.00,NULL),(8,'Llave de Boca Fija','Juego de llaves fijas de diferentes medidas',3,500.00,NULL),(9,'Cinta Métrica','Cinta métrica de 5 metros con bloqueo',0,150.00,NULL),(10,'Flexómetro','Flexómetro de 3 metros con carcasa reforzada',13,200.00,NULL),(11,'Nivel de Burbuja','Nivel de burbuja de 12 pulgadas con triple indicador',10,250.00,NULL),(12,'Sierra Manual','Sierra para madera de 18 pulgadas con mango ergonómico',8,270.00,NULL),(13,'Segueta','Segueta de acero con mango plástico',15,100.00,NULL),(14,'Serrucho','Serrucho con hoja de acero templado',10,350.00,NULL),(15,'Taladro Percutor','Taladro eléctrico de 600W con velocidad variable',5,1800.00,NULL),(16,'Brocas para Madera','Juego de 10 brocas para madera',12,400.00,NULL),(17,'Brocas para Metal','Juego de 10 brocas para metal',10,500.00,NULL),(18,'Brocas para Concreto','Juego de 5 brocas con punta de carburo',8,600.00,NULL),(19,'Lijadora Eléctrica','Lijadora de 300W con velocidad ajustable',4,2200.00,NULL),(20,'Pulidora Angular','Pulidora de 750W con disco de 4.5 pulgadas',6,2800.00,NULL),(21,'Cepillo de Carpintero','Cepillo manual para madera con cuchilla ajustable',10,750.00,NULL),(22,'Cinta Aislante','Cinta aislante de PVC de 10 metros',22,50.00,NULL),(23,'Cinta Doble Cara','Cinta adhesiva doble cara de alta resistencia',20,90.00,NULL),(24,'Pegamento de Contacto','Pegamento de contacto de 100ml',18,120.00,NULL),(26,'Pistola de Silicona','Pistola de silicona de 40W con interruptor',9,450.00,NULL),(27,'Clavos para Madera','Clavos galvanizados de 2 pulgadas (paquete de 500)',30,180.00,NULL),(28,'Tornillos para Madera','Tornillos de 1 pulgada para madera (paquete de 200)',24,200.00,NULL),(29,'Tuercas y Arandelas','Juego de 100 tuercas y arandelas metálicas',20,250.00,NULL),(30,'Bisagras Metálicas','Par de bisagras metálicas de 3 pulgadas',12,300.00,NULL),(31,'Candado de Seguridad','Candado de acero inoxidable con llave',0,500.00,NULL),(32,'Pasador de Seguridad','Pasador de seguridad metálico de 6 pulgadas',15,280.00,NULL),(33,'Cerradura para Puerta','Cerradura de embutir con llave',8,1200.00,NULL),(34,'Manija para Puerta','Manija metálica con acabado cromado',10,850.00,NULL),(35,'Cerradura Digital','Cerradura electrónica con lector de huella',0,6500.00,NULL),(36,'Llaves Allen','Juego de 10 llaves Allen de diferentes tamaños',15,450.00,NULL),(37,'Llaves Torx','Juego de 8 llaves Torx de acero inoxidable',12,500.00,NULL),(38,'Cortafrío','Cortafrío de acero con mango antideslizante',10,300.00,NULL),(39,'Machete','Machete con hoja de acero inoxidable de 24 pulgadas',7,600.00,NULL),(40,'Hacha de Mano','Hacha de 1.5kg con mango de madera',6,850.00,NULL),(41,'Pala','Pala de punta con mango largo de madera',10,950.00,NULL),(42,'Carretilla','Carretilla metálica con rueda reforzada',3,3200.00,NULL),(43,'Escalera de Aluminio','Escalera plegable de 6 escalones',5,4800.00,NULL),(44,'Manguera para Jardín','Manguera reforzada de 15 metros',11,1500.00,NULL),(45,'Aspersor para Jardín','Aspersor giratorio de 3 brazos',0,800.00,NULL),(46,'Llave de Paso','Llave de paso para agua de 1/2 pulgada',15,250.00,NULL),(47,'Válvula de Esfera','Válvula de esfera de bronce de 3/4 pulgada',10,600.00,NULL),(48,'Cinta de Teflón','Cinta selladora de 10 metros',24,100.00,NULL),(49,'Foco LED','Foco LED de 10W luz blanca',30,150.00,NULL),(50,'Regleta Eléctrica','Regleta de 5 tomas con protección contra sobrecarga',9,500.00,NULL);
+INSERT INTO `inventario` VALUES (1,'Sierra Circular 7 1/4\"','Sierra Electrica',0,5.00,''),(3,'Martillo','Martillo de acero con mango de goma',0,250.00,NULL),(4,'Destornillador Phillips','Destornillador de estrella de 6 pulgadas',0,120.00,NULL),(5,'Destornillador Plano','Destornillador plano de 6 pulgadas',0,110.00,NULL),(6,'Alicate de Corte','Alicate de acero inoxidable con mango ergonómico',0,180.00,''),(7,'Llave Inglesa','Llave ajustable de 10 pulgadas',0,320.00,NULL),(8,'Llave de Boca Fija','Juego de llaves fijas de diferentes medidas',3,500.00,NULL),(9,'Cinta Métrica','Cinta métrica de 5 metros con bloqueo',0,150.00,NULL),(10,'Flexómetro','Flexómetro de 3 metros con carcasa reforzada',13,200.00,NULL),(11,'Nivel de Burbuja','Nivel de burbuja de 12 pulgadas con triple indicador',10,250.00,NULL),(12,'Sierra Manual','Sierra para madera de 18 pulgadas con mango ergonómico',8,270.00,NULL),(13,'Segueta','Segueta de acero con mango plástico',15,100.00,NULL),(14,'Serrucho','Serrucho con hoja de acero templado',10,350.00,NULL),(15,'Taladro Percutor','Taladro eléctrico de 600W con velocidad variable',5,1800.00,NULL),(16,'Brocas para Madera','Juego de 10 brocas para madera',11,400.00,NULL),(17,'Brocas para Metal','Juego de 10 brocas para metal',0,500.00,NULL),(18,'Brocas para Concreto','Juego de 5 brocas con punta de carburo',8,600.00,NULL),(19,'Lijadora Eléctrica','Lijadora de 300W con velocidad ajustable',4,2200.00,NULL),(20,'Pulidora Angular','Pulidora de 750W con disco de 4.5 pulgadas',6,2800.00,NULL),(21,'Cepillo de Carpintero','Cepillo manual para madera con cuchilla ajustable',10,750.00,NULL),(22,'Cinta Aislante','Cinta aislante de PVC de 10 metros',22,50.00,NULL),(23,'Cinta Doble Cara','Cinta adhesiva doble cara de alta resistencia',20,90.00,NULL),(24,'Pegamento de Contacto','Pegamento de contacto de 100ml',18,120.00,NULL),(26,'Pistola de Silicona','Pistola de silicona de 40W con interruptor',9,450.00,NULL),(27,'Clavos para Madera','Clavos galvanizados de 2 pulgadas (paquete de 500)',30,180.00,NULL),(28,'Tornillos para Madera','Tornillos de 1 pulgada para madera (paquete de 200)',24,200.00,NULL),(29,'Tuercas y Arandelas','Juego de 100 tuercas y arandelas metálicas',20,250.00,NULL),(30,'Bisagras Metálicas','Par de bisagras metálicas de 3 pulgadas',12,300.00,NULL),(31,'Candado de Seguridad','Candado de acero inoxidable con llave',0,500.00,NULL),(32,'Pasador de Seguridad','Pasador de seguridad metálico de 6 pulgadas',15,280.00,NULL),(33,'Cerradura para Puerta','Cerradura de embutir con llave',8,1200.00,NULL),(34,'Manija para Puerta','Manija metálica con acabado cromado',10,850.00,NULL),(35,'Cerradura Digital','Cerradura electrónica con lector de huella',0,6500.00,NULL),(36,'Llaves Allen','Juego de 10 llaves Allen de diferentes tamaños',15,450.00,NULL),(37,'Llaves Torx','Juego de 8 llaves Torx de acero inoxidable',12,500.00,NULL),(38,'Cortafrío','Cortafrío de acero con mango antideslizante',10,300.00,NULL),(39,'Machete','Machete con hoja de acero inoxidable de 24 pulgadas',7,600.00,NULL),(40,'Hacha de Mano','Hacha de 1.5kg con mango de madera',6,850.00,NULL),(41,'Pala','Pala de punta con mango largo de madera',10,950.00,NULL),(42,'Carretilla','Carretilla metálica con rueda reforzada',3,3200.00,NULL),(43,'Escalera de Aluminio','Escalera plegable de 6 escalones',5,4800.00,NULL),(44,'Manguera para Jardín','Manguera reforzada de 15 metros',11,1500.00,NULL),(45,'Aspersor para Jardín','Aspersor giratorio de 3 brazos',0,800.00,NULL),(46,'Llave de Paso','Llave de paso para agua de 1/2 pulgada',15,250.00,NULL),(47,'Válvula de Esfera','Válvula de esfera de bronce de 3/4 pulgada',10,600.00,NULL),(48,'Cinta de Teflón','Cinta selladora de 10 metros',24,100.00,NULL),(49,'Foco LED','Foco LED de 10W luz blanca',30,150.00,NULL),(50,'Regleta Eléctrica','Regleta de 5 tomas con protección contra sobrecarga',9,500.00,NULL);
 /*!40000 ALTER TABLE `inventario` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -293,7 +295,7 @@ CREATE TABLE `notificaciones` (
   `mensaje` varchar(255) DEFAULT NULL,
   `fecha` datetime DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=55 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=58 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -302,8 +304,63 @@ CREATE TABLE `notificaciones` (
 
 LOCK TABLES `notificaciones` WRITE;
 /*!40000 ALTER TABLE `notificaciones` DISABLE KEYS */;
-INSERT INTO `notificaciones` VALUES (47,'Venta realizada - Total: RD$ 5.90','2026-01-30 15:25:40'),(48,'Venta realizada por Administrador del Sistema: Cliente - Total: $5.90','2026-01-30 15:25:40'),(49,'Venta realizada - Total: RD$ 708.00','2026-01-30 15:27:25'),(50,'Venta realizada por juan: Cliente - Total: $708.00','2026-01-30 15:27:25'),(51,'Venta realizada - Total: RD$ 5.90','2026-01-30 16:02:52'),(52,'Venta realizada por juan: Cliente - Total: $5.90','2026-01-30 16:02:52'),(53,'Venta realizada por Administrador del Sistema: Cliente - Total: $5.90','2026-02-02 14:28:28'),(54,'Venta realizada por Administrador del Sistema: Cliente - Total: $141.60','2026-02-02 14:28:53');
+INSERT INTO `notificaciones` VALUES (55,'Venta realizada por Administrador del Sistema: Cliente - Total: $283.20','2026-04-02 10:46:12'),(56,'Venta realizada por Administrador del Sistema: Cliente - Total: $129.80','2026-05-13 14:11:21'),(57,'Venta realizada por Administrador del Sistema: Jonuel Collado - Total: $3186.00 (credito)','2026-05-13 14:38:40');
 /*!40000 ALTER TABLE `notificaciones` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `rol_permisos`
+--
+
+DROP TABLE IF EXISTS `rol_permisos`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `rol_permisos` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `rol_id` int NOT NULL,
+  `pagina` varchar(100) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `fk_rp_rol` (`rol_id`),
+  CONSTRAINT `fk_rp_rol` FOREIGN KEY (`rol_id`) REFERENCES `roles` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=86 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `rol_permisos`
+--
+
+LOCK TABLES `rol_permisos` WRITE;
+/*!40000 ALTER TABLE `rol_permisos` DISABLE KEYS */;
+INSERT INTO `rol_permisos` VALUES (1,1,'ventas.html'),(2,1,'inventario.html'),(3,1,'clientes.html'),(4,1,'reportes.html'),(5,1,'cuentas_por_cobrar_reporte.html'),(6,1,'cuadre_caja.html'),(7,1,'productos_agotados.html'),(8,1,'reporte_ventas.html'),(9,1,'reporte_ventas_cajero.html'),(10,1,'config_general.html'),(11,1,'config_usuarios.html'),(12,1,'configuracion_cajeros.html'),(13,1,'cargar_excel.html'),(14,1,'roles.html'),(15,1,'crear_producto.html'),(16,1,'consultar_productos.html'),(17,1,'editar_producto.html'),(18,1,'eliminar_producto.html'),(78,2,'ventas.html'),(79,2,'inventario.html'),(80,2,'clientes.html'),(81,2,'consultar_productos.html'),(82,3,'ventas.html'),(83,3,'reportes.html'),(84,3,'reporte_ventas.html'),(85,3,'cuentas_por_cobrar_reporte.html');
+/*!40000 ALTER TABLE `rol_permisos` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `roles`
+--
+
+DROP TABLE IF EXISTS `roles`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `roles` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `nombre` varchar(100) NOT NULL,
+  `descripcion` text,
+  `activo` tinyint(1) DEFAULT '1',
+  `fecha_creacion` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `nombre` (`nombre`)
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `roles`
+--
+
+LOCK TABLES `roles` WRITE;
+/*!40000 ALTER TABLE `roles` DISABLE KEYS */;
+INSERT INTO `roles` VALUES (1,'Administrador','Acceso completo al sistema',1,'2026-05-14 13:57:05'),(2,'Cajero','Solo ventas e inventario básico',1,'2026-05-14 13:57:05'),(3,'Supervisor','Ventas, reportes y clientes',1,'2026-05-14 13:57:05');
+/*!40000 ALTER TABLE `roles` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -323,11 +380,14 @@ CREATE TABLE `usuarios` (
   `activo` tinyint(1) DEFAULT '1',
   `fecha_creacion` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `fecha_modificacion` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `rol_id` int DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `idx_usuarios_rol` (`rol`),
   KEY `idx_usuarios_cajero` (`cajero_id`),
-  CONSTRAINT `fk_usuarios_cajero` FOREIGN KEY (`cajero_id`) REFERENCES `cajeros` (`id`) ON DELETE SET NULL
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+  KEY `rol_id` (`rol_id`),
+  CONSTRAINT `fk_usuarios_cajero` FOREIGN KEY (`cajero_id`) REFERENCES `cajeros` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `usuarios_ibfk_1` FOREIGN KEY (`rol_id`) REFERENCES `roles` (`id`) ON DELETE SET NULL
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -336,7 +396,7 @@ CREATE TABLE `usuarios` (
 
 LOCK TABLES `usuarios` WRITE;
 /*!40000 ALTER TABLE `usuarios` DISABLE KEYS */;
-INSERT INTO `usuarios` VALUES (1,'admin','$2b$10$RGDmq1VxBLotocmEIg7pIOif/QVC71.3kA4vH2h8fkwJnUVEmZZMK','admin',1,'Administrador del Sistema',1,'2026-01-29 12:50:25','2026-01-30 18:49:22'),(3,'fede','$2b$10$9i0K1Vsv0NLsDuPaJr2TFO8WAXib0Dy1pVpRu8Es4APYNokjKr2Yy','cajero',NULL,'fede',1,'2026-01-29 12:57:09','2026-01-29 20:53:03'),(4,'juan','$2b$10$/zTKAz6gVD3OScyWRVW3FOilPI1wyk2cxflNJmSNPsrGuS4XQly/m','cajero',2,'juan',1,'2026-01-29 20:52:55','2026-01-29 20:53:03');
+INSERT INTO `usuarios` VALUES (1,'admin','$2b$10$RGDmq1VxBLotocmEIg7pIOif/QVC71.3kA4vH2h8fkwJnUVEmZZMK','admin',1,'Administrador del Sistema',1,'2026-01-29 12:50:25','2026-05-14 14:05:12',1),(3,'fede','$2b$10$9i0K1Vsv0NLsDuPaJr2TFO8WAXib0Dy1pVpRu8Es4APYNokjKr2Yy','cajero',NULL,'fede',1,'2026-01-29 12:57:09','2026-05-14 14:05:16',2),(4,'juan','$2b$10$/zTKAz6gVD3OScyWRVW3FOilPI1wyk2cxflNJmSNPsrGuS4XQly/m','cajero',2,'juan',1,'2026-01-29 20:52:55','2026-05-14 14:05:16',2),(5,'Jonuel','$2b$10$w1rLFzrhBLsIxhttAaLu6.bNJsTf5GONcmNyLIKyk.jwfP/iKcS2.','supervisor',4,'Jonuel Collado',1,'2026-05-13 19:55:49','2026-05-14 14:05:21',3),(6,'JCT','$2b$10$wJB3q24jKI1UZheS9AUap.ZpDlfdxaZQrET6e7BbMZmLIjDeJjGQ2','supervisor',5,'JCOLLADO',1,'2026-05-15 13:51:59','2026-05-15 14:09:58',3);
 /*!40000 ALTER TABLE `usuarios` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -357,12 +417,13 @@ CREATE TABLE `ventas` (
   `itbis` decimal(10,2) DEFAULT NULL,
   `total` decimal(10,2) DEFAULT NULL,
   `cajero_id` int DEFAULT NULL,
+  `forma_pago` varchar(20) DEFAULT 'efectivo',
   PRIMARY KEY (`id`),
   KEY `idx_ventas_cajero` (`cajero_id`),
   KEY `fk_ventas_cliente` (`cliente_id`),
   CONSTRAINT `fk_ventas_cajero` FOREIGN KEY (`cajero_id`) REFERENCES `cajeros` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
   CONSTRAINT `fk_ventas_cliente` FOREIGN KEY (`cliente_id`) REFERENCES `clientes` (`id`) ON DELETE SET NULL
-) ENGINE=InnoDB AUTO_INCREMENT=50 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=58 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -371,7 +432,7 @@ CREATE TABLE `ventas` (
 
 LOCK TABLES `ventas` WRITE;
 /*!40000 ALTER TABLE `ventas` DISABLE KEYS */;
-INSERT INTO `ventas` VALUES (1,'2025-09-16 10:54:47','','',NULL,13.75,2.48,16.23,NULL),(2,'2025-09-16 11:01:28','','',NULL,41.25,7.42,48.67,NULL),(3,'2025-09-16 11:05:02','','',NULL,250.00,45.00,295.00,NULL),(4,'2025-09-16 11:06:50','','',NULL,250.00,45.00,295.00,NULL),(5,'2025-09-16 14:57:40','','',NULL,250.00,45.00,295.00,NULL),(6,'2025-09-16 14:59:30','','',NULL,120.00,21.60,141.60,NULL),(7,'2025-09-16 15:21:31','Jeison De Los Santos','',NULL,600.00,108.00,708.00,NULL),(8,'2025-09-16 15:27:07','','',NULL,110.00,19.80,129.80,NULL),(9,'2025-09-16 15:29:21','','',NULL,320.00,57.60,377.60,NULL),(10,'2025-09-16 15:30:28','','',NULL,180.00,32.40,212.40,NULL),(11,'2025-09-16 15:35:37','','',NULL,180.00,32.40,212.40,NULL),(12,'2025-09-16 15:48:27','','',NULL,180.00,32.40,212.40,NULL),(13,'2025-09-16 15:51:29','','',NULL,150.00,27.00,177.00,NULL),(14,'2025-09-16 15:52:38','','',NULL,180.00,32.40,212.40,NULL),(15,'2025-09-16 15:54:43','','',NULL,180.00,32.40,212.40,NULL),(16,'2025-09-16 15:58:51','','',NULL,500.00,90.00,590.00,NULL),(17,'2025-09-16 16:03:22','Jordy','',NULL,930.00,167.40,1097.40,NULL),(18,'2025-09-16 16:16:14','Jonuel','40237396748',NULL,2000.00,360.00,2360.00,NULL),(19,'2025-10-15 16:52:49','','',NULL,2500.00,450.00,2950.00,NULL),(20,'2025-11-11 16:26:08','Raul Fernandez','40245687418',NULL,750.00,135.00,885.00,NULL),(21,'2025-11-11 17:41:16','','',NULL,1100.00,198.00,1298.00,NULL),(22,'2025-12-12 16:26:41','','',NULL,360.00,64.80,424.80,NULL),(23,'2026-01-22 08:48:37','','',NULL,1000.00,180.00,1180.00,NULL),(24,'2026-01-22 09:24:40','','',NULL,120.00,21.60,141.60,NULL),(25,'2026-01-23 11:14:17','','',NULL,5.00,0.90,5.90,NULL),(26,'2026-01-23 11:40:08','','',NULL,5.00,0.90,5.90,NULL),(27,'2026-01-23 11:54:10','','',NULL,320.00,57.60,377.60,NULL),(28,'2026-01-23 13:13:42','','',NULL,12400.00,2232.00,14632.00,NULL),(29,'2026-01-27 11:23:43','','',NULL,320.00,57.60,377.60,NULL),(30,'2026-01-27 11:29:04','','',NULL,5.00,0.90,5.90,NULL),(31,'2026-01-27 11:33:11','','',NULL,455.00,81.90,536.90,NULL),(32,'2026-01-27 11:33:55','','',NULL,200.00,36.00,236.00,NULL),(33,'2026-01-27 11:34:11','','',NULL,500.00,90.00,590.00,NULL),(34,'2026-01-27 11:34:43','','',NULL,5.00,0.90,5.90,NULL),(35,'2026-01-27 11:49:23','','',NULL,250.00,45.00,295.00,NULL),(36,'2026-01-27 16:36:53','','',NULL,2500.00,450.00,2950.00,NULL),(37,'2026-01-27 16:49:56','','',NULL,150.00,27.00,177.00,NULL),(38,'2026-01-27 16:54:15','','',NULL,500.00,90.00,590.00,NULL),(39,'2026-01-27 17:02:01','','',NULL,5.00,0.90,5.90,NULL),(40,'2026-01-28 10:42:43','','',NULL,320.00,57.60,377.60,NULL),(41,'2026-01-29 09:00:06','','',NULL,1200.00,216.00,1416.00,NULL),(42,'2026-01-29 09:00:56','Jonuel','',NULL,600.00,108.00,708.00,NULL),(43,'2026-01-30 14:28:03','','',NULL,200.00,36.00,236.00,NULL),(44,'2026-01-30 14:45:24','Federiko','',NULL,33610.00,6049.80,39659.80,NULL),(45,'2026-01-30 15:25:40','','',NULL,5.00,0.90,5.90,1),(46,'2026-01-30 15:27:25','','',NULL,600.00,108.00,708.00,2),(47,'2026-01-30 16:02:52','','',NULL,5.00,0.90,5.90,2),(48,'2026-02-02 14:28:28','','',NULL,5.00,0.90,5.90,1),(49,'2026-02-02 14:28:53','','',NULL,120.00,21.60,141.60,1);
+INSERT INTO `ventas` VALUES (1,'2025-09-16 10:54:47','','',NULL,13.75,2.48,16.23,NULL,'efectivo'),(2,'2025-09-16 11:01:28','','',NULL,41.25,7.42,48.67,NULL,'efectivo'),(3,'2025-09-16 11:05:02','','',NULL,250.00,45.00,295.00,NULL,'efectivo'),(4,'2025-09-16 11:06:50','','',NULL,250.00,45.00,295.00,NULL,'efectivo'),(5,'2025-09-16 14:57:40','','',NULL,250.00,45.00,295.00,NULL,'efectivo'),(6,'2025-09-16 14:59:30','','',NULL,120.00,21.60,141.60,NULL,'efectivo'),(7,'2025-09-16 15:21:31','Jeison De Los Santos','',NULL,600.00,108.00,708.00,NULL,'efectivo'),(8,'2025-09-16 15:27:07','','',NULL,110.00,19.80,129.80,NULL,'efectivo'),(9,'2025-09-16 15:29:21','','',NULL,320.00,57.60,377.60,NULL,'efectivo'),(10,'2025-09-16 15:30:28','','',NULL,180.00,32.40,212.40,NULL,'efectivo'),(11,'2025-09-16 15:35:37','','',NULL,180.00,32.40,212.40,NULL,'efectivo'),(12,'2025-09-16 15:48:27','','',NULL,180.00,32.40,212.40,NULL,'efectivo'),(13,'2025-09-16 15:51:29','','',NULL,150.00,27.00,177.00,NULL,'efectivo'),(14,'2025-09-16 15:52:38','','',NULL,180.00,32.40,212.40,NULL,'efectivo'),(15,'2025-09-16 15:54:43','','',NULL,180.00,32.40,212.40,NULL,'efectivo'),(16,'2025-09-16 15:58:51','','',NULL,500.00,90.00,590.00,NULL,'efectivo'),(17,'2025-09-16 16:03:22','Jordy','',NULL,930.00,167.40,1097.40,NULL,'efectivo'),(18,'2025-09-16 16:16:14','Jonuel','40237396748',NULL,2000.00,360.00,2360.00,NULL,'efectivo'),(19,'2025-10-15 16:52:49','','',NULL,2500.00,450.00,2950.00,NULL,'efectivo'),(20,'2025-11-11 16:26:08','Raul Fernandez','40245687418',NULL,750.00,135.00,885.00,NULL,'efectivo'),(21,'2025-11-11 17:41:16','','',NULL,1100.00,198.00,1298.00,NULL,'efectivo'),(22,'2025-12-12 16:26:41','','',NULL,360.00,64.80,424.80,NULL,'efectivo'),(23,'2026-01-22 08:48:37','','',NULL,1000.00,180.00,1180.00,NULL,'efectivo'),(24,'2026-01-22 09:24:40','','',NULL,120.00,21.60,141.60,NULL,'efectivo'),(25,'2026-01-23 11:14:17','','',NULL,5.00,0.90,5.90,NULL,'efectivo'),(26,'2026-01-23 11:40:08','','',NULL,5.00,0.90,5.90,NULL,'efectivo'),(27,'2026-01-23 11:54:10','','',NULL,320.00,57.60,377.60,NULL,'efectivo'),(28,'2026-01-23 13:13:42','','',NULL,12400.00,2232.00,14632.00,NULL,'efectivo'),(29,'2026-01-27 11:23:43','','',NULL,320.00,57.60,377.60,NULL,'efectivo'),(30,'2026-01-27 11:29:04','','',NULL,5.00,0.90,5.90,NULL,'efectivo'),(31,'2026-01-27 11:33:11','','',NULL,455.00,81.90,536.90,NULL,'efectivo'),(32,'2026-01-27 11:33:55','','',NULL,200.00,36.00,236.00,NULL,'efectivo'),(33,'2026-01-27 11:34:11','','',NULL,500.00,90.00,590.00,NULL,'efectivo'),(34,'2026-01-27 11:34:43','','',NULL,5.00,0.90,5.90,NULL,'efectivo'),(35,'2026-01-27 11:49:23','','',NULL,250.00,45.00,295.00,NULL,'efectivo'),(36,'2026-01-27 16:36:53','','',NULL,2500.00,450.00,2950.00,NULL,'efectivo'),(37,'2026-01-27 16:49:56','','',NULL,150.00,27.00,177.00,NULL,'efectivo'),(38,'2026-01-27 16:54:15','','',NULL,500.00,90.00,590.00,NULL,'efectivo'),(39,'2026-01-27 17:02:01','','',NULL,5.00,0.90,5.90,NULL,'efectivo'),(40,'2026-01-28 10:42:43','','',NULL,320.00,57.60,377.60,NULL,'efectivo'),(41,'2026-01-29 09:00:06','','',NULL,1200.00,216.00,1416.00,NULL,'efectivo'),(42,'2026-01-29 09:00:56','Jonuel','',NULL,600.00,108.00,708.00,NULL,'efectivo'),(43,'2026-01-30 14:28:03','','',NULL,200.00,36.00,236.00,NULL,'efectivo'),(44,'2026-01-30 14:45:24','Federiko','',NULL,33610.00,6049.80,39659.80,NULL,'efectivo'),(45,'2026-01-30 15:25:40','','',NULL,5.00,0.90,5.90,1,'efectivo'),(46,'2026-01-30 15:27:25','','',NULL,600.00,108.00,708.00,2,'efectivo'),(47,'2026-01-30 16:02:52','','',NULL,5.00,0.90,5.90,2,'efectivo'),(48,'2026-02-02 14:28:28','','',NULL,5.00,0.90,5.90,1,'efectivo'),(49,'2026-02-02 14:28:53','','',NULL,120.00,21.60,141.60,1,'efectivo'),(50,'2026-04-02 10:46:12','','',NULL,240.00,43.20,283.20,1,'efectivo'),(51,'2026-05-13 14:11:21','','',NULL,110.00,19.80,129.80,1,'efectivo'),(52,'2026-05-13 14:38:40','Jonuel Collado','',2,2700.00,486.00,3186.00,1,'credito'),(53,'2026-05-13 15:44:49','Jonuel Collado','',2,80.00,14.40,94.40,1,'efectivo'),(54,'2026-05-13 15:47:13','Jonuel Collado','',2,330.00,59.40,389.40,1,'efectivo'),(55,'2026-05-14 14:40:28','Jonuel Collado','',2,5000.00,900.00,5900.00,1,'credito'),(56,'2026-05-14 14:51:29','Jonuel Collado','',2,1600.00,288.00,1888.00,1,'efectivo'),(57,'2026-05-15 09:44:45','','',NULL,400.00,72.00,472.00,1,'efectivo');
 /*!40000 ALTER TABLE `ventas` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -467,4 +528,4 @@ SET character_set_client = @saved_cs_client;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-04-01 16:24:00
+-- Dump completed on 2026-05-15 15:10:31
