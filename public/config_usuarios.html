@@ -47,7 +47,7 @@ body {
 }
 
 .page-title i {
-    color: #2196f3;
+    color: var(--color-editar);
 }
 
 .actions-bar {
@@ -61,20 +61,20 @@ body {
     padding: 12px 24px;
     border: none;
     border-radius: 8px;
-    background: linear-gradient(90deg, #2196f3, #64b5f6);
+    background: var(--gradient);
     color: white;
     font-weight: 700;
     cursor: pointer;
     display: flex;
     align-items: center;
     gap: 8px;
-    box-shadow: 0 4px 12px rgba(33, 150, 243, 0.3);
+    box-shadow: var(--shadow-sm);
     transition: all 0.3s;
 }
 
 .btn-primary:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(33, 150, 243, 0.4);
+    box-shadow: var(--shadow-md);
 }
 
 .tabla-card {
@@ -91,7 +91,7 @@ table {
 }
 
 thead {
-    background: linear-gradient(135deg, #2196f3, #1976d2);
+    background: var(--accent-blue);
 }
 
 th {
@@ -105,12 +105,12 @@ th {
 
 td {
     padding: 12px;
-    border-bottom: 1px solid #f0f0f0;
+    border-bottom: 1px solid var(--border);
     color: var(--text);
 }
 
 tbody tr:hover {
-    background: #f0f8ff;
+    background: var(--card-hover-inv);
 }
 
 .badge {
@@ -121,13 +121,13 @@ tbody tr:hover {
 }
 
 .badge-activo {
-    background: #e8f5e9;
-    color: #2e7d32;
+    background: rgba(var(--primary-rgb),0.1);
+    color: var(--success);
 }
 
 .badge-inactivo {
-    background: #ffebee;
-    color: #c62828;
+    background: rgba(var(--danger-rgb),0.1);
+    color: var(--danger);
 }
 
 .btn-icon {
@@ -140,17 +140,17 @@ tbody tr:hover {
 }
 
 .btn-editar {
-    background: #2196f3;
+    background: var(--color-editar);
     color: white;
 }
 
 .btn-cambiar-password {
-    background: #ff9800;
+    background: var(--color-excel);
     color: white;
 }
 
 .btn-eliminar {
-    background: #f44336;
+    background: var(--color-eliminar);
     color: white;
 }
 
@@ -166,7 +166,7 @@ tbody tr:hover {
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.5);
+    background: var(--modal-overlay);
     z-index: 9999;
     align-items: center;
     justify-content: center;
@@ -222,7 +222,7 @@ tbody tr:hover {
 .form-group select {
     width: 100%;
     padding: 10px 12px;
-    border: 2px solid #e0e0e0;
+    border: 2px solid var(--border);
     border-radius: 8px;
     font-size: 1em;
     transition: all 0.2s;
@@ -231,8 +231,8 @@ tbody tr:hover {
 .form-group input:focus,
 .form-group select:focus {
     outline: none;
-    border-color: #2196f3;
-    box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.1);
+    border-color: var(--color-editar);
+    box-shadow: 0 0 0 3px var(--secondary-glow);
 }
 
 .modal-actions {
@@ -243,10 +243,10 @@ tbody tr:hover {
 
 .btn-secondary {
     padding: 12px 24px;
-    border: 2px solid #2196f3;
+    border: 2px solid var(--color-editar);
     border-radius: 8px;
     background: var(--card-bg);
-    color: #2196f3;
+    color: var(--color-editar);
     font-weight: 700;
     cursor: pointer;
 }
@@ -310,6 +310,7 @@ tbody tr:hover {
             
             <form id="form-usuario" onsubmit="guardarUsuario(event)">
                 <input type="hidden" id="usuario_id">
+                <input type="hidden" id="rol_id">
                 
                 <div class="form-group">
                     <label for="username">Nombre de Usuario *</label>
@@ -329,7 +330,7 @@ tbody tr:hover {
                 
                 <div class="form-group">
                     <label for="rol">Rol *</label>
-                    <select id="rol" required>
+                    <select id="rol" required onchange="actualizarRolId(this.value)">
                         <option value="cajero">Cajero</option>
                         <option value="supervisor">Supervisor</option>
                         <option value="admin">Administrador</option>
@@ -408,6 +409,9 @@ tbody tr:hover {
     <script>
         const API = 'http://localhost:5000';
         
+        // Cache de roles para mapear nombre → id
+        let rolesCache = [];
+
         document.addEventListener('DOMContentLoaded', function() {
             fetch('header.html')
                 .then(r => r.text())
@@ -424,7 +428,25 @@ tbody tr:hover {
             
             cargarUsuarios();
             cargarCajeros();
+            cargarRoles();
         });
+
+        // Cargar roles disponibles en la BD
+        function cargarRoles() {
+            fetch(`${API}/api/roles/all`)
+                .then(r => r.json())
+                .then(roles => {
+                    rolesCache = roles;
+                    actualizarRolId(document.getElementById('rol').value);
+                })
+                .catch(err => console.error('Error al cargar roles:', err));
+        }
+
+        // Busca en el cache el rol_id que corresponde al nombre de rol seleccionado
+        function actualizarRolId(rolNombre) {
+            const rol = rolesCache.find(r => r.nombre.toLowerCase() === rolNombre.toLowerCase());
+            document.getElementById('rol_id').value = rol ? rol.id : '';
+        }
         
         function cargarUsuarios() {
             fetch(`${API}/api/usuarios/all`)
@@ -435,9 +457,9 @@ tbody tr:hover {
                     
                     usuarios.forEach(usuario => {
                         const rolBadge = {
-                            'admin': '<span class="badge" style="background: #e3f2fd; color: #1976d2;">Admin</span>',
-                            'supervisor': '<span class="badge" style="background: #fff3e0; color: #f57c00;">Supervisor</span>',
-                            'cajero': '<span class="badge" style="background: #f3e5f5; color: #7b1fa2;">Cajero</span>'
+                            'admin': '<span class="badge" style="background: rgba(var(--secondary-rgb),0.1); color: var(--color-editar);">Admin</span>',
+                            'supervisor': '<span class="badge" style="background: rgba(var(--warning-rgb),0.1); color: var(--warning);">Supervisor</span>',
+                            'cajero': '<span class="badge" style="background: rgba(var(--primary-rgb),0.08); color: var(--color-consultar);">Cajero</span>'
                         };
                         
                         const tr = document.createElement('tr');
@@ -508,6 +530,8 @@ tbody tr:hover {
                     document.getElementById('password').required = false;
                     document.getElementById('password-required').style.display = 'none';
                     document.getElementById('password-help').textContent = 'Dejar en blanco para mantener la contraseña actual';
+                    // Sincronizar rol_id con el rol del usuario
+                    actualizarRolId(usuario.rol);
                     document.getElementById('modal-usuario').classList.add('active');
                 });
         }
@@ -521,6 +545,7 @@ tbody tr:hover {
                 nombre_completo: document.getElementById('nombre_completo').value,
                 password: document.getElementById('password').value,
                 rol: document.getElementById('rol').value,
+                rol_id: document.getElementById('rol_id').value || null,
                 cajero_id: document.getElementById('cajero_id').value || null,
                 activo: document.getElementById('activo').value
             };

@@ -46,18 +46,8 @@ router.get('/all', (req, res) => {
   });
 });
 
-// ── GET /api/roles/:id — rol con sus permisos ──
-router.get('/:id', (req, res) => {
-  db.query('SELECT * FROM roles WHERE id = ?', [req.params.id], (err, rol) => {
-    if (err || !rol.length) return res.status(404).json({ message: 'Rol no encontrado' });
-    db.query('SELECT pagina FROM rol_permisos WHERE rol_id = ?', [req.params.id], (err2, perms) => {
-      if (err2) return res.status(500).json({ message: 'Error al obtener permisos' });
-      res.json({ ...rol[0], permisos: perms.map(p => p.pagina) });
-    });
-  });
-});
-
 // ── GET /api/roles/usuario/:userId — permisos del usuario ──
+// IMPORTANTE: debe ir ANTES de /:id para que Express no lo capture como id='usuario'
 router.get('/usuario/:userId', (req, res) => {
   const q = `
     SELECT rp.pagina FROM usuarios u
@@ -78,6 +68,17 @@ router.get('/usuario/:userId', (req, res) => {
       return;
     }
     res.json(rows.map(r => r.pagina));
+  });
+});
+
+// ── GET /api/roles/:id — rol con sus permisos ──
+router.get('/:id', (req, res) => {
+  db.query('SELECT * FROM roles WHERE id = ?', [req.params.id], (err, rol) => {
+    if (err || !rol.length) return res.status(404).json({ message: 'Rol no encontrado' });
+    db.query('SELECT pagina FROM rol_permisos WHERE rol_id = ?', [req.params.id], (err2, perms) => {
+      if (err2) return res.status(500).json({ message: 'Error al obtener permisos' });
+      res.json({ ...rol[0], permisos: perms.map(p => p.pagina) });
+    });
   });
 });
 

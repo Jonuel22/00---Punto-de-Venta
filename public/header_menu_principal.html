@@ -3,7 +3,7 @@
    Header global para todas las páginas INTERNAS (excepto menu)
    Incluir con: fetch('header_menu_principal.html')
    ============================================================ -->
-<link rel="stylesheet" href="theme.css">
+
 
 <header class="app-header">
   <!-- Brand + Back -->
@@ -89,7 +89,13 @@
   window.cerrarSesion = function() {
     const TOKEN = localStorage.getItem('token');
     fetch('http://localhost:5000/api/auth/logout',{method:'POST',headers:{Authorization:`Bearer ${TOKEN}`}})
-      .finally(()=>{ localStorage.clear(); sessionStorage.clear(); window.location.replace('login.html'); });
+      .finally(()=>{
+        const theme = localStorage.getItem('jct_theme');
+        localStorage.clear();
+        sessionStorage.clear();
+        if (theme) localStorage.setItem('jct_theme', theme);
+        window.location.replace('login.html');
+      });
   };
 
   // User menu

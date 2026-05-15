@@ -2,7 +2,7 @@
    header.html — JCT POS v2
    Header global para páginas internas (ventas, clientes, etc.)
    ============================================================ -->
-<link rel="stylesheet" href="theme.css">
+
 
 <style>
   /* ── Header ── */
@@ -216,7 +216,10 @@
     fetch('http://localhost:5000/api/auth/logout', {
       method: 'POST', headers: { Authorization: `Bearer ${TOKEN}` }
     }).finally(() => {
-      localStorage.clear(); sessionStorage.clear();
+      const theme = localStorage.getItem('jct_theme');
+      localStorage.clear();
+      sessionStorage.clear();
+      if (theme) localStorage.setItem('jct_theme', theme);
       window.location.replace('login.html');
     });
   };

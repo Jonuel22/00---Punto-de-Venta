@@ -17,7 +17,7 @@
 
 body {
     font-family: 'Roboto', sans-serif;
-    background: linear-gradient(135deg, #e8f5e9, #b2dfdb);
+    background: var(--bg);
     min-height: 100vh;
     padding-top: 80px;
 }
@@ -29,17 +29,17 @@ body {
 }
 
 .page-header {
-    background: rgba(255, 255, 255, 0.95);
+    background: var(--card-bg);
     backdrop-filter: blur(12px);
     border-radius: 16px;
     padding: 32px;
     margin-bottom: 24px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--shadow-sm);
 }
 
 .page-title {
     font-size: 2.2em;
-    color: #222;
+    color: var(--text);
     display: flex;
     align-items: center;
     gap: 12px;
@@ -47,21 +47,21 @@ body {
 }
 
 .page-title i {
-    color: #00cc66;
+    color: var(--primary);
 }
 
 .config-card {
-    background: rgba(255, 255, 255, 0.95);
+    background: var(--card-bg);
     backdrop-filter: blur(12px);
     border-radius: 16px;
     padding: 32px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--shadow-sm);
     margin-bottom: 24px;
 }
 
 .config-section-title {
     font-size: 1.4em;
-    color: #333;
+    color: var(--text);
     margin-bottom: 20px;
     display: flex;
     align-items: center;
@@ -69,14 +69,14 @@ body {
 }
 
 .config-section-title i {
-    color: #00cc66;
+    color: var(--primary);
 }
 
 .logo-preview {
     text-align: center;
     margin: 20px 0;
     padding: 30px;
-    background: linear-gradient(135deg, #a8edea, #fed6e3);
+    background: var(--bg3);
     border-radius: 12px;
     min-height: 200px;
     display: flex;
@@ -87,37 +87,37 @@ body {
 .logo-preview img {
     max-width: 300px;
     max-height: 150px;
-    filter: drop-shadow(0 4px 12px rgba(0,0,0,0.2));
+    filter: drop-shadow(var(--shadow-sm));
 }
 
 .file-upload-area {
-    border: 2px dashed #00cc66;
+    border: 2px dashed var(--primary);
     border-radius: 12px;
     padding: 30px;
     text-align: center;
     cursor: pointer;
     transition: all 0.3s;
-    background: rgba(0, 204, 102, 0.05);
+    background: var(--primary-glow2);
 }
 
 .file-upload-area:hover {
-    border-color: #00aa55;
-    background: rgba(0, 204, 102, 0.1);
+    border-color: var(--primary-dark);
+    background: var(--primary-glow);
 }
 
 .file-upload-area i {
     font-size: 3em;
-    color: #00cc66;
+    color: var(--primary);
     margin-bottom: 10px;
 }
 
 .file-upload-area p {
-    color: #666;
+    color: var(--text-muted);
     margin: 10px 0 5px 0;
 }
 
 .file-upload-area span {
-    color: #999;
+    color: var(--text-muted);
     font-size: 0.9em;
 }
 
@@ -129,29 +129,29 @@ input[type="file"] {
     padding: 12px 24px;
     border: none;
     border-radius: 8px;
-    background: linear-gradient(90deg, #00cc66, #66ccff);
-    color: white;
+    background: var(--gradient);
+    color: #fff;
     font-weight: 700;
     cursor: pointer;
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    box-shadow: 0 4px 12px rgba(0, 204, 102, 0.3);
+    box-shadow: var(--shadow-sm);
     transition: all 0.3s;
     font-size: 1em;
 }
 
 .btn-primary:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(0, 204, 102, 0.4);
+    box-shadow: var(--shadow-md);
 }
 
 .btn-secondary {
     padding: 12px 24px;
-    border: 2px solid #00cc66;
+    border: 2px solid var(--primary);
     border-radius: 8px;
-    background: white;
-    color: #00cc66;
+    background: var(--card-bg);
+    color: var(--primary);
     font-weight: 700;
     cursor: pointer;
     display: inline-flex;
@@ -162,7 +162,7 @@ input[type="file"] {
 }
 
 .btn-secondary:hover {
-    background: #f0f8ff;
+    background: var(--card-hover-inv);
 }
 
 .actions {
@@ -180,7 +180,7 @@ input[type="file"] {
 }
 
 .nav-card {
-    background: rgba(255, 255, 255, 0.95);
+    background: var(--card-bg);
     backdrop-filter: blur(12px);
     border-radius: 12px;
     padding: 24px;
@@ -190,13 +190,13 @@ input[type="file"] {
     transition: all 0.3s;
     text-decoration: none;
     color: inherit;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--shadow-sm);
     
 }
 
 .nav-card:hover {
     transform: translateY(-4px);
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+    box-shadow: var(--shadow-md);
 }
 
 .nav-card i {
@@ -211,15 +211,15 @@ input[type="file"] {
 
 .nav-card p {
     font-size: 0.9em;
-    color: #666;
+    color: var(--text-muted);
 }
 
-.nav-card.usuarios i { color: #2196f3; }
-.nav-card.cajeros i { color: #ff9800; }
+.nav-card.usuarios i { color: var(--color-editar); }
+.nav-card.cajeros i { color: var(--color-excel); }
 
 .success-message {
-    background: #d4edda;
-    color: #155724;
+    background: rgba(var(--primary-rgb),0.1);
+    color: var(--success);
     padding: 12px;
     border-radius: 8px;
     margin-top: 16px;
@@ -227,8 +227,8 @@ input[type="file"] {
 }
 
 .error-message {
-    background: #f8d7da;
-    color: #721c24;
+    background: rgba(var(--danger-rgb),0.1);
+    color: var(--danger);
     padding: 12px;
     border-radius: 8px;
     margin-top: 16px;
@@ -237,22 +237,22 @@ input[type="file"] {
 
 /* Galería de logos */
 .logo-card {
-    background: white;
+    background: var(--card-bg);
     border-radius: 12px;
     padding: 16px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--shadow-sm);
     transition: all 0.3s;
     border: 2px solid transparent;
 }
 
 .logo-card.activo {
-    border-color: #00cc66;
-    box-shadow: 0 4px 12px rgba(0, 204, 102, 0.3);
+    border-color: var(--primary);
+    box-shadow: var(--shadow-sm);
 }
 
 .logo-card:hover {
     transform: translateY(-4px);
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+    box-shadow: var(--shadow-md);
 }
 
 .logo-card img {
@@ -260,14 +260,14 @@ input[type="file"] {
     height: 120px;
     object-fit: contain;
     margin-bottom: 12px;
-    background: linear-gradient(135deg, #a8edea, #fed6e3);
+    background: var(--bg3);
     border-radius: 8px;
     padding: 10px;
 }
 
 .logo-card-name {
     font-size: 0.9em;
-    color: #333;
+    color: var(--text);
     font-weight: 600;
     margin-bottom: 8px;
     text-align: center;
@@ -292,31 +292,31 @@ input[type="file"] {
 }
 
 .btn-activar {
-    background: #00cc66;
-    color: white;
+    background: var(--primary);
+    color: #fff;
 }
 
 .btn-activar:hover {
-    background: #00aa55;
+    background: var(--primary-dark);
 }
 
 .btn-activar:disabled {
-    background: #ccc;
+    background: var(--border);
     cursor: not-allowed;
 }
 
 .btn-eliminar-small {
-    background: #f44336;
-    color: white;
+    background: var(--color-eliminar);
+    color: #fff;
 }
 
 .btn-eliminar-small:hover {
-    background: #d32f2f;
+    background: var(--danger);
 }
 
 .badge-activo {
-    background: #00cc66;
-    color: white;
+    background: var(--primary);
+    color: #fff;
     padding: 4px 8px;
     border-radius: 12px;
     font-size: 0.75em;
@@ -335,7 +335,7 @@ input[type="file"] {
                 <i class="fas fa-cog"></i>
                 Configuración del Sistema
             </h1>
-            <p style="color: #666; font-size: 1em;">Personaliza y gestiona tu punto de venta</p>
+            <p style="color: var(--text-muted); font-size: 1em;">Personaliza y gestiona tu punto de venta</p>
         </div>
         
         <!-- Navegación a otras configuraciones -->
@@ -352,8 +352,8 @@ input[type="file"] {
                 <p>Gestionar cajeros y turnos</p>
             </a>
 
-            <a href="roles.html" class="nav-card" style="border-top:3px solid #9c27b0;">
-                <i class="fas fa-shield-alt" style="color:#9c27b0;"></i>
+            <a href="roles.html" class="nav-card" style="border-top:3px solid var(--color-consultar);">
+                <i class="fas fa-shield-alt" style="color:var(--color-consultar);"></i>
                 <h3>Roles</h3>
                 <p>Gestionar roles y permisos</p>
             </a>
@@ -365,9 +365,9 @@ input[type="file"] {
                 <i class="fas fa-palette"></i>
                 Apariencia
             </h2>
-            <p style="color:#666;margin-bottom:20px;">Selecciona el tema visual del sistema. El cambio se aplica de inmediato en todas las páginas.</p>
+            <p style="color:var(--text-muted);margin-bottom:20px;">Selecciona el tema visual del sistema. El cambio se aplica de inmediato en todas las páginas.</p>
             <div style="display:flex;gap:16px;flex-wrap:wrap;">
-                <div id="theme-dark-card" onclick="setTheme('dark')" style="flex:1;min-width:160px;border:2px solid transparent;border-radius:14px;padding:20px;cursor:pointer;background:#0d1117;text-align:center;transition:all 0.2s;">
+                <div id="theme-dark-card" onclick="setTheme('dark')" style="flex:1;min-width:160px;border:2px solid transparent;border-radius:14px;padding:20px;cursor:pointer;background:var(--bg);text-align:center;transition:all 0.2s;">
                     <i class="fas fa-moon" style="font-size:2em;color:#00cc66;display:block;margin-bottom:10px;"></i>
                     <div style="color:#e6edf3;font-weight:700;margin-bottom:4px;">Modo Oscuro</div>
                     <div style="color:#8b949e;font-size:0.82em;">Fondo oscuro, ideal para uso prolongado</div>
@@ -390,14 +390,14 @@ input[type="file"] {
             
             <div class="logo-preview">
                 <img id="logoPreview" src="images/Logo2.png" alt="Logo actual">
-                <p style="margin-top: 10px; color: #666; font-size: 0.9em;">Vista previa del nuevo logo</p>
+                <p style="margin-top: 10px; color: var(--text-muted); font-size: 0.9em;">Vista previa del nuevo logo</p>
             </div>
             
             <label for="logoUpload" class="file-upload-area">
                 <i class="fas fa-cloud-upload-alt"></i>
                 <p><strong>Click para subir nuevo logo</strong></p>
                 <span>PNG, JPG o SVG (Máx. 2MB)</span>
-                <input type="text" id="logoNombre" placeholder="Nombre del logo (opcional)" style="margin-top: 10px; padding: 8px; width: 80%; border-radius: 6px; border: 1px solid #ddd;">
+                <input type="text" id="logoNombre" placeholder="Nombre del logo (opcional)" style="margin-top: 10px; padding: 8px; width: 80%; border-radius: 6px; border: 1px solid var(--border);">
             </label>
             <input type="file" id="logoUpload" accept="image/png,image/jpeg,image/jpg,image/svg+xml">
             
@@ -417,8 +417,8 @@ input[type="file"] {
             
             <!-- Galería de Logos -->
             <div style="margin-top: 40px;">
-                <h3 style="font-size: 1.2em; color: #333; margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
-                    <i class="fas fa-images" style="color: #00cc66;"></i>
+                <h3 style="font-size: 1.2em; color: var(--text); margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
+                    <i class="fas fa-images" style="color: var(--primary);"></i>
                     Galería de Logos
                 </h3>
                 
@@ -450,10 +450,43 @@ input[type="file"] {
                         document.body.appendChild(newScript);
                     });
                 });
-            
-            // Cargar logo actual
+
             cargarLogoActual();
+            aplicarPermisosConfig();
+
+            const current = localStorage.getItem('jct_theme') || 'dark';
+            actualizarTarjetasTema(current);
         });
+
+        // Filtrar nav-cards de configuración según permisos
+        const CARDS_CONFIG = [
+          { pagina: 'config_usuarios.html',       selector: 'a[href="config_usuarios.html"]'       },
+          { pagina: 'configuracion_cajeros.html',  selector: 'a[href="configuracion_cajeros.html"]'  },
+          { pagina: 'roles.html',                  selector: 'a[href="roles.html"]'                  },
+        ];
+
+        async function aplicarPermisosConfig() {
+          const user = JSON.parse(localStorage.getItem('user') || '{}');
+          const esAdmin = user.rol === 'admin';
+          if (esAdmin && !user.rol_id) return; // admin total, no filtrar
+
+          try {
+            const res = await fetch(`${API}/api/roles/usuario/${user.id}`, {
+              headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+            });
+            if (!res.ok) return;
+            const permisos = await res.json();
+
+            CARDS_CONFIG.forEach(c => {
+              const el = document.querySelector(c.selector);
+              if (el && !permisos.includes(c.pagina)) {
+                el.style.display = 'none';
+              }
+            });
+          } catch(e) {
+            console.error('Error al obtener permisos de configuración:', e);
+          }
+        }
         
         // Cargar logo actual
         function cargarLogoActual() {
@@ -559,11 +592,7 @@ input[type="file"] {
             lightCard.style.boxShadow   = theme === 'light' ? '0 4px 14px rgba(0,168,84,0.2)' : 'none';
         }
 
-        // Marcar el tema activo al cargar
-        document.addEventListener('DOMContentLoaded', function() {
-            const current = localStorage.getItem('jct_theme') || 'dark';
-            actualizarTarjetasTema(current);
-        });
+        // El tema se aplica dentro del DOMContentLoaded principal
     </script>
 </body>
 </html>

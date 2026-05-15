@@ -64,7 +64,7 @@ router.get('/activos', (req, res) => {
 
 // Crear nuevo usuario
 router.post('/create', async (req, res) => {
-  const { username, nombre_completo, password, rol, cajero_id } = req.body;
+  const { username, nombre_completo, password, rol, cajero_id, rol_id } = req.body;
   
   if (!username || !password) {
     return res.status(400).json({ message: 'Usuario y contraseña son requeridos' });
@@ -75,7 +75,6 @@ router.post('/create', async (req, res) => {
   }
   
   try {
-    // Verificar si el usuario ya existe
     const checkQuery = 'SELECT id FROM usuarios WHERE username = ?';
     db.query(checkQuery, [username], async (err, result) => {
       if (err) {
@@ -87,30 +86,35 @@ router.post('/create', async (req, res) => {
         return res.status(400).json({ message: 'El nombre de usuario ya existe' });
       }
       
-      // Hashear password
       const hashedPassword = await bcrypt.hash(password, 10);
       
-      // Insertar usuario
-      const insertQuery = `
-        INSERT INTO usuarios (username, password, nombre_completo, rol, cajero_id, activo)
-        VALUES (?, ?, ?, ?, ?, 1)
-      `;
-      
-      db.query(insertQuery, [
-        username, 
-        hashedPassword, 
-        nombre_completo, 
-        rol || 'cajero', 
-        cajero_id || null
-      ], (err, result) => {
-        if (err) {
-          console.error('Error al crear usuario:', err);
-          return res.status(500).json({ message: 'Error al crear usuario' });
-        }
-        
-        res.json({ 
-          message: 'Usuario creado exitosamente',
-          usuarioId: result.insertId 
+      // Resolver rol_id: usar el enviado, o buscar por nombre de rol
+      const resolverRolId = (cb) => {
+        if (rol_id) return cb(rol_id);
+        const rolNombre = rol || 'cajero';
+        db.query('SELECT id FROM roles WHERE LOWER(nombre) = LOWER(?)', [rolNombre], (e, rows) => {
+          cb(!e && rows.length ? rows[0].id : null);
+        });
+      };
+
+      resolverRolId((rolIdFinal) => {
+        const insertQuery = `
+          INSERT INTO usuarios (username, password, nombre_completo, rol, rol_id, cajero_id, activo)
+          VALUES (?, ?, ?, ?, ?, ?, 1)
+        `;
+        db.query(insertQuery, [
+          username,
+          hashedPassword,
+          nombre_completo,
+          rol || 'cajero',
+          rolIdFinal || null,
+          cajero_id || null
+        ], (err, result) => {
+          if (err) {
+            console.error('Error al crear usuario:', err);
+            return res.status(500).json({ message: 'Error al crear usuario' });
+          }
+          res.json({ message: 'Usuario creado exitosamente', usuarioId: result.insertId });
         });
       });
     });
@@ -123,36 +127,44 @@ router.post('/create', async (req, res) => {
 // Actualizar usuario
 router.put('/update/:id', async (req, res) => {
   const { id } = req.params;
-  const { username, nombre_completo, password, rol, cajero_id, activo } = req.body;
+  const { username, nombre_completo, password, rol, cajero_id, activo, rol_id } = req.body;
   
   try {
-    let query = `
-      UPDATE usuarios 
-      SET username = ?, nombre_completo = ?, rol = ?, cajero_id = ?, activo = ?
-    `;
-    let params = [username, nombre_completo, rol || 'cajero', cajero_id || null, activo];
-    
-    // Si se proporciona password, hashear y actualizar
-    if (password && password.trim() !== '') {
-      if (password.length < 6) {
-        return res.status(400).json({ message: 'La contraseña debe tener al menos 6 caracteres' });
+    // Resolver rol_id: usar el enviado, o buscar por nombre de rol
+    const resolverRolId = (cb) => {
+      if (rol_id) return cb(rol_id);
+      const rolNombre = rol || 'cajero';
+      db.query('SELECT id FROM roles WHERE LOWER(nombre) = LOWER(?)', [rolNombre], (e, rows) => {
+        cb(!e && rows.length ? rows[0].id : null);
+      });
+    };
+
+    resolverRolId(async (rolIdFinal) => {
+      let query = `
+        UPDATE usuarios 
+        SET username = ?, nombre_completo = ?, rol = ?, rol_id = ?, cajero_id = ?, activo = ?
+      `;
+      let params = [username, nombre_completo, rol || 'cajero', rolIdFinal || null, cajero_id || null, activo];
+      
+      if (password && password.trim() !== '') {
+        if (password.length < 6) {
+          return res.status(400).json({ message: 'La contraseña debe tener al menos 6 caracteres' });
+        }
+        const hashedPassword = await bcrypt.hash(password, 10);
+        query += ', password = ?';
+        params.push(hashedPassword);
       }
       
-      const hashedPassword = await bcrypt.hash(password, 10);
-      query += ', password = ?';
-      params.push(hashedPassword);
-    }
-    
-    query += ' WHERE id = ?';
-    params.push(id);
-    
-    db.query(query, params, (err, result) => {
-      if (err) {
-        console.error('Error al actualizar usuario:', err);
-        return res.status(500).json({ message: 'Error al actualizar usuario' });
-      }
+      query += ' WHERE id = ?';
+      params.push(id);
       
-      res.json({ message: 'Usuario actualizado exitosamente' });
+      db.query(query, params, (err) => {
+        if (err) {
+          console.error('Error al actualizar usuario:', err);
+          return res.status(500).json({ message: 'Error al actualizar usuario' });
+        }
+        res.json({ message: 'Usuario actualizado exitosamente' });
+      });
     });
   } catch (error) {
     console.error('Error:', error);

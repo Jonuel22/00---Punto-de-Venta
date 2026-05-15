@@ -50,7 +50,7 @@ body {
 }
 
 .page-title i {
-    color: #2196f3;
+    color: var(--color-editar);
 }
 
 .filters-card {
@@ -83,7 +83,7 @@ body {
 .form-group input,
 .form-group select {
     padding: 10px 12px;
-    border: 2px solid #e0e0e0;
+    border: 2px solid var(--border);
     border-radius: 8px;
     font-size: 1em;
     transition: all 0.2s;
@@ -92,8 +92,8 @@ body {
 .form-group input:focus,
 .form-group select:focus {
     outline: none;
-    border-color: #2196f3;
-    box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.1);
+    border-color: var(--color-editar);
+    box-shadow: 0 0 0 3px var(--secondary-glow);
 }
 
 .actions-row {
@@ -116,23 +116,23 @@ body {
 }
 
 .btn-primary {
-    background: linear-gradient(90deg, #2196f3, #64b5f6);
+    background: linear-gradient(90deg, var(--color-editar), #64b5f6);
     color: white;
-    box-shadow: 0 4px 12px rgba(33, 150, 243, 0.3);
+    box-shadow: var(--shadow-sm);
 }
 
 .btn-primary:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(33, 150, 243, 0.4);
+    box-shadow: var(--shadow-md);
 }
 
 .btn-success {
-    background: #217346;
+    background: var(--success);
     color: white;
 }
 
 .btn-danger {
-    background: #dc3545;
+    background: var(--danger);
     color: white;
 }
 
@@ -152,7 +152,7 @@ body {
 }
 
 .stat-item {
-    background: linear-gradient(135deg, rgba(33, 150, 243, 0.05), rgba(100, 181, 246, 0.05));
+    background: var(--secondary-glow);
     padding: 20px;
     border-radius: 12px;
     text-align: center;
@@ -167,7 +167,7 @@ body {
 .stat-value {
     font-size: 1.8em;
     font-weight: 700;
-    color: #2196f3;
+    color: var(--color-editar);
 }
 
 .table-card {
@@ -185,7 +185,7 @@ table {
 }
 
 thead {
-    background: linear-gradient(135deg, #2196f3, #1976d2);
+    background: linear-gradient(135deg, var(--color-editar), var(--accent-blue));
     position: sticky;
     top: 0;
     z-index: 10;
@@ -202,24 +202,24 @@ th {
 
 td {
     padding: 12px;
-    border-bottom: 1px solid #f0f0f0;
+    border-bottom: 1px solid var(--border);
     color: var(--text);
 }
 
 tbody tr:hover {
-    background: #f0f8ff;
+    background: var(--card-hover-inv);
 }
 
 .empty-state {
     text-align: center;
     padding: 60px 20px;
-    color: #999;
+    color: var(--text-muted);
 }
 
 .empty-state i {
     font-size: 4em;
     margin-bottom: 16px;
-    color: #ddd;
+    color: var(--text-muted);
 }
     </style>
 </head>
@@ -416,10 +416,10 @@ tbody tr:hover {
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
                     <td><strong>${cajero.cajero_nombre || 'Sin cajero'}</strong></td>
-                    <td><strong style="color: #2196f3;">$${parseFloat(cajero.total_ventas || 0).toFixed(2)}</strong></td>
+                    <td><strong style="color: var(--color-editar);">$${parseFloat(cajero.total_ventas || 0).toFixed(2)}</strong></td>
                     <td>${cajero.num_transacciones || 0}</td>
                     <td>$${parseFloat(cajero.ticket_promedio || 0).toFixed(2)}</td>
-                    <td style="color: #4caf50;">$${comision.toFixed(2)}</td>
+                    <td style="color: var(--primary);">$${comision.toFixed(2)}</td>
                 `;
                 tbody.appendChild(tr);
             });

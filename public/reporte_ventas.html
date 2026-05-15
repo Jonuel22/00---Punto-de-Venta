@@ -41,7 +41,7 @@ body {
     padding: 32px;
     margin-bottom: 24px;
     box-shadow: var(--shadow-sm);
-    border: 1px solid rgba(255, 255, 255, 0.5);
+    border: 1px solid var(--border);
 }
 
 .reporte-title {
@@ -56,7 +56,7 @@ body {
 }
 
 .reporte-title i {
-    color: #00cc66;
+    color: var(--primary);
     font-size: 0.9em;
 }
 
@@ -90,7 +90,7 @@ body {
 .filtro-group input {
     padding: 10px 12px;
     border-radius: 8px;
-    border: 2px solid #e0e0e0;
+    border: 2px solid var(--border);
     font-size: 1em;
     transition: all 0.2s;
     background: var(--card-bg);
@@ -98,15 +98,15 @@ body {
 
 .filtro-group input:focus {
     outline: none;
-    border-color: #00cc66;
-    box-shadow: 0 0 0 3px rgba(0, 204, 102, 0.1);
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px var(--primary-glow);
 }
 
 .btn-filtrar {
     padding: 12px 24px;
     border: none;
     border-radius: 8px;
-    background: linear-gradient(90deg, #00cc66, #66ccff);
+    background: var(--gradient);
     color: #fff;
     font-weight: 700;
     font-size: 1em;
@@ -116,19 +116,19 @@ body {
     align-items: center;
     justify-content: center;
     gap: 8px;
-    box-shadow: 0 4px 12px rgba(0, 204, 102, 0.3);
+    box-shadow: var(--shadow-sm);
 }
 
 .btn-filtrar:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(0, 204, 102, 0.4);
+    box-shadow: var(--shadow-md);
 }
 
 .btn-hoy {
     padding: 12px 24px;
     border: none;
     border-radius: 8px;
-    background: linear-gradient(90deg, #2196f3, #64b5f6);
+    background: linear-gradient(90deg, var(--color-editar), #64b5f6);
     color: #fff;
     font-weight: 700;
     font-size: 1em;
@@ -138,13 +138,13 @@ body {
     align-items: center;
     justify-content: center;
     gap: 8px;
-    box-shadow: 0 4px 12px rgba(33, 150, 243, 0.3);
+    box-shadow: var(--shadow-sm);
 }
 
 .btn-hoy:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(33, 150, 243, 0.4);
-    background: linear-gradient(90deg, #1976d2, #42a5f5);
+    box-shadow: var(--shadow-md);
+    background: linear-gradient(90deg, var(--accent-blue), #42a5f5);
 }
 
 /* ===== ACCIONES ===== */
@@ -154,7 +154,7 @@ body {
     flex-wrap: wrap;
     margin-top: 20px;
     padding-top: 20px;
-    border-top: 1px solid #e0e0e0;
+    border-top: 1px solid var(--border);
 }
 
 .btn-accion {
@@ -168,26 +168,26 @@ body {
     display: flex;
     align-items: center;
     gap: 8px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--shadow-sm);
 }
 
 .btn-excel {
-    background: #217346;
+    background: var(--success);
     color: white;
 }
 
 .btn-excel:hover {
-    background: #1a5c37;
+    background: var(--primary-dark);
     transform: translateY(-2px);
 }
 
 .btn-pdf {
-    background: #dc3545;
+    background: var(--danger);
     color: white;
 }
 
 .btn-pdf:hover {
-    background: #c82333;
+    background: var(--danger);
     transform: translateY(-2px);
 }
 
@@ -198,7 +198,7 @@ body {
     border-radius: 16px;
     padding: 24px;
     box-shadow: var(--shadow-sm);
-    border: 1px solid rgba(255, 255, 255, 0.5);
+    border: 1px solid var(--border);
     margin-bottom: 24px;
 }
 
@@ -208,7 +208,7 @@ body {
     align-items: center;
     margin-bottom: 16px;
     padding-bottom: 12px;
-    border-bottom: 2px solid #e0e0e0;
+    border-bottom: 2px solid var(--border);
 }
 
 .tabla-info {
@@ -222,7 +222,7 @@ body {
     overflow-y: auto;
     max-height: 600px;
     border-radius: 8px;
-    border: 1px solid #e0e0e0;
+    border: 1px solid var(--border);
 }
 
 .tabla-reporte {
@@ -238,7 +238,7 @@ body {
 }
 
 .tabla-reporte th {
-    background: linear-gradient(135deg, #00cc66, #00aa55);
+    background: var(--gradient);
     color: white;
     padding: 14px 12px;
     text-align: left;
@@ -246,28 +246,28 @@ body {
     font-size: 0.9em;
     letter-spacing: 0.5px;
     text-transform: uppercase;
-    border-bottom: 2px solid #00aa55;
+    border-bottom: 2px solid var(--primary-dark);
 }
 
 .tabla-reporte td {
     padding: 12px;
-    border-bottom: 1px solid #f0f0f0;
+    border-bottom: 1px solid var(--border);
     color: var(--text);
     font-size: 0.95em;
     background: var(--card-bg);
 }
 
 .tabla-reporte tbody tr:hover {
-    background: #f0f8ff;
+    background: var(--card-hover-inv);
 }
 
 .tabla-reporte tfoot td {
-    background: #f8f9fa;
+    background: var(--bg3);
     font-weight: 700;
-    color: #00cc66;
+    color: var(--primary);
     font-size: 1.1em;
     padding: 16px 12px;
-    border-top: 2px solid #00cc66;
+    border-top: 2px solid var(--primary);
 }
 
 /* ===== STATS ===== */
@@ -284,7 +284,7 @@ body {
     border-radius: 12px;
     padding: 20px;
     box-shadow: var(--shadow-sm);
-    border: 1px solid rgba(255, 255, 255, 0.5);
+    border: 1px solid var(--border);
     transition: transform 0.2s;
 }
 
@@ -304,7 +304,7 @@ body {
 .stat-box span {
     font-size: 1.8em;
     font-weight: 700;
-    color: #00cc66;
+    color: var(--primary);
 }
 
 /* ===== RESPONSIVE ===== */
@@ -456,7 +456,7 @@ body {
                     </tbody>
                     <tfoot>
                         <tr>
-                            <td colspan="4" style="text-align:right; background: #f8f9fa;">Total Vendido:</td>
+                            <td colspan="4" style="text-align:right; background: var(--bg3);">Total Vendido:</td>
                             <td id="total-vendido">RD$ 0.00</td>
                         </tr>
                     </tfoot>

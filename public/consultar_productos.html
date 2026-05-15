@@ -16,7 +16,7 @@ body {
   margin: 0;
   font-family: 'Roboto', sans-serif;
   padding-top: 80px;
-  background: linear-gradient(135deg, #a8edea 0%, #b2d0e0 100%);
+  background: var(--page-bg-inv);
   min-height: 100vh;
 }
 
@@ -39,13 +39,12 @@ body {
 .product-list {
   width: 100%;
   max-width: 1100px;
-  background: rgba(255,255,255,0.35);
+  background: var(--glass-bg);
   backdrop-filter: blur(14px) saturate(180%);
   border-radius: 20px;
   padding: 30px;
   box-shadow:
-    0 12px 36px rgba(31,38,135,0.2),
-    0 4px 16px rgba(0,0,0,0.12);
+    var(--glass-shadow);
 }
 
 /* ===== SEARCH ===== */
@@ -60,8 +59,8 @@ body {
   flex: 1;
   padding: 12px 14px;
   border-radius: 12px;
-  border: 1.8px solid #c5ddeb;
-  background: rgba(255,255,255,0.85);
+  border: 1.8px solid var(--input-border-inv);
+  background: var(--input-bg-inv);
   font-size: 1em;
 }
 
@@ -71,15 +70,15 @@ body {
   border: none;
   font-weight: 700;
   color: #fff;
-  background: linear-gradient(135deg, #00cc66, #66ccff);
+  background: var(--gradient);
   cursor: pointer;
-  box-shadow: 0 6px 18px rgba(0,204,102,0.3);
+  box-shadow: 0 6px 18px var(--primary-glow);
   transition: transform 0.2s, box-shadow 0.2s;
 }
 
 .search-button:hover {
   transform: translateY(-1px) scale(1.05);
-  box-shadow: 0 10px 28px rgba(0,204,102,0.45);
+  box-shadow: 0 10px 28px var(--primary-glow);
 }
 
 /* ===== SUGGESTIONS ===== */
@@ -89,7 +88,7 @@ body {
   width: 100%;
   background: var(--card-bg);
   border-radius: 12px;
-  box-shadow: 0 6px 18px rgba(0,0,0,0.15);
+  box-shadow: var(--shadow-md);
   max-height: 220px;
   overflow-y: auto;
   z-index: 10;
@@ -102,7 +101,7 @@ body {
 }
 
 .suggestion-item:hover {
-  background: #eef6ff;
+  background: var(--card-hover-inv);
 }
 
 /* ===== TABLE ===== */
@@ -116,7 +115,7 @@ table {
 
 th {
   
-  background: #1976d2;
+  background: var(--table-head-inv);
   color: white;
   padding: 14px;
   font-size: 0.95em;
@@ -124,22 +123,22 @@ th {
 
 td {
   padding: 12px;
-  background: rgba(255,255,255,0.9);
-  border-bottom: 1px solid #e0e0e0;
+  background: var(--table-row-inv);
+  border-bottom: 1px solid var(--table-border-inv);
 }
 
 
 /* ===== HIGHLIGHT ===== */
 .highlight td {
-  background-color: #73c0f7;
+  background-color: var(--highlight-row);
   transition: background-color 0.3s ease;
 }
 
 
 @keyframes pulse {
-  0% { background-color: #e3f2fd; }
-  50% { background-color: #ffffff; }
-  100% { background-color: #e3f2fd; }
+  0% { background-color: var(--accent-blue-bg); }
+  50% { background-color: var(--card-bg); }
+  100% { background-color: var(--accent-blue-bg); }
 }
   </style>
 </head>
@@ -162,10 +161,10 @@ td {
       </div>
 
       <!-- Total de productos -->
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; padding: 12px; background: rgba(255,255,255,0.6); border-radius: 12px;">
-        <div style="font-size: 1.1em; font-weight: 600; color: #1976d2;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; padding: 12px; background: var(--glass-bg); border-radius: 12px;">
+        <div style="font-size: 1.1em; font-weight: 600; color: var(--accent-blue);">
           <i class="fas fa-boxes" style="margin-right: 8px;"></i>
-          Total de Productos: <span id="totalProductos" style="color: #00cc66; font-size: 1.3em;">0</span>
+          Total de Productos: <span id="totalProductos" style="color: var(--primary); font-size: 1.3em;">0</span>
         </div>
         <div style="font-size: 0.9em; color: var(--text-muted);">
           Mostrando <span id="productosVisibles" style="font-weight: 600;">0</span> productos

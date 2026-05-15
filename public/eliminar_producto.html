@@ -16,7 +16,7 @@ body {
   margin: 0;
   font-family: 'Roboto', sans-serif;
   padding-top: 80px;
-  background: linear-gradient(135deg, #a8edea 0%, #b2d0e0 100%);
+  background: var(--page-bg-inv);
   min-height: 100vh;
   overflow-x: hidden;
 }
@@ -33,7 +33,7 @@ body {
   top: 0;
   width: 100%;
   z-index: 1000;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  box-shadow: var(--shadow-xs);
 }
 
 /* ===== MAIN ===== */
@@ -57,15 +57,14 @@ body {
 form {
   width: 100%;
   max-width: 720px;
-  background: rgba(255,255,255,0.35);
+  background: var(--glass-bg);
   backdrop-filter: blur(14px) saturate(180%);
   -webkit-backdrop-filter: blur(14px) saturate(180%);
-  border: 3px solid #b2d0e0;
+  border: 3px solid var(--glass-border);
   border-radius: 20px;
   padding: 36px 32px;
   box-shadow:
-    0 12px 36px rgba(31,38,135,0.2),
-    0 4px 16px rgba(0,0,0,0.12);
+    var(--glass-shadow);
 }
 
 /* ===== SEARCH PRODUCT ===== */
@@ -80,8 +79,8 @@ form {
   width: 100%;
   padding: 12px 0px;
   border-radius: 10px;
-  border: 1.8px solid #c5ddeb;
-  background: rgba(255,255,255,0.75);
+  border: 1.8px solid var(--input-border-inv);
+  background: var(--input-bg-inv);
   font-size: 0.95em;
 }
 
@@ -89,7 +88,7 @@ form {
   margin-top: 6px;
   background: var(--card-bg);
   border-radius: 10px;
-  border: 1px solid #ccc;
+  border: 1px solid var(--border);
   max-height: 200px;
   overflow-y: auto;
 }
@@ -100,7 +99,7 @@ form {
 }
 
 .search-results div:hover {
-  background: #f4f4f4;
+  background: var(--card-hover-inv);
 }
 
 /* ===== LABELS ===== */
@@ -118,10 +117,10 @@ textarea {
   width: 100%;
   padding: 12px 0;
   border-radius: 10px;
-  border: 1.8px solid #c5ddeb;
+  border: 1.8px solid var(--input-border-inv);
   font-size: 0.95em;
   outline: none;
-  background: rgba(255,255,255,0.75);
+  background: var(--input-bg-inv);
   transition: border 0.25s, box-shadow 0.25s;
 }
 
@@ -132,8 +131,8 @@ textarea {
 
 input:focus,
 textarea:focus {
-  border-color: #ff9800;
-  box-shadow: 0 0 0 3px rgba(255,152,0,0.2);
+  border-color: var(--warning);
+  box-shadow: 0 0 0 3px rgba(var(--warning-rgb),0.2);
 }
 
 /* ===== BUTTON EDITAR ===== */
@@ -145,17 +144,17 @@ textarea:focus {
   font-size: 1em;
   font-weight: 700;
   color: #fff;
-  background: linear-gradient(90deg, #00cc66 0%, #66ccff 100%);
+  background: var(--gradient);
   cursor: pointer;
-  box-shadow: 0 6px 18px rgba(0, 204, 102, 0.25);
+  box-shadow: 0 6px 18px var(--primary-glow);
   transition: transform 0.25s, box-shadow 0.25s, opacity 0.25s;
   width: 100%;
 }
 
 .btn-editar-producto:hover {
   transform: translateY(-1px) scale(1.02);   /* más presencia */
-  background: linear-gradient(270deg, #00cc66 0%, #66ccff 100%); /* 🔄 cambio de lado */
-  box-shadow: 0 14px 36px rgba(0, 204, 102, 0.45);
+  background: var(--gradient);
+  box-shadow: 0 14px 36px var(--primary-glow);
   opacity: 0.98;
 }
 
@@ -169,7 +168,7 @@ textarea:focus {
   top: 50%;
   right: 10px;
   transform: translateY(-50%);
-  background: linear-gradient(135deg, #00cc66, #66ccff);
+  background: var(--gradient);
   border: none;
   color: #fff;
   width: 34px;
@@ -179,13 +178,13 @@ textarea:focus {
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  box-shadow: var(--shadow-md);
   transition: transform 0.2s, box-shadow 0.2s;
 }
 
 .search-input-wrapper button:hover {
   transform: translateY(-50%) scale(1.08);
-  box-shadow: 0 6px 18px rgba(0,0,0,0.3);
+  box-shadow: var(--shadow-lg);
 }
 
 /* ===== MODAL OVERLAY ===== */
@@ -193,7 +192,7 @@ textarea:focus {
   display: none;
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.35);
+  background: var(--modal-overlay);
   z-index: 5000;
   backdrop-filter: blur(4px);
 }
@@ -205,7 +204,7 @@ textarea:focus {
   margin: 80px auto;
   padding: 26px 24px 20px;
   border-radius: 18px;
-  box-shadow: 0 20px 50px rgba(0,0,0,0.35);
+  box-shadow: var(--shadow-xl);
   position: relative;
   animation: modalIn 0.3s ease;
 }
@@ -217,7 +216,7 @@ textarea:focus {
 
 .modal-card h3 {
   margin-bottom: 14px;
-  color: #1769aa;
+  color: var(--accent-blue);
   text-align: center;
 }
 
@@ -226,7 +225,7 @@ textarea:focus {
   width: 100%;
   padding: 12px 0px;
   border-radius: 10px;
-  border: 1.6px solid #c5ddeb;
+  border: 1.6px solid var(--input-border-inv);
   font-size: 1em;
   margin-bottom: 12px;
 }
@@ -236,18 +235,18 @@ textarea:focus {
   max-height: 320px;
   overflow-y: auto;
   border-radius: 10px;
-  border: 1px solid #e0e0e0;
+  border: 1px solid var(--border);
 }
 
 .modal-resultados div {
   padding: 10px 14px;
   cursor: pointer;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid var(--border);
   transition: background 0.2s;
 }
 
 .modal-resultados div:hover {
-  background: #eef6ff;
+  background: var(--card-hover-inv);
 }
 
 /* ===== CLOSE ===== */
@@ -259,11 +258,11 @@ textarea:focus {
   border: none;
   font-size: 1.6em;
   cursor: pointer;
-  color: #888;
+  color: var(--text-muted);
 }
 
 .modal-close:hover {
-  color: #f44336;
+  color: var(--color-eliminar);
 }
 
 </style>

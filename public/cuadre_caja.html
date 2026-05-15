@@ -15,26 +15,68 @@
   }
   .page-wrapper{position:relative;z-index:1;}
 
-  .estado-badge {
-    padding:5px 14px;border-radius:20px;font-size:.78em;font-weight:700;
-    text-transform:uppercase;letter-spacing:.5px;
-  }
-  .estado-abierto { background:rgba(0,204,102,.12);color:var(--success);border:1px solid rgba(0,204,102,.2); }
-  .estado-cerrado { background:var(--bg3);color:var(--text-muted);border:1px solid var(--border); }
+  /* ── Badges ── */
+  .estado-badge{padding:5px 14px;border-radius:20px;font-size:.78em;font-weight:700;text-transform:uppercase;letter-spacing:.5px;}
+  .estado-abierto{background:rgba(0,204,102,.12);color:var(--success);border:1px solid rgba(0,204,102,.2);}
+  .estado-cerrado{background:var(--bg3);color:var(--text-muted);border:1px solid var(--border);}
 
-  .diferencia-pos { color:var(--success);font-weight:700; }
-  .diferencia-neg { color:var(--danger);font-weight:700; }
-  .diferencia-neu { color:var(--text-muted);font-weight:700; }
+  .diferencia-pos{color:var(--success);font-weight:700;}
+  .diferencia-neg{color:var(--danger);font-weight:700;}
+  .diferencia-neu{color:var(--text-muted);font-weight:700;}
 
-  .cuadre-action-row { display:flex;align-items:center;gap:8px;flex-wrap:wrap; }
-
-  .filter-bar {
+  /* ── Filtros ── */
+  .filter-bar{
     display:flex;align-items:center;gap:12px;flex-wrap:wrap;
     background:var(--card-bg);border:1px solid var(--card-border);
     border-radius:14px;padding:16px 20px;margin-bottom:20px;
     box-shadow:var(--shadow-sm);
   }
-  .filter-bar label { font-size:.78em;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.4px;white-space:nowrap; }
+  .filter-bar label{font-size:.78em;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.4px;white-space:nowrap;}
+
+  /* ── Panel cajas abiertas ── */
+  .cajas-abiertas-panel{margin-bottom:24px;}
+  .caja-live-card{
+    background:var(--card-bg);border:1.5px solid rgba(0,204,102,.3);
+    border-radius:16px;padding:18px 20px;
+    box-shadow:0 0 20px rgba(0,204,102,.06);
+    display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:16px;align-items:center;
+    margin-bottom:10px;transition:box-shadow .2s;
+  }
+  .caja-live-card:hover{box-shadow:0 4px 24px rgba(0,204,102,.13);}
+  .caja-live-label{font-size:.72em;text-transform:uppercase;letter-spacing:.5px;color:var(--text-muted);margin-bottom:3px;}
+  .caja-live-val{font-size:1.05em;font-weight:800;}
+  .pulse-dot{width:9px;height:9px;background:var(--success);border-radius:50%;display:inline-block;margin-right:7px;
+    box-shadow:0 0 0 0 rgba(0,204,102,.5);animation:pulse-ring 1.6s ease-out infinite;}
+  @keyframes pulse-ring{0%{box-shadow:0 0 0 0 rgba(0,204,102,.5);}70%{box-shadow:0 0 0 8px rgba(0,204,102,0);}100%{box-shadow:0 0 0 0 rgba(0,204,102,0);}}
+
+  /* ── Tabs del detalle ── */
+  .tab-row{display:flex;gap:0;border-bottom:2px solid var(--border);margin-bottom:18px;}
+  .tab-btn{
+    padding:9px 20px;font-size:.85em;font-weight:600;cursor:pointer;
+    border:none;background:transparent;color:var(--text-muted);
+    border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .18s;
+  }
+  .tab-btn.active{color:var(--primary);border-bottom-color:var(--primary);}
+  .tab-pane{display:none;}
+  .tab-pane.active{display:block;}
+
+  /* ── Forma pago badge ── */
+  .fp-efectivo{background:rgba(0,204,102,.1);color:var(--success);border:1px solid rgba(0,204,102,.2);}
+  .fp-tarjeta{background:rgba(79,142,247,.1);color:#4f8ef7;border:1px solid rgba(79,142,247,.2);}
+  .fp-transferencia{background:rgba(255,193,7,.1);color:#c79b00;border:1px solid rgba(255,193,7,.2);}
+  .fp-otro{background:var(--bg3);color:var(--text-muted);border:1px solid var(--border);}
+
+  /* ── Barra desglose forma pago ── */
+  .fp-row{display:flex;align-items:center;gap:12px;margin-bottom:8px;}
+  .fp-bar-bg{flex:1;height:8px;background:var(--bg3);border-radius:4px;overflow:hidden;}
+  .fp-bar-fill{height:100%;border-radius:4px;transition:width .4s;}
+
+  /* ── Print ── */
+  @media print{
+    #header-container,.filter-bar,.stats-grid,.cajas-abiertas-panel,
+    .card-header .badge,.btn,.btn-close{display:none!important;}
+    .modal-content{box-shadow:none!important;}
+  }
 </style>
 </head>
 <body>
@@ -42,36 +84,18 @@
 <div class="page-wrapper">
 <div class="container">
 
+  <!-- ── Encabezado ── -->
   <div class="page-header">
     <div>
       <h1 class="page-title"><i class="fas fa-cash-register"></i> Cuadre de Caja</h1>
-      <p class="page-subtitle">Apertura, cierre y control de cajas por cajero</p>
+      <p class="page-subtitle">Apertura, cierre y control de cajas en tiempo real</p>
     </div>
     <button class="btn btn-primary" onclick="abrirModalAbrirCaja()">
       <i class="fas fa-lock-open"></i> Abrir Caja
     </button>
   </div>
 
-  <!-- Filtros -->
-  <div class="filter-bar">
-    <label><i class="fas fa-calendar" style="color:var(--primary);margin-right:5px;"></i>Desde</label>
-    <input type="date" class="form-control" id="filtroDesde" style="width:160px;" onchange="cargarCuadres()">
-    <label>Hasta</label>
-    <input type="date" class="form-control" id="filtroHasta" style="width:160px;" onchange="cargarCuadres()">
-    <label>Estado</label>
-    <select class="form-control" id="filtroEstado" style="width:140px;" onchange="cargarCuadres()">
-      <option value="">Todos</option>
-      <option value="abierto">Abierto</option>
-      <option value="cerrado">Cerrado</option>
-    </select>
-    <div class="search-wrapper" style="flex:1;min-width:200px;">
-      <i class="fas fa-search search-icon"></i>
-      <input type="text" class="search-input" id="searchCuadre" placeholder="Buscar cajero..." oninput="cargarCuadres()">
-    </div>
-    <button class="btn btn-secondary" onclick="limpiarFiltros()"><i class="fas fa-undo"></i> Limpiar</button>
-  </div>
-
-  <!-- KPIs resumen -->
+  <!-- ── KPIs ── -->
   <div class="stats-grid stagger mb-20">
     <div class="stat-card">
       <div class="stat-icon"><i class="fas fa-door-open"></i></div>
@@ -91,7 +115,41 @@
     </div>
   </div>
 
-  <!-- Tabla -->
+  <!-- ── Panel Cajas Activas en Vivo ── -->
+  <div class="cajas-abiertas-panel" id="panelCajasVivo" style="display:none;">
+    <div class="card-title mb-12" style="display:flex;align-items:center;gap:8px;">
+      <span class="pulse-dot"></span>
+      <span>Cajas Activas Ahora</span>
+      <span class="badge badge-success" id="badgeCajasVivo">0</span>
+      <small style="color:var(--text-muted);font-weight:400;margin-left:4px;">· actualiza cada 60 s</small>
+    </div>
+    <div id="listaCajasVivo"></div>
+  </div>
+
+  <!-- ── Filtros Historial ── -->
+  <div class="filter-bar">
+    <label><i class="fas fa-calendar" style="color:var(--primary);margin-right:5px;"></i>Desde</label>
+    <input type="date" class="form-control" id="filtroDesde" style="width:160px;" onchange="cargarCuadres()">
+    <label>Hasta</label>
+    <input type="date" class="form-control" id="filtroHasta" style="width:160px;" onchange="cargarCuadres()">
+    <label>Estado</label>
+    <select class="form-control" id="filtroEstado" style="width:140px;" onchange="cargarCuadres()">
+      <option value="">Todos</option>
+      <option value="abierto">Abierto</option>
+      <option value="cerrado">Cerrado</option>
+    </select>
+    <label>Cajero</label>
+    <select class="form-control" id="filtroCajero" style="width:170px;" onchange="cargarCuadres()">
+      <option value="">Todos</option>
+    </select>
+    <div class="search-wrapper" style="flex:1;min-width:180px;">
+      <i class="fas fa-search search-icon"></i>
+      <input type="text" class="search-input" id="searchCuadre" placeholder="Buscar cajero..." oninput="aplicarFiltrosLocales()">
+    </div>
+    <button class="btn btn-secondary" onclick="limpiarFiltros()"><i class="fas fa-undo"></i> Limpiar</button>
+  </div>
+
+  <!-- ── Tabla Historial ── -->
   <div class="card">
     <div class="card-header">
       <div class="card-title"><i class="fas fa-table"></i> Historial de Cuadres</div>
@@ -101,21 +159,24 @@
       <table>
         <thead><tr>
           <th>#</th><th>Cajero</th><th>Apertura</th><th>Cierre</th>
-          <th>Monto Apertura</th><th>Total Ventas</th><th>Monto Real</th>
-          <th>Diferencia</th><th>Estado</th><th>Acciones</th>
+          <th>Monto Apertura</th><th>Total Ventas</th><th>Transacciones</th>
+          <th>Monto Real</th><th>Diferencia</th><th>Estado</th><th>Acciones</th>
         </tr></thead>
         <tbody id="tablaCuadres">
-          <tr><td colspan="10" style="text-align:center;padding:40px;color:var(--text-muted);">
+          <tr><td colspan="11" style="text-align:center;padding:40px;color:var(--text-muted);">
             <i class="fas fa-spinner fa-spin"></i> Cargando...
           </td></tr>
         </tbody>
       </table>
     </div>
   </div>
-</div>
-</div>
 
-<!-- Modal Abrir Caja -->
+</div><!-- /container -->
+</div><!-- /page-wrapper -->
+
+<!-- ══════════════════════════════════════════════
+     MODAL: ABRIR CAJA
+══════════════════════════════════════════════ -->
 <div class="modal" id="modalAbrir">
   <div class="modal-content modal-content-sm">
     <div class="modal-header">
@@ -129,143 +190,255 @@
     <div class="form-group">
       <label>Monto de Apertura (RD$)</label>
       <input type="number" class="form-control" id="abrirMonto" placeholder="0.00" step="0.01" min="0">
+      <small style="color:var(--text-muted);margin-top:4px;display:block;">Efectivo inicial que se coloca en la caja</small>
+    </div>
+    <div class="form-group">
+      <label>Notas de Apertura <span style="color:var(--text-muted);font-weight:400;">(opcional)</span></label>
+      <textarea class="form-control" id="abrirNotas" placeholder="Observaciones iniciales..." style="height:60px;"></textarea>
     </div>
     <div style="display:flex;gap:10px;margin-top:8px;">
       <button class="btn btn-ghost" style="flex:1;" onclick="cerrarModal('modalAbrir')"><i class="fas fa-times"></i> Cancelar</button>
-      <button class="btn btn-primary" style="flex:1;" onclick="abrirCaja()"><i class="fas fa-lock-open"></i> Abrir</button>
+      <button class="btn btn-primary" style="flex:1;" onclick="abrirCaja()"><i class="fas fa-lock-open"></i> Abrir Caja</button>
     </div>
   </div>
 </div>
 
-<!-- Modal Cerrar Caja -->
+<!-- ══════════════════════════════════════════════
+     MODAL: CERRAR CAJA
+══════════════════════════════════════════════ -->
 <div class="modal" id="modalCerrar">
-  <div class="modal-content modal-content-sm">
+  <div class="modal-content" style="max-width:580px;">
     <div class="modal-header">
       <div class="modal-title"><i class="fas fa-lock" style="color:var(--danger);"></i> Cerrar Caja</div>
       <button class="btn-close" onclick="cerrarModal('modalCerrar')">&times;</button>
     </div>
     <input type="hidden" id="cerrarCuadreId">
+
+    <!-- Resumen de la caja -->
     <div id="resumenCierre" style="background:var(--bg3);border-radius:12px;padding:16px;margin-bottom:16px;font-size:.88em;"></div>
+
+    <!-- Desglose por forma de pago -->
+    <div id="desgloseFP" style="margin-bottom:14px;display:none;">
+      <div style="font-size:.78em;text-transform:uppercase;letter-spacing:.5px;color:var(--text-muted);margin-bottom:8px;font-weight:700;">
+        <i class="fas fa-credit-card"></i> Ventas por forma de pago
+      </div>
+      <div id="desgloseFPContent"></div>
+    </div>
+
     <div class="form-group">
-      <label>Monto Real en Caja (RD$)</label>
+      <label>Monto Real Contado en Caja (RD$)</label>
       <input type="number" class="form-control" id="cerrarMontoReal" placeholder="0.00" step="0.01" min="0" oninput="calcularDiferencia()">
     </div>
-    <div id="diferenciaPreview" style="display:none;padding:10px 14px;border-radius:10px;margin-bottom:14px;font-size:.88em;font-weight:600;"></div>
+    <div id="diferenciaPreview" style="display:none;padding:12px 16px;border-radius:10px;margin-bottom:14px;font-size:.9em;font-weight:600;"></div>
     <div class="form-group">
-      <label>Observaciones</label>
-      <textarea class="form-control" id="cerrarObs" placeholder="Notas del cierre..." style="height:70px;"></textarea>
+      <label>Observaciones del Cierre</label>
+      <textarea class="form-control" id="cerrarObs" placeholder="Notas del cierre, incidencias, etc..." style="height:70px;"></textarea>
     </div>
     <div style="display:flex;gap:10px;">
       <button class="btn btn-ghost" style="flex:1;" onclick="cerrarModal('modalCerrar')"><i class="fas fa-times"></i> Cancelar</button>
-      <button class="btn btn-danger" style="flex:1;" onclick="cerrarCaja()"><i class="fas fa-lock"></i> Cerrar Caja</button>
+      <button class="btn btn-danger" style="flex:2;" onclick="cerrarCaja()"><i class="fas fa-lock"></i> Confirmar Cierre de Caja</button>
     </div>
   </div>
 </div>
 
-<!-- Modal Detalle -->
+<!-- ══════════════════════════════════════════════
+     MODAL: DETALLE DEL CUADRE
+══════════════════════════════════════════════ -->
 <div class="modal" id="modalDetalle">
-  <div class="modal-content">
+  <div class="modal-content" style="max-width:800px;">
     <div class="modal-header">
-      <div class="modal-title"><i class="fas fa-info-circle"></i> Detalle del Cuadre</div>
-      <button class="btn-close" onclick="cerrarModal('modalDetalle')">&times;</button>
+      <div class="modal-title" id="detalleTitulo"><i class="fas fa-info-circle"></i> Detalle del Cuadre</div>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <button class="btn btn-sm btn-secondary" onclick="imprimirDetalle()" title="Imprimir"><i class="fas fa-print"></i></button>
+        <button class="btn-close" onclick="cerrarModal('modalDetalle')">&times;</button>
+      </div>
     </div>
-    <div id="detalleContent"></div>
+
+    <!-- Tabs -->
+    <div class="tab-row">
+      <button class="tab-btn active" onclick="switchTab('tabResumen',this)"><i class="fas fa-tachometer-alt"></i> Resumen</button>
+      <button class="tab-btn" onclick="switchTab('tabVentas',this)"><i class="fas fa-shopping-cart"></i> Ventas <span id="ventasBadge" class="badge badge-info" style="margin-left:4px;">0</span></button>
+      <button class="tab-btn" onclick="switchTab('tabFormaPago',this)"><i class="fas fa-credit-card"></i> Por Forma de Pago</button>
+      <button class="tab-btn" onclick="switchTab('tabObs',this)"><i class="fas fa-sticky-note"></i> Notas</button>
+    </div>
+
+    <!-- Tab: Resumen -->
+    <div class="tab-pane active" id="tabResumen">
+      <div id="detalleResumen"></div>
+    </div>
+
+    <!-- Tab: Ventas -->
+    <div class="tab-pane" id="tabVentas">
+      <div style="margin-bottom:10px;display:flex;align-items:center;gap:10px;">
+        <div class="search-wrapper" style="flex:1;">
+          <i class="fas fa-search search-icon"></i>
+          <input type="text" class="search-input" id="searchVentaDetalle" placeholder="Buscar venta o cliente..." oninput="filtrarVentasDetalle()">
+        </div>
+      </div>
+      <div id="detalleVentas"></div>
+    </div>
+
+    <!-- Tab: Forma de Pago -->
+    <div class="tab-pane" id="tabFormaPago">
+      <div id="detalleFormaPago"></div>
+    </div>
+
+    <!-- Tab: Notas -->
+    <div class="tab-pane" id="tabObs">
+      <div id="detalleObs"></div>
+    </div>
   </div>
 </div>
 
+<!-- Toasts -->
 <div class="toast toast-success" id="toastOk"><i class="fas fa-check-circle"></i><span id="toastOkMsg"></span></div>
 <div class="toast toast-error"   id="toastErr"><i class="fas fa-exclamation-circle"></i><span id="toastErrMsg"></span></div>
 
 <script>
 const API   = 'http://localhost:5000';
 const TOKEN = localStorage.getItem('token');
-let cuadresData = [];
+let cuadresData     = [];
+let ventasDetalleAll= [];
+let intervalVivo    = null;
 
+// ── Header ──────────────────────────────────────────────────────────────────
 fetch('header_menu_principal.html').then(r=>r.text()).then(h=>{
   document.getElementById('header-container').innerHTML=h;
-  document.querySelectorAll('#header-container script').forEach(s=>{const ns=document.createElement('script');ns.textContent=s.textContent;document.body.appendChild(ns);});
+  document.querySelectorAll('#header-container script').forEach(s=>{
+    const ns=document.createElement('script');ns.textContent=s.textContent;document.body.appendChild(ns);
+  });
 });
 
-function ok(m){const t=document.getElementById('toastOk');document.getElementById('toastOkMsg').textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3000);}
-function err(m){const t=document.getElementById('toastErr');document.getElementById('toastErrMsg').textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3500);}
+// ── Utilidades ──────────────────────────────────────────────────────────────
+function ok(m){const t=document.getElementById('toastOk');document.getElementById('toastOkMsg').textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3200);}
+function err(m){const t=document.getElementById('toastErr');document.getElementById('toastErrMsg').textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),4000);}
 function fmtRD(n){return'RD$ '+parseFloat(n||0).toLocaleString('es-DO',{minimumFractionDigits:2,maximumFractionDigits:2});}
-function fmtFecha(s){const d=new Date(s),p=n=>n<10?'0'+n:n;return`${p(d.getDate())}/${p(d.getMonth()+1)}/${d.getFullYear()} ${p(d.getHours())}:${p(d.getMinutes())}`;}
+function fmtFecha(s){
+  if(!s)return'—';
+  const d=new Date(s),p=n=>n<10?'0'+n:n;
+  return`${p(d.getDate())}/${p(d.getMonth()+1)}/${d.getFullYear()} ${p(d.getHours())}:${p(d.getMinutes())}`;
+}
 function cerrarModal(id){document.getElementById(id).classList.remove('active');}
+function fpClass(fp){
+  const m={efectivo:'fp-efectivo',tarjeta:'fp-tarjeta',transferencia:'fp-transferencia'};
+  return m[fp]||'fp-otro';
+}
+function fpIcon(fp){
+  const m={efectivo:'fa-money-bill-wave',tarjeta:'fa-credit-card',transferencia:'fa-exchange-alt'};
+  return m[fp]||'fa-question-circle';
+}
 
-// Inicializar fechas
+// ── Tabs ─────────────────────────────────────────────────────────────────────
+function switchTab(paneId, btn){
+  document.querySelectorAll('.tab-pane').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById(paneId).classList.add('active');
+  btn.classList.add('active');
+}
+
+// ── Init fechas ──────────────────────────────────────────────────────────────
 (function(){
   const hoy=new Date().toISOString().split('T')[0];
-  const hace30=new Date(Date.now()-30*24*60*60*1000).toISOString().split('T')[0];
+  const hace30=new Date(Date.now()-30*864e5).toISOString().split('T')[0];
   document.getElementById('filtroDesde').value=hace30;
   document.getElementById('filtroHasta').value=hoy;
 })();
 
+// ── Cargar cajeros para filtro ───────────────────────────────────────────────
+async function cargarCajerosFiltro(){
+  const cajeros=await fetch(`${API}/api/cajeros/activos`,{headers:{Authorization:`Bearer ${TOKEN}`}}).then(r=>r.json()).catch(()=>[]);
+  const sel=document.getElementById('filtroCajero');
+  cajeros.forEach(c=>{
+    const o=document.createElement('option');o.value=c.id;o.textContent=c.nombre;sel.appendChild(o);
+  });
+}
+
+// ── Limpiar filtros ──────────────────────────────────────────────────────────
 function limpiarFiltros(){
   const hoy=new Date().toISOString().split('T')[0];
-  const hace30=new Date(Date.now()-30*24*60*60*1000).toISOString().split('T')[0];
+  const hace30=new Date(Date.now()-30*864e5).toISOString().split('T')[0];
   document.getElementById('filtroDesde').value=hace30;
   document.getElementById('filtroHasta').value=hoy;
   document.getElementById('filtroEstado').value='';
+  document.getElementById('filtroCajero').value='';
   document.getElementById('searchCuadre').value='';
   cargarCuadres();
 }
 
+// ── Cargar historial ─────────────────────────────────────────────────────────
 async function cargarCuadres(){
-  const desde  = document.getElementById('filtroDesde').value;
-  const hasta  = document.getElementById('filtroHasta').value;
-  const estado = document.getElementById('filtroEstado').value;
-  const q      = document.getElementById('searchCuadre').value.toLowerCase();
+  const desde   = document.getElementById('filtroDesde').value;
+  const hasta   = document.getElementById('filtroHasta').value;
+  const estado  = document.getElementById('filtroEstado').value;
+  const cajeroId= document.getElementById('filtroCajero').value;
 
   let url = `${API}/api/cuadre-caja/historial?`;
-  if(desde) url+=`desde=${desde}&`;
-  if(hasta) url+=`hasta=${hasta}&`;
-  if(estado)url+=`estado=${estado}`;
+  if(desde)    url+=`desde=${desde}&`;
+  if(hasta)    url+=`hasta=${hasta}&`;
+  if(estado)   url+=`estado=${estado}&`;
+  if(cajeroId) url+=`cajero_id=${cajeroId}`;
 
-  const data = await fetch(url,{headers:{Authorization:`Bearer ${TOKEN}`}}).then(r=>r.json()).catch(()=>[]);
-  cuadresData = Array.isArray(data)?data:[];
+  const tbody=document.getElementById('tablaCuadres');
+  tbody.innerHTML=`<tr><td colspan="11" style="text-align:center;padding:30px;color:var(--text-muted);"><i class="fas fa-spinner fa-spin"></i> Cargando...</td></tr>`;
 
-  let filtrado = cuadresData;
-  if(q) filtrado=filtrado.filter(c=>c.cajero_nombre?.toLowerCase().includes(q));
-
-  renderTabla(filtrado);
-  actualizarKPIs(filtrado);
+  const data=await fetch(url,{headers:{Authorization:`Bearer ${TOKEN}`}}).then(r=>r.json()).catch(()=>[]);
+  cuadresData=Array.isArray(data)?data:[];
+  aplicarFiltrosLocales();
+  cargarCajasVivo();
 }
 
+function aplicarFiltrosLocales(){
+  const q=document.getElementById('searchCuadre').value.toLowerCase();
+  let lista=cuadresData;
+  if(q) lista=lista.filter(c=>c.cajero_nombre?.toLowerCase().includes(q)||c.cajero_usuario?.toLowerCase().includes(q));
+  renderTabla(lista);
+  actualizarKPIs(lista);
+}
+
+// ── Tabla ────────────────────────────────────────────────────────────────────
 function renderTabla(lista){
   const tbody=document.getElementById('tablaCuadres');
   document.getElementById('totalCuadres').textContent=`${lista.length} registros`;
   if(!lista.length){
-    tbody.innerHTML=`<tr><td colspan="10"><div class="empty-state"><i class="fas fa-inbox"></i><p>Sin cuadres en el período</p></div></td></tr>`;
+    tbody.innerHTML=`<tr><td colspan="11"><div class="empty-state"><i class="fas fa-inbox"></i><p>Sin cuadres en el período</p></div></td></tr>`;
     return;
   }
   tbody.innerHTML=lista.map(c=>{
     const dif=parseFloat(c.diferencia||0);
     const difClass=dif>0?'diferencia-pos':dif<0?'diferencia-neg':'diferencia-neu';
     const difIcon =dif>0?'fa-arrow-up':dif<0?'fa-arrow-down':'fa-minus';
+    const esAbierta=c.estado==='abierto';
     return`<tr>
       <td style="color:var(--text-muted);font-size:.8em;">#${c.id}</td>
       <td><strong>${c.cajero_nombre||'N/A'}</strong><br><small style="color:var(--text-muted);">${c.cajero_usuario||''}</small></td>
       <td style="font-size:.82em;">${fmtFecha(c.fecha_apertura)}</td>
-      <td style="font-size:.82em;">${c.fecha_cierre?fmtFecha(c.fecha_cierre):'<span style="color:var(--success);">En curso</span>'}</td>
+      <td style="font-size:.82em;">${c.fecha_cierre?fmtFecha(c.fecha_cierre):'<span style="color:var(--success);font-weight:600;"><span class=\'pulse-dot\'></span>En curso</span>'}</td>
       <td>${fmtRD(c.monto_apertura)}</td>
       <td><strong>${fmtRD(c.total_ventas)}</strong></td>
-      <td>${c.monto_real?fmtRD(c.monto_real):'—'}</td>
-      <td class="${difClass}"><i class="fas ${difIcon}" style="font-size:.75em;"></i> ${fmtRD(Math.abs(dif))}</td>
+      <td style="text-align:center;">${parseInt(c.total_transacciones||0)}</td>
+      <td>${c.monto_real?fmtRD(c.monto_real):'<span style="color:var(--text-muted);">—</span>'}</td>
+      <td class="${difClass}">
+        ${c.estado==='cerrado'?`<i class="fas ${difIcon}" style="font-size:.75em;"></i> ${fmtRD(Math.abs(dif))}`:'<span style="color:var(--text-muted);">—</span>'}
+      </td>
       <td><span class="estado-badge estado-${c.estado}">${c.estado}</span></td>
       <td>
-        <button class="btn btn-sm btn-secondary" onclick="verDetalle(${c.id})" title="Ver detalle"><i class="fas fa-eye"></i></button>
-        ${c.estado==='abierto'?`<button class="btn btn-sm btn-danger" onclick="abrirModalCerrar(${c.id})" title="Cerrar caja"><i class="fas fa-lock"></i></button>`:''}
+        <div style="display:flex;gap:6px;">
+          <button class="btn btn-sm btn-secondary" onclick="verDetalle(${c.id})" title="Ver detalle"><i class="fas fa-eye"></i></button>
+          ${esAbierta?`<button class="btn btn-sm btn-danger" onclick="abrirModalCerrar(${c.id})" title="Cerrar caja"><i class="fas fa-lock"></i></button>`:''}
+          ${!esAbierta?`<button class="btn btn-sm btn-ghost" onclick="imprimirCuadre(${c.id})" title="Imprimir"><i class="fas fa-print"></i></button>`:''}
+        </div>
       </td>
     </tr>`;
   }).join('');
 }
 
+// ── KPIs ─────────────────────────────────────────────────────────────────────
 function actualizarKPIs(lista){
   const abiertas=lista.filter(c=>c.estado==='abierto').length;
   const hoy=new Date().toISOString().split('T')[0];
   const hoyList=lista.filter(c=>c.fecha_apertura?.startsWith(hoy));
   const totalVentas=hoyList.reduce((s,c)=>s+parseFloat(c.total_ventas||0),0);
-  const totalDif=lista.reduce((s,c)=>s+parseFloat(c.diferencia||0),0);
+  const totalDif=lista.filter(c=>c.estado==='cerrado').reduce((s,c)=>s+parseFloat(c.diferencia||0),0);
   document.getElementById('kpiAbiertas').textContent=abiertas;
   document.getElementById('kpiCuadresHoy').textContent=hoyList.length;
   document.getElementById('kpiVentasHoy').textContent=fmtRD(totalVentas);
@@ -274,98 +447,292 @@ function actualizarKPIs(lista){
   dEl.className='stat-value '+(totalDif<0?'text-danger':totalDif>0?'text-success':'');
 }
 
+// ── Panel cajas vivo ──────────────────────────────────────────────────────────
+async function cargarCajasVivo(){
+  const data=await fetch(`${API}/api/cuadre-caja/abiertas`,{headers:{Authorization:`Bearer ${TOKEN}`}}).then(r=>r.json()).catch(()=>[]);
+  const panel=document.getElementById('panelCajasVivo');
+  const lista=document.getElementById('listaCajasVivo');
+  document.getElementById('badgeCajasVivo').textContent=data.length;
+  if(!data.length){panel.style.display='none';clearInterval(intervalVivo);return;}
+  panel.style.display='block';
+  lista.innerHTML=data.map(c=>{
+    const totalLive=parseFloat(c.total_ventas_live||0);
+    const esperado=parseFloat(c.monto_apertura||0)+totalLive;
+    return`<div class="caja-live-card">
+      <div>
+        <div class="caja-live-label">Cajero</div>
+        <div class="caja-live-val"><span class="pulse-dot"></span>${c.cajero_nombre}</div>
+        <small style="color:var(--text-muted);">${c.cajero_usuario||''}</small>
+      </div>
+      <div>
+        <div class="caja-live-label">Apertura</div>
+        <div class="caja-live-val" style="font-size:.9em;">${fmtFecha(c.fecha_apertura)}</div>
+        <small style="color:var(--text-muted);">${fmtRD(c.monto_apertura)} iniciales</small>
+      </div>
+      <div>
+        <div class="caja-live-label">Ventas Acumuladas</div>
+        <div class="caja-live-val text-primary">${fmtRD(totalLive)}</div>
+        <small style="color:var(--text-muted);">${parseInt(c.total_transacciones_live||0)} transacciones · Esperado ${fmtRD(esperado)}</small>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:6px;">
+        <button class="btn btn-sm btn-secondary" onclick="verDetalle(${c.id})"><i class="fas fa-eye"></i> Ver Ventas</button>
+        <button class="btn btn-sm btn-danger" onclick="abrirModalCerrar(${c.id})"><i class="fas fa-lock"></i> Cerrar</button>
+      </div>
+    </div>`;
+  }).join('');
+
+  // Auto-refrescar cada 60 s si hay cajas abiertas
+  if(!intervalVivo){
+    intervalVivo=setInterval(()=>{cargarCajasVivo();cargarCuadres();},60000);
+  }
+}
+
+// ── Modal Abrir Caja ──────────────────────────────────────────────────────────
 async function abrirModalAbrirCaja(){
   const cajeros=await fetch(`${API}/api/cajeros/activos`,{headers:{Authorization:`Bearer ${TOKEN}`}}).then(r=>r.json()).catch(()=>[]);
   const sel=document.getElementById('abrirCajero');
+  if(!cajeros.length){err('No hay cajeros activos registrados');return;}
   sel.innerHTML=cajeros.map(c=>`<option value="${c.id}">${c.nombre}</option>`).join('');
   document.getElementById('abrirMonto').value='';
+  document.getElementById('abrirNotas').value='';
   document.getElementById('modalAbrir').classList.add('active');
 }
 
 async function abrirCaja(){
   const cajero_id=parseInt(document.getElementById('abrirCajero').value);
   const monto=parseFloat(document.getElementById('abrirMonto').value)||0;
-  const res=await fetch(`${API}/api/cuadre-caja/abrir`,{method:'POST',headers:{'Content-Type':'application/json',Authorization:`Bearer ${TOKEN}`},body:JSON.stringify({cajero_id,monto_apertura:monto})}).then(r=>r.json());
+  const notas=document.getElementById('abrirNotas').value.trim();
+  const res=await fetch(`${API}/api/cuadre-caja/abrir`,{
+    method:'POST',
+    headers:{'Content-Type':'application/json',Authorization:`Bearer ${TOKEN}`},
+    body:JSON.stringify({cajero_id,monto_apertura:monto,notas_apertura:notas||undefined})
+  }).then(r=>r.json()).catch(()=>({message:'Error de red'}));
   if(res.cuadreId){ok('Caja abierta exitosamente');cerrarModal('modalAbrir');cargarCuadres();}
   else err(res.message||'Error al abrir caja');
 }
 
-function abrirModalCerrar(id){
+// ── Modal Cerrar Caja ─────────────────────────────────────────────────────────
+async function abrirModalCerrar(id){
   const c=cuadresData.find(x=>x.id===id);
   if(!c)return;
+
+  // Cargar ventas en vivo para el desglose
+  const ventasRes=await fetch(`${API}/api/cuadre-caja/ventas-caja/${id}`,{headers:{Authorization:`Bearer ${TOKEN}`}}).then(r=>r.json()).catch(()=>({ventas:[],resumen:{total:0,count:0,por_forma:{}}}));
+  const resumen=ventasRes.resumen||{total:0,count:0,por_forma:{}};
+  const totalVentasLive=resumen.total||0;
+  const porForma=resumen.por_forma||{};
+  const esperado=parseFloat(c.monto_apertura||0)+totalVentasLive;
+
   document.getElementById('cerrarCuadreId').value=id;
   document.getElementById('cerrarMontoReal').value='';
   document.getElementById('cerrarObs').value='';
   document.getElementById('diferenciaPreview').style.display='none';
+
   document.getElementById('resumenCierre').innerHTML=`
-    <div style="display:flex;justify-content:space-between;margin-bottom:6px;"><span>Cajero:</span><strong>${c.cajero_nombre}</strong></div>
-    <div style="display:flex;justify-content:space-between;margin-bottom:6px;"><span>Apertura:</span><strong>${fmtFecha(c.fecha_apertura)}</strong></div>
-    <div style="display:flex;justify-content:space-between;margin-bottom:6px;"><span>Total Ventas:</span><strong class="text-primary">${fmtRD(c.total_ventas)}</strong></div>
-    <div style="display:flex;justify-content:space-between;"><span>Monto Apertura:</span><strong>${fmtRD(c.monto_apertura)}</strong></div>`;
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px 20px;">
+      <div><span style="color:var(--text-muted);">Cajero:</span> <strong>${c.cajero_nombre}</strong></div>
+      <div><span style="color:var(--text-muted);">Estado:</span> <span class="estado-badge estado-abierto">Abierta</span></div>
+      <div><span style="color:var(--text-muted);">Apertura:</span> <strong>${fmtFecha(c.fecha_apertura)}</strong></div>
+      <div><span style="color:var(--text-muted);">Monto Apertura:</span> <strong>${fmtRD(c.monto_apertura)}</strong></div>
+      <div><span style="color:var(--text-muted);">Total Ventas:</span> <strong class="text-primary">${fmtRD(totalVentasLive)}</strong></div>
+      <div><span style="color:var(--text-muted);">Transacciones:</span> <strong>${resumen.count||0}</strong></div>
+      <div style="grid-column:1/-1;border-top:1px solid var(--border);padding-top:8px;margin-top:4px;">
+        <span style="color:var(--text-muted);">Monto Esperado en Caja:</span>
+        <strong style="color:var(--primary);font-size:1.05em;"> ${fmtRD(esperado)}</strong>
+      </div>
+    </div>`;
+
+  // Desglose forma de pago
+  const fpKeys=Object.keys(porForma);
+  const fpDiv=document.getElementById('desgloseFP');
+  if(fpKeys.length){
+    fpDiv.style.display='block';
+    document.getElementById('desgloseFPContent').innerHTML=fpKeys.map(fp=>{
+      const monto=porForma[fp]||0;
+      const pct=totalVentasLive>0?Math.round(monto/totalVentasLive*100):0;
+      return`<div class="fp-row">
+        <span class="estado-badge ${fpClass(fp)}" style="width:110px;text-align:center;"><i class="fas ${fpIcon(fp)}"></i> ${fp}</span>
+        <div class="fp-bar-bg"><div class="fp-bar-fill" style="width:${pct}%;background:${fp==='efectivo'?'var(--success)':fp==='tarjeta'?'#4f8ef7':'#c79b00'};"></div></div>
+        <span style="font-weight:700;min-width:90px;text-align:right;">${fmtRD(monto)}</span>
+        <span style="color:var(--text-muted);font-size:.8em;min-width:36px;">${pct}%</span>
+      </div>`;
+    }).join('');
+  } else fpDiv.style.display='none';
+
+  // Guardar datos para calcularDiferencia
+  document.getElementById('cerrarMontoReal').dataset.esperado=esperado;
   document.getElementById('modalCerrar').classList.add('active');
 }
 
 function calcularDiferencia(){
-  const id=parseInt(document.getElementById('cerrarCuadreId').value);
-  const c=cuadresData.find(x=>x.id===id);
   const real=parseFloat(document.getElementById('cerrarMontoReal').value)||0;
-  const esperado=parseFloat(c?.monto_apertura||0)+parseFloat(c?.total_ventas||0);
+  const esperado=parseFloat(document.getElementById('cerrarMontoReal').dataset.esperado||0);
   const dif=real-esperado;
   const el=document.getElementById('diferenciaPreview');
   el.style.display='block';
   el.style.background=dif>=0?'rgba(0,204,102,.08)':'rgba(244,67,54,.08)';
   el.style.border=dif>=0?'1px solid rgba(0,204,102,.2)':'1px solid rgba(244,67,54,.2)';
   el.style.color=dif>=0?'var(--success)':'var(--danger)';
-  el.innerHTML=`<i class="fas fa-balance-scale"></i> Esperado: ${fmtRD(esperado)} · Real: ${fmtRD(real)} · Diferencia: <strong>${dif>=0?'+':''}${fmtRD(dif)}</strong>`;
+  const icon=dif>0?'fa-arrow-up':dif<0?'fa-arrow-down':'fa-check';
+  el.innerHTML=`<i class="fas ${icon}"></i> &nbsp;Esperado: <strong>${fmtRD(esperado)}</strong> &nbsp;·&nbsp; Real: <strong>${fmtRD(real)}</strong> &nbsp;·&nbsp; Diferencia: <strong>${dif>=0?'+':''}${fmtRD(dif)}</strong>`;
 }
 
 async function cerrarCaja(){
   const id=parseInt(document.getElementById('cerrarCuadreId').value);
   const monto_real=parseFloat(document.getElementById('cerrarMontoReal').value)||0;
   const obs=document.getElementById('cerrarObs').value;
-  const res=await fetch(`${API}/api/cuadre-caja/cerrar/${id}`,{method:'POST',headers:{'Content-Type':'application/json',Authorization:`Bearer ${TOKEN}`},body:JSON.stringify({monto_real,observaciones:obs})}).then(r=>r.json());
-  if(res.message?.includes('cerrada')||res.cuadreId||res.ok){ok('Caja cerrada');cerrarModal('modalCerrar');cargarCuadres();}
-  else err(res.message||'Error al cerrar caja');
+  const res=await fetch(`${API}/api/cuadre-caja/cerrar/${id}`,{
+    method:'POST',
+    headers:{'Content-Type':'application/json',Authorization:`Bearer ${TOKEN}`},
+    body:JSON.stringify({monto_real,observaciones:obs})
+  }).then(r=>r.json()).catch(()=>({message:'Error de red'}));
+  if(res.message?.toLowerCase().includes('cerrada')){
+    ok('Caja cerrada exitosamente');
+    cerrarModal('modalCerrar');
+    cargarCuadres();
+  } else err(res.message||'Error al cerrar caja');
 }
 
+// ── Detalle del cuadre ────────────────────────────────────────────────────────
 async function verDetalle(id){
+  // Resetear tabs
+  document.querySelectorAll('.tab-pane').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelector('.tab-pane').classList.add('active');
+  document.querySelector('.tab-btn').classList.add('active');
+
+  document.getElementById('detalleResumen').innerHTML=`<div style="text-align:center;padding:30px;color:var(--text-muted);"><i class="fas fa-spinner fa-spin fa-2x"></i></div>`;
+  document.getElementById('modalDetalle').classList.add('active');
+
   const res=await fetch(`${API}/api/cuadre-caja/detalle/${id}`,{headers:{Authorization:`Bearer ${TOKEN}`}}).then(r=>r.json()).catch(()=>null);
-  if(!res){err('Error al cargar detalle');return;}
+  if(!res){err('Error al cargar detalle');cerrarModal('modalDetalle');return;}
+
   const c=res.cuadre||res;
   const ventas=res.ventas||[];
+  const rsm=res.resumen||{};
+  const totalVentasLive=rsm.total_ventas_live||parseFloat(c.total_ventas||0);
+  const porForma=rsm.por_forma_pago||{};
   const dif=parseFloat(c.diferencia||0);
-  document.getElementById('detalleContent').innerHTML=`
-    <div class="form-row mb-16">
-      <div class="info-cliente-item"><strong style="font-size:.72em;text-transform:uppercase;color:var(--text-muted);">Cajero</strong><span>${c.cajero_nombre}</span></div>
-      <div class="info-cliente-item"><strong style="font-size:.72em;text-transform:uppercase;color:var(--text-muted);">Estado</strong><span class="estado-badge estado-${c.estado}">${c.estado}</span></div>
-      <div class="info-cliente-item"><strong style="font-size:.72em;text-transform:uppercase;color:var(--text-muted);">Apertura</strong><span>${fmtFecha(c.fecha_apertura)}</span></div>
-      <div class="info-cliente-item"><strong style="font-size:.72em;text-transform:uppercase;color:var(--text-muted);">Cierre</strong><span>${c.fecha_cierre?fmtFecha(c.fecha_cierre):'En curso'}</span></div>
+  ventasDetalleAll=ventas;
+
+  // ── Título
+  document.getElementById('detalleTitulo').innerHTML=`<i class="fas fa-info-circle"></i> Cuadre #${c.id} — ${c.cajero_nombre}`;
+  document.getElementById('ventasBadge').textContent=ventas.length;
+
+  // ── Tab Resumen
+  const esAbierta=c.estado==='abierto';
+  document.getElementById('detalleResumen').innerHTML=`
+    <div class="form-row mb-16" style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px;">
+      <div style="background:var(--bg3);border-radius:10px;padding:14px;text-align:center;">
+        <div class="stat-label">Apertura</div>
+        <div style="font-size:1.1em;font-weight:800;margin-top:4px;">${fmtRD(c.monto_apertura)}</div>
+        <small style="color:var(--text-muted);">${fmtFecha(c.fecha_apertura)}</small>
+      </div>
+      <div style="background:var(--bg3);border-radius:10px;padding:14px;text-align:center;">
+        <div class="stat-label">Total Ventas</div>
+        <div class="text-primary" style="font-size:1.1em;font-weight:800;margin-top:4px;">${fmtRD(totalVentasLive)}</div>
+        <small style="color:var(--text-muted);">${ventas.length} transacciones</small>
+      </div>
+      <div style="background:var(--bg3);border-radius:10px;padding:14px;text-align:center;">
+        <div class="stat-label">Monto Esperado</div>
+        <div style="font-size:1.1em;font-weight:800;margin-top:4px;">${fmtRD((parseFloat(c.monto_apertura)||0)+totalVentasLive)}</div>
+        <small style="color:var(--text-muted);">Apertura + Ventas</small>
+      </div>
+      <div style="background:var(--bg3);border-radius:10px;padding:14px;text-align:center;">
+        <div class="stat-label">${esAbierta?'Estado':'Monto Real'}</div>
+        <div style="font-size:1.1em;font-weight:800;margin-top:4px;">${esAbierta?'<span class="estado-badge estado-abierto">Abierta</span>':fmtRD(c.monto_real)}</div>
+        ${!esAbierta?`<small class="${dif>0?'text-success':dif<0?'text-danger':''}" style="font-weight:700;">${dif>=0?'+':''}${fmtRD(dif)} diferencia</small>`:''}
+      </div>
     </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px;margin-bottom:16px;text-align:center;">
-      <div class="stat-card" style="flex-direction:column;gap:4px;padding:14px;">
-        <div class="stat-label">Apertura</div><div style="font-size:1.1em;font-weight:800;">${fmtRD(c.monto_apertura)}</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:.88em;">
+      <div style="background:var(--bg3);border-radius:10px;padding:12px;">
+        <div class="caja-live-label">Información del Cajero</div>
+        <div style="margin-top:6px;"><strong>${c.cajero_nombre}</strong></div>
+        <div style="color:var(--text-muted);">@${c.cajero_usuario||'—'}</div>
       </div>
-      <div class="stat-card" style="flex-direction:column;gap:4px;padding:14px;">
-        <div class="stat-label">Ventas</div><div class="text-primary" style="font-size:1.1em;font-weight:800;">${fmtRD(c.total_ventas)}</div>
+      <div style="background:var(--bg3);border-radius:10px;padding:12px;">
+        <div class="caja-live-label">Fechas</div>
+        <div style="margin-top:6px;"><i class="fas fa-lock-open" style="color:var(--success);width:16px;"></i> ${fmtFecha(c.fecha_apertura)}</div>
+        <div style="color:var(--text-muted);"><i class="fas fa-lock" style="color:var(--danger);width:16px;"></i> ${c.fecha_cierre?fmtFecha(c.fecha_cierre):'En curso...'}</div>
       </div>
-      <div class="stat-card" style="flex-direction:column;gap:4px;padding:14px;">
-        <div class="stat-label">Real</div><div style="font-size:1.1em;font-weight:800;">${c.monto_real?fmtRD(c.monto_real):'—'}</div>
+    </div>`;
+
+  // ── Tab Ventas
+  renderVentasDetalle(ventas);
+
+  // ── Tab Forma de Pago
+  const fpKeys=Object.keys(porForma);
+  document.getElementById('detalleFormaPago').innerHTML=fpKeys.length?`
+    <div style="margin-bottom:16px;">
+      ${fpKeys.map(fp=>{
+        const monto=porForma[fp]||0;
+        const pct=totalVentasLive>0?((monto/totalVentasLive)*100).toFixed(1):0;
+        return`<div style="background:var(--bg3);border-radius:12px;padding:14px;margin-bottom:10px;display:flex;align-items:center;gap:16px;">
+          <span class="estado-badge ${fpClass(fp)}" style="width:130px;text-align:center;font-size:.82em;">
+            <i class="fas ${fpIcon(fp)}"></i> ${fp.toUpperCase()}
+          </span>
+          <div class="fp-bar-bg" style="flex:1;"><div class="fp-bar-fill" style="width:${pct}%;background:${fp==='efectivo'?'var(--success)':fp==='tarjeta'?'#4f8ef7':'#c79b00'};"></div></div>
+          <div style="text-align:right;min-width:110px;">
+            <div style="font-weight:800;">${fmtRD(monto)}</div>
+            <small style="color:var(--text-muted);">${pct}% del total</small>
+          </div>
+        </div>`;
+      }).join('')}
+      <div style="background:var(--bg3);border-radius:12px;padding:14px;display:flex;justify-content:space-between;align-items:center;border:1px solid var(--border);">
+        <strong>Total General</strong>
+        <strong class="text-primary" style="font-size:1.1em;">${fmtRD(totalVentasLive)}</strong>
       </div>
-      <div class="stat-card" style="flex-direction:column;gap:4px;padding:14px;">
-        <div class="stat-label">Diferencia</div>
-        <div class="${dif>0?'diferencia-pos':dif<0?'diferencia-neg':'diferencia-neu'}" style="font-size:1.1em;">${dif>=0?'+':''}${fmtRD(dif)}</div>
-      </div>
-    </div>
-    ${ventas.length?`<div class="card-title mb-8"><i class="fas fa-shopping-cart"></i> Ventas del período (${ventas.length})</div>
-    <div class="table-wrapper"><table>
-      <thead><tr><th>#</th><th>Fecha</th><th>Cliente</th><th>Forma Pago</th><th>Total</th></tr></thead>
-      <tbody>${ventas.map(v=>`<tr><td>#${v.id}</td><td style="font-size:.8em;">${fmtFecha(v.fecha)}</td><td>${v.cliente_nombre||'N/A'}</td>
-        <td><span class="badge badge-info">${v.forma_pago||'efectivo'}</span></td><td><strong>${fmtRD(v.total)}</strong></td></tr>`).join('')}
-      </tbody></table></div>`:'<p style="text-align:center;padding:20px;color:var(--text-muted);">Sin ventas en este período</p>'}
-    ${c.observaciones?`<div class="info-cliente mt-16"><strong style="font-size:.78em;text-transform:uppercase;color:var(--text-muted);">Observaciones</strong><p style="margin-top:6px;">${c.observaciones}</p></div>`:''}`;
-  document.getElementById('modalDetalle').classList.add('active');
+    </div>`:'<p style="text-align:center;padding:30px;color:var(--text-muted);">Sin ventas registradas</p>';
+
+  // ── Tab Notas
+  document.getElementById('detalleObs').innerHTML=`
+    <div style="padding:8px 0;">
+      ${c.observaciones?`
+        <div style="background:var(--bg3);border-radius:12px;padding:16px;font-size:.9em;line-height:1.6;">
+          <div class="caja-live-label" style="margin-bottom:8px;"><i class="fas fa-sticky-note"></i> Observaciones</div>
+          ${c.observaciones}
+        </div>`:'<p style="text-align:center;padding:30px;color:var(--text-muted);"><i class="fas fa-sticky-note"></i><br>Sin observaciones registradas</p>'}
+    </div>`;
 }
 
+function renderVentasDetalle(ventas){
+  document.getElementById('detalleVentas').innerHTML=ventas.length?`
+    <div class="table-wrapper"><table>
+      <thead><tr><th>#</th><th>Fecha</th><th>Cliente</th><th>Forma Pago</th><th style="text-align:right;">Total</th></tr></thead>
+      <tbody>${ventas.map(v=>`
+        <tr>
+          <td style="color:var(--text-muted);font-size:.8em;">#${v.id}</td>
+          <td style="font-size:.82em;">${fmtFecha(v.fecha)}</td>
+          <td>${v.cliente_nombre||'<span style="color:var(--text-muted);">Cliente general</span>'}</td>
+          <td><span class="estado-badge ${fpClass(v.forma_pago||'efectivo')}" style="font-size:.74em;padding:3px 10px;">
+            <i class="fas ${fpIcon(v.forma_pago||'efectivo')}"></i> ${(v.forma_pago||'efectivo').toUpperCase()}
+          </span></td>
+          <td style="text-align:right;"><strong>${fmtRD(v.total)}</strong></td>
+        </tr>`).join('')}
+      </tbody>
+    </table></div>`:'<p style="text-align:center;padding:30px;color:var(--text-muted);">Sin ventas en este cuadre</p>';
+}
+
+function filtrarVentasDetalle(){
+  const q=document.getElementById('searchVentaDetalle').value.toLowerCase();
+  const filtradas=ventasDetalleAll.filter(v=>
+    String(v.id).includes(q)||
+    (v.cliente_nombre||'').toLowerCase().includes(q)||
+    (v.forma_pago||'').toLowerCase().includes(q)
+  );
+  renderVentasDetalle(filtradas);
+}
+
+// ── Imprimir ──────────────────────────────────────────────────────────────────
+function imprimirDetalle(){window.print();}
+
+async function imprimirCuadre(id){
+  await verDetalle(id);
+  setTimeout(()=>window.print(),400);
+}
+
+// ── Inicializar ───────────────────────────────────────────────────────────────
+cargarCajerosFiltro();
 cargarCuadres();
 </script>
 </body>

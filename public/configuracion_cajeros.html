@@ -47,7 +47,7 @@ body {
 }
 
 .page-title i {
-    color: #ff9800;
+    color: var(--color-excel);
 }
 
 .actions-bar {
@@ -61,28 +61,28 @@ body {
     padding: 12px 24px;
     border: none;
     border-radius: 8px;
-    background: linear-gradient(90deg, #ff9800, #ffb74d);
+    background: var(--gradient);
     color: white;
     font-weight: 700;
     cursor: pointer;
     display: flex;
     align-items: center;
     gap: 8px;
-    box-shadow: 0 4px 12px rgba(255, 152, 0, 0.3);
+    box-shadow: var(--shadow-sm);
     transition: all 0.3s;
 }
 
 .btn-primary:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(255, 152, 0, 0.4);
+    box-shadow: var(--shadow-md);
 }
 
 .btn-secondary {
     padding: 12px 24px;
-    border: 2px solid #ff9800;
+    border: 2px solid var(--color-excel);
     border-radius: 8px;
     background: var(--card-bg);
-    color: #ff9800;
+    color: var(--color-excel);
     font-weight: 700;
     cursor: pointer;
     display: inline-flex;
@@ -92,7 +92,7 @@ body {
 }
 
 .btn-secondary:hover {
-    background: #fff3e0;
+    background: rgba(var(--warning-rgb),0.08);
 }
 
 .tabla-card {
@@ -109,7 +109,7 @@ table {
 }
 
 thead {
-    background: linear-gradient(135deg, #ff9800, #f57c00);
+    background: var(--gradient);
 }
 
 th {
@@ -123,12 +123,12 @@ th {
 
 td {
     padding: 12px;
-    border-bottom: 1px solid #f0f0f0;
+    border-bottom: 1px solid var(--border);
     color: var(--text);
 }
 
 tbody tr:hover {
-    background: #fff3e0;
+    background: rgba(var(--warning-rgb),0.08);
 }
 
 .badge {
@@ -139,13 +139,13 @@ tbody tr:hover {
 }
 
 .badge-activo {
-    background: #e8f5e9;
-    color: #2e7d32;
+    background: rgba(var(--primary-rgb),0.1);
+    color: var(--success);
 }
 
 .badge-inactivo {
-    background: #ffebee;
-    color: #c62828;
+    background: rgba(var(--danger-rgb),0.1);
+    color: var(--danger);
 }
 
 .btn-icon {
@@ -158,12 +158,12 @@ tbody tr:hover {
 }
 
 .btn-editar {
-    background: #2196f3;
+    background: var(--color-editar);
     color: white;
 }
 
 .btn-eliminar {
-    background: #f44336;
+    background: var(--color-eliminar);
     color: white;
 }
 
@@ -179,7 +179,7 @@ tbody tr:hover {
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.5);
+    background: var(--modal-overlay);
     z-index: 9999;
     align-items: center;
     justify-content: center;
@@ -235,7 +235,7 @@ tbody tr:hover {
 .form-group select {
     width: 100%;
     padding: 10px 12px;
-    border: 2px solid #e0e0e0;
+    border: 2px solid var(--border);
     border-radius: 8px;
     font-size: 1em;
     transition: all 0.2s;
@@ -244,8 +244,8 @@ tbody tr:hover {
 .form-group input:focus,
 .form-group select:focus {
     outline: none;
-    border-color: #ff9800;
-    box-shadow: 0 0 0 3px rgba(255, 152, 0, 0.1);
+    border-color: var(--color-excel);
+    box-shadow: 0 0 0 3px rgba(var(--warning-rgb),0.15);
 }
 
 .modal-actions {
@@ -261,13 +261,13 @@ tbody tr:hover {
 }
 
 .info-box {
-    background: #e3f2fd;
-    border-left: 4px solid #2196f3;
+    background: rgba(var(--secondary-rgb),0.08);
+    border-left: 4px solid var(--color-editar);
     padding: 12px;
     margin-bottom: 16px;
     border-radius: 4px;
     font-size: 0.9em;
-    color: #1565c0;
+    color: var(--color-editar);
 }
     </style>
 </head>
@@ -402,7 +402,7 @@ tbody tr:hover {
                     tbody.innerHTML = '';
                     
                     if (cajeros.length === 0) {
-                        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding: 40px; color: #999;">No hay cajeros registrados</td></tr>';
+                        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding: 40px; color: var(--text-muted);">No hay cajeros registrados</td></tr>';
                         return;
                     }
                     
@@ -411,7 +411,7 @@ tbody tr:hover {
                         tr.innerHTML = `
                             <td>${cajero.id}</td>
                             <td>${cajero.nombre}</td>
-                            <td>${cajero.username || '<span style="color: #999;">Sin usuario</span>'}</td>
+                            <td>${cajero.username || '<span style="color: var(--text-muted);">Sin usuario</span>'}</td>
                             <td>${cajero.email || 'N/A'}</td>
                             <td>${cajero.telefono || 'N/A'}</td>
                             <td>

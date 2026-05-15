@@ -84,6 +84,36 @@ button, input, select, textarea { font-family: inherit; }
   --sidebar-border: rgba(255,255,255,0.06);
   --sidebar-active: rgba(0,204,102,0.1);
   --sidebar-hover:  rgba(255,255,255,0.04);
+
+  /* ── Inventario / páginas de productos ── */
+  --page-bg-inv:         linear-gradient(135deg, #0d1117 0%, #161b22 100%);
+  --glass-bg:            rgba(22,27,34,0.85);
+  --glass-border:        rgba(255,255,255,0.08);
+  --glass-shadow:        0 12px 36px rgba(0,0,0,0.6), 0 4px 16px rgba(0,0,0,0.4);
+  --input-bg-inv:        rgba(33,38,45,0.9);
+  --input-border-inv:    rgba(255,255,255,0.1);
+  --accent-blue:         #4f8ef7;
+  --accent-blue-bg:      rgba(79,142,247,0.12);
+  --table-head-inv:      #1f2937;
+  --table-row-inv:       rgba(22,27,34,0.9);
+  --table-border-inv:    rgba(255,255,255,0.06);
+  --highlight-row:       rgba(79,142,247,0.2);
+  --card-hover-inv:      rgba(255,255,255,0.05);
+  --warning-note-bg:     rgba(255,152,0,0.1);
+  --warning-note-border: var(--warning);
+  --warning-note-text:   #ffb74d;
+  --subtitle-color:      #8b949e;
+  --stat-label-color:    #8b949e;
+  --modal-h3-color:      #4f8ef7;
+  --modal-close-color:   #8b949e;
+  --search-result-hover: rgba(255,255,255,0.05);
+  --file-upload-icon:    #4f8ef7;
+  --file-name-color:     #4f8ef7;
+  --color-crear:         #4caf50;
+  --color-editar:        #4f8ef7;
+  --color-eliminar:      #f44336;
+  --color-excel:         #ff9800;
+  --color-consultar:     #9c27b0;
 }
 
 /* ====================================================
@@ -156,6 +186,36 @@ button, input, select, textarea { font-family: inherit; }
   --sidebar-border: rgba(0,0,0,0.07);
   --sidebar-active: rgba(0,168,84,0.08);
   --sidebar-hover:  rgba(0,0,0,0.03);
+
+  /* ── Inventario / páginas de productos ── */
+  --page-bg-inv:         #f4f6f9;
+  --glass-bg:            #ffffff;
+  --glass-border:        rgba(0,0,0,0.07);
+  --glass-shadow:        0 2px 8px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.05);
+  --input-bg-inv:        #ffffff;
+  --input-border-inv:    rgba(0,0,0,0.13);
+  --accent-blue:         #1769aa;
+  --accent-blue-bg:      rgba(23,105,170,0.05);
+  --table-head-inv:      #1976d2;
+  --table-row-inv:       rgba(255,255,255,0.9);
+  --table-border-inv:    #e0e0e0;
+  --highlight-row:       #73c0f7;
+  --card-hover-inv:      #eef6ff;
+  --warning-note-bg:     rgba(255,235,59,0.2);
+  --warning-note-border: #ffc107;
+  --warning-note-text:   #795548;
+  --subtitle-color:      #555555;
+  --stat-label-color:    #555555;
+  --modal-h3-color:      #1769aa;
+  --modal-close-color:   #888888;
+  --search-result-hover: #eef6ff;
+  --file-upload-icon:    #1769aa;
+  --file-name-color:     #1769aa;
+  --color-crear:         #4caf50;
+  --color-editar:        #2196f3;
+  --color-eliminar:      #f44336;
+  --color-excel:         #ff9800;
+  --color-consultar:     #9c27b0;
 }
 
 /* ====================================================

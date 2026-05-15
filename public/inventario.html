@@ -17,7 +17,7 @@
 
 body {
   font-family: 'Roboto', sans-serif;
-  background: var(--bg);
+  background: var(--page-bg-inv);
   min-height: 100vh;
   padding-top: 80px;
   overflow-x: hidden;
@@ -42,7 +42,7 @@ body {
 .subtitle {
   text-align: center;
   font-size: 1.1em;
-  color: #555;
+  color: var(--subtitle-color);
   margin-bottom: 48px;
 }
 
@@ -68,7 +68,7 @@ body {
   align-items: center;
   justify-content: center;
   box-shadow: var(--shadow-sm);
-  border: 1px solid rgba(255, 255, 255, 0.5);
+  border: 1px solid var(--glass-border);
   cursor: pointer;
   transition: all 0.3s cubic-bezier(.23, 1.01, .32, 1);
   position: relative;
@@ -83,7 +83,7 @@ body {
   left: 0;
   width: 100%;
   height: 4px;
-  background: linear-gradient(90deg, #00cc66, #66ccff);
+  background: var(--gradient);
   transform: scaleX(0);
   transition: transform 0.3s;
 }
@@ -94,20 +94,20 @@ body {
 
 .card:hover {
   transform: translateY(-8px) scale(1.02);
-  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+  box-shadow: var(--shadow-md);
 }
 
 /* ===== CARD ICON ===== */
 .card i {
   font-size: 3.5em;
-  color: #00cc66;
+  color: var(--primary);
   margin-bottom: 20px;
   transition: all 0.3s;
 }
 
 .card:hover i {
   transform: scale(1.1);
-  color: #00dd77;
+  color: var(--primary-dark);
 }
 
 /* ===== CARD TITLE ===== */
@@ -127,17 +127,17 @@ body {
 }
 
 /* ===== CARD VARIANTS ===== */
-.card.crear { border-top: 3px solid #4caf50; }
-.card.editar { border-top: 3px solid #2196f3; }
-.card.eliminar { border-top: 3px solid #f44336; }
-.card.excel { border-top: 3px solid #ff9800; }
-.card.consultar { border-top: 3px solid #9c27b0; }
+.card.crear { border-top: 3px solid var(--color-crear); }
+.card.editar { border-top: 3px solid var(--color-editar); }
+.card.eliminar { border-top: 3px solid var(--color-eliminar); }
+.card.excel { border-top: 3px solid var(--color-excel); }
+.card.consultar { border-top: 3px solid var(--color-consultar); }
 
-.card.crear i { color: #4caf50; }
-.card.editar i { color: #2196f3; }
-.card.eliminar i { color: #f44336; }
-.card.excel i { color: #ff9800; }
-.card.consultar i { color: #9c27b0; }
+.card.crear i { color: var(--color-crear); }
+.card.editar i { color: var(--color-editar); }
+.card.eliminar i { color: var(--color-eliminar); }
+.card.excel i { color: var(--color-excel); }
+.card.consultar i { color: var(--color-consultar); }
 
 /* ===== STATS SECTION ===== */
 .stats-section {
@@ -153,7 +153,7 @@ body {
   border-radius: 12px;
   padding: 24px;
   box-shadow: var(--shadow-sm);
-  border: 1px solid rgba(255, 255, 255, 0.5);
+  border: 1px solid var(--glass-border);
   transition: transform 0.2s;
 }
 
@@ -163,7 +163,7 @@ body {
 
 .stat-card h4 {
   margin: 0 0 8px 0;
-  color: #555;
+  color: var(--stat-label-color);
   font-size: 0.85em;
   font-weight: 600;
   text-transform: uppercase;
@@ -173,7 +173,7 @@ body {
 .stat-card span {
   font-size: 1.8em;
   font-weight: 700;
-  color: #00cc66;
+  color: var(--primary);
 }
 
 /* ===== RESPONSIVE ===== */
@@ -252,7 +252,7 @@ body {
       </div>
       <div class="stat-card">
         <h4>Sin Stock</h4>
-        <span id="sinStock" style="color: #f44336;">0</span>
+        <span id="sinStock" style="color: var(--color-eliminar);">0</span>
       </div>
     </div>
 
@@ -291,13 +291,47 @@ body {
   </section>
 
   <script>
+    const API   = 'http://localhost:5000';
+    const TOKEN = localStorage.getItem('token');
+
+    // Mapa página → selector de card en inventario
+    const CARDS_INVENTARIO = [
+      { pagina: 'crear_producto.html',    selector: 'a[href="crear_producto.html"]'    },
+      { pagina: 'editar_producto.html',   selector: 'a[href="editar_producto.html"]'   },
+      { pagina: 'eliminar_producto.html', selector: 'a[href="eliminar_producto.html"]' },
+      { pagina: 'cargar_excel.html',      selector: 'a[href="cargar_excel.html"]'      },
+      { pagina: 'consultar_productos.html', selector: 'a[href="consultar_productos.html"]' },
+    ];
+
+    async function aplicarPermisosInventario() {
+      const user = JSON.parse(localStorage.getItem('user') || '{}');
+      const esAdmin = user.rol === 'admin';
+      if (esAdmin && !user.rol_id) return; // admin total, no filtrar
+
+      try {
+        const res = await fetch(`${API}/api/roles/usuario/${user.id}`, {
+          headers: { Authorization: `Bearer ${TOKEN}` }
+        });
+        if (!res.ok) return;
+        const permisos = await res.json();
+
+        CARDS_INVENTARIO.forEach(c => {
+          const el = document.querySelector(c.selector);
+          if (el && !permisos.includes(c.pagina)) {
+            el.style.display = 'none';
+          }
+        });
+      } catch(e) {
+        console.error('Error al obtener permisos de inventario:', e);
+      }
+    }
+
     // Cargar header global
     document.addEventListener('DOMContentLoaded', function() {
       fetch('header.html')
         .then(r => r.text())
         .then(html => {
           document.getElementById('header-container').innerHTML = html;
-          // Ejecutar los scripts del header
           const scripts = document.getElementById('header-container').querySelectorAll('script');
           scripts.forEach(script => {
             const newScript = document.createElement('script');
@@ -309,19 +343,19 @@ body {
             document.body.appendChild(newScript);
           });
         });
-      
-      // Cargar estadísticas
+
       cargarEstadisticas();
+      aplicarPermisosInventario();
     });
 
     function cargarEstadisticas() {
-      fetch('http://localhost:5000/api/inventory/all')
+      fetch(`${API}/api/inventory/all`)
         .then(r => r.json())
         .then(productos => {
           const total = productos.length;
           const sinStock = productos.filter(p => p.cantidad === 0).length;
           const enStock = total - sinStock;
-          
+
           document.getElementById('totalProductos').textContent = total;
           document.getElementById('enStock').textContent = enStock;
           document.getElementById('sinStock').textContent = sinStock;
