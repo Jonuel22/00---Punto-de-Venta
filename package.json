@@ -30,14 +30,27 @@
   "build": {
     "appId": "com.jctechnology.puntoventa",
     "productName": "Punto de Venta JCTechnology",
+    "asar": true,
+    "asarUnpack": [
+      "server.js",
+      "routes/**/*",
+      "public/**/*",
+      "*.html",
+      "*.css",
+      "*.js",
+      "LOGO.jpg",
+      "LOGO.ico",
+      "images/**/*",
+      "node_modules/**/*"
+    ],
     "win": {
       "target": "nsis",
-      "icon": "LOGO.jpg"
+      "icon": "LOGO.ico"
     },
     "nsis": {
       "oneClick": false,
       "allowToChangeInstallationDirectory": true,
-      "installerHeaderIcon": "LOGO.jpg",
+      "installerHeaderIcon": "LOGO.ico",
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
       "shortcutName": "Punto de Venta"

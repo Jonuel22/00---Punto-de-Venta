@@ -5,12 +5,15 @@ const cors       = require('cors');
 const cookieParser = require('cookie-parser');
 
 const app  = express();
-const port = 5000;
+const port = process.env.PORT || 5000;
+
+// En producción (Electron .exe) APP_ROOT apunta a app.asar.unpacked
+const appRoot = process.env.APP_ROOT || __dirname;
 
 app.use(cors({ origin: true, credentials: true }));
 app.use(bodyParser.json());
 app.use(cookieParser());
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(appRoot, 'public')));
 
 // Importar rutas y middleware
 const authRoutes          = require('./routes/auth');
@@ -23,7 +26,7 @@ const cuadreCajaRoutes    = require('./routes/cuadre_caja');
 const usuariosRouter      = require('./routes/usuarios');
 const clientes_backendRouter = require('./routes/clientes_backend');
 const configRouter        = require('./routes/config');
-const rolesRouter         = require('./routes/roles');          // ← NUEVO
+const rolesRouter         = require('./routes/roles');
 const { authMiddleware }  = require('./routes/authMiddleware');
 
 // No-cache middleware
@@ -47,7 +50,7 @@ app.use('/api/cuadre-caja',   authMiddleware, noCacheHeaders, cuadreCajaRoutes);
 app.use('/api/usuarios',      authMiddleware, noCacheHeaders, usuariosRouter);
 app.use('/api/config',        authMiddleware, noCacheHeaders, configRouter);
 app.use('/api/clientes',      authMiddleware, noCacheHeaders, clientes_backendRouter);
-app.use('/api/roles',         authMiddleware, noCacheHeaders, rolesRouter);  // ← NUEVO
+app.use('/api/roles',         authMiddleware, noCacheHeaders, rolesRouter);
 
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);

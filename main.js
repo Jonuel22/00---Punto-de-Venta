@@ -1,36 +1,63 @@
 const { app, BrowserWindow, dialog } = require('electron');
 const path = require('path');
-const { spawn } = require('child_process');
+const { spawn, execSync } = require('child_process');
 const http = require('http');
 
 let mainWindow;
 let serverProcess;
 const PORT = 5000;
 
+// ── Buscar node.exe en el sistema ───────────────────────────────────────────
+function findNode() {
+  try {
+    const result = execSync('where node', { encoding: 'utf8', timeout: 3000 }).trim().split('\n')[0].trim();
+    if (result) return result;
+  } catch (e) {}
+
+  const fs = require('fs');
+  const commonPaths = [
+    'C:\\Program Files\\nodejs\\node.exe',
+    'C:\\Program Files (x86)\\nodejs\\node.exe',
+  ];
+  for (const p of commonPaths) {
+    try { if (fs.existsSync(p)) return p; } catch (e) {}
+  }
+  return null;
+}
+
 // ── Lanzar el servidor Express ──────────────────────────────────────────────
 function startServer() {
-  const serverPath = path.join(__dirname, 'server.js');
-
-  // En desarrollo usar node del sistema; en producción (.exe) usar el empaquetado
   const isProd = app.isPackaged;
-  const nodeBin = isProd
-    ? path.join(process.resourcesPath, 'node', 'node.exe')
-    : process.execPath.includes('electron')
-      ? 'node'
-      : process.execPath;
+
+  const appRoot = isProd
+    ? path.join(process.resourcesPath, 'app.asar.unpacked')
+    : __dirname;
+
+  const serverPath = path.join(appRoot, 'server.js');
+  const nodeBin = findNode();
+
+  if (!nodeBin) {
+    dialog.showErrorBox(
+      'Node.js no encontrado',
+      'No se encontró Node.js instalado en el sistema.\n\nPor favor instala Node.js desde:\nhttps://nodejs.org\n\nLuego vuelve a abrir la aplicación.'
+    );
+    app.quit();
+    return;
+  }
 
   serverProcess = spawn(nodeBin, [serverPath], {
-    cwd: __dirname,
-    env: { ...process.env, PORT: PORT },
+    cwd: appRoot,
+    env: {
+      ...process.env,
+      PORT: PORT,
+      APP_ROOT: appRoot,
+    },
     stdio: 'pipe',
   });
 
   serverProcess.stdout.on('data', d => console.log('[SERVER]', d.toString()));
   serverProcess.stderr.on('data', d => console.error('[SERVER ERR]', d.toString()));
-
-  serverProcess.on('close', code => {
-    console.log(`Server process exited with code ${code}`);
-  });
+  serverProcess.on('close', code => console.log(`Server exited with code ${code}`));
 }
 
 // ── Esperar que el servidor esté listo ──────────────────────────────────────
@@ -48,6 +75,25 @@ function waitForServer(retries = 30, delay = 1000) {
   });
 }
 
+// ── Crear ventana de impresión ──────────────────────────────────────────────
+function createPrintWindow(url) {
+  const printWin = new BrowserWindow({
+    width: 800,
+    height: 600,
+    show: true,
+    webPreferences: {
+      nodeIntegration: false,
+      contextIsolation: true,
+    }
+  });
+  printWin.loadURL(url);
+  printWin.webContents.on('did-finish-load', () => {
+    printWin.webContents.print({}, (success) => {
+      if (success) printWin.close();
+    });
+  });
+}
+
 // ── Crear la ventana principal ──────────────────────────────────────────────
 function createWindow() {
   mainWindow = new BrowserWindow({
@@ -61,14 +107,28 @@ function createWindow() {
       nodeIntegration: false,
       contextIsolation: true,
     },
-    show: false, // no mostrar hasta que cargue
+    show: false,
   });
 
-  // Pantalla de carga mientras arranca el servidor
+  // Permitir que window.open() funcione para impresión
+  mainWindow.webContents.setWindowOpenHandler(({ url }) => {
+    // Si es una URL de datos (blob/data) o about:blank, abrir ventana nueva de Electron
+    return {
+      action: 'allow',
+      overrideBrowserWindowOptions: {
+        width: 800,
+        height: 600,
+        webPreferences: {
+          nodeIntegration: false,
+          contextIsolation: true,
+        }
+      }
+    };
+  });
+
   mainWindow.loadFile(path.join(__dirname, 'splash.html'));
   mainWindow.show();
 
-  // Cuando el servidor esté listo, cargar la app real
   waitForServer()
     .then(() => {
       mainWindow.loadURL(`http://localhost:${PORT}/login.html`);
