@@ -1,61 +1,30 @@
-const express = require('express');
-const router = express.Router();
-const mysql = require('mysql');
+const express  = require('express');
+const router   = express.Router();
+const supabase = require('../db');
 
-const db = mysql.createConnection({
-  host: 'localhost',
-  user: 'root',
-  password: '2002',
-  database: 'punto_de_venta'
+router.get('/acciones', async (req, res) => {
+  const { data, error } = await supabase.from('notificaciones').select('*').order('fecha', { ascending: false }).limit(20);
+  if (error) { console.error(error); return res.status(500).json([]); }
+  res.json(data);
 });
 
-// ===== OBTENER NOTIFICACIONES DE ACCIONES (DESDE TABLA NOTIFICACIONES) =====
-router.get('/acciones', (req, res) => {
-  db.query('SELECT * FROM notificaciones ORDER BY fecha DESC LIMIT 20', (err, result) => {
-    if (err) {
-      console.error('Error al obtener acciones:', err);
-      return res.status(500).json([]);
-    }
-    res.json(result);
-  });
+router.get('/alertas', async (req, res) => {
+  const { data, error } = await supabase.from('inventario').select('id, nombre').eq('cantidad', 0).order('nombre');
+  if (error) { console.error(error); return res.status(500).json([]); }
+  res.json(data.map(i => ({ id: i.id, mensaje: `⚠️ ${i.nombre} - Sin stock disponible`, fecha: new Date().toISOString() })));
 });
 
-// ===== OBTENER NOTIFICACIONES DE ALERTAS (PRODUCTOS SIN STOCK) =====
-router.get('/alertas', (req, res) => {
-  const query = `
-    SELECT 
-      i.id,
-      CONCAT('⚠️ ', i.nombre, ' - Sin stock disponible') as mensaje,
-      NOW() as fecha
-    FROM inventario i
-    WHERE i.cantidad = 0
-    ORDER BY i.nombre ASC
-  `;
-  
-  db.query(query, (err, rows) => {
-    if (err) {
-      console.error('Error al obtener alertas:', err);
-      return res.status(500).json([]);
-    }
-    res.json(rows);
-  });
-});
-
-// ===== AGREGAR NOTIFICACIÓN =====
-router.post('/add', (req, res) => {
+router.post('/add', async (req, res) => {
   const { mensaje } = req.body;
-  db.query('INSERT INTO notificaciones (mensaje, fecha) VALUES (?, NOW())', [mensaje], err => {
-    if (err) return res.status(500).json({ok:false});
-    res.json({ok:true});
-  });
+  const { error } = await supabase.from('notificaciones').insert({ mensaje, fecha: new Date().toISOString() });
+  if (error) { console.error(error); return res.status(500).json({ ok: false }); }
+  res.json({ ok: true });
 });
 
-// ===== LIMPIAR NOTIFICACIONES =====
-router.post('/clear', (req, res) => {
-  db.query('DELETE FROM notificaciones', err => {
-    if (err) return res.status(500).json({ok:false});
-    res.json({ok:true});
-  });
+router.post('/clear', async (req, res) => {
+  const { error } = await supabase.from('notificaciones').delete().neq('id', 0);
+  if (error) { console.error(error); return res.status(500).json({ ok: false }); }
+  res.json({ ok: true });
 });
 
 module.exports = router;

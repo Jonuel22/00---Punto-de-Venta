@@ -1,13 +1,7 @@
-const express = require('express');
-const router  = express.Router();
-const mysql   = require('mysql');
+const express  = require('express');
+const router   = express.Router();
+const supabase = require('../db');
 
-const db = mysql.createConnection({
-  host: 'localhost', user: 'root',
-  password: '2002', database: 'punto_de_venta'
-});
-
-// ── Lista de todas las páginas del sistema ──
 const TODAS_LAS_PAGINAS = [
   { pagina: 'ventas.html',                     label: 'Ventas',                  icono: 'fa-cash-register',        grupo: 'Operaciones' },
   { pagina: 'inventario.html',                 label: 'Inventario',               icono: 'fa-boxes',                grupo: 'Operaciones' },
@@ -29,117 +23,74 @@ const TODAS_LAS_PAGINAS = [
   { pagina: 'roles.html',                      label: 'Gestión de Roles',         icono: 'fa-shield-alt',           grupo: 'Configuración' },
 ];
 
-// ── GET /api/roles/paginas — lista de todas las páginas del sistema ──
 router.get('/paginas', (req, res) => res.json(TODAS_LAS_PAGINAS));
 
-// ── GET /api/roles/all — todos los roles con conteo de permisos ──
-router.get('/all', (req, res) => {
-  const q = `
-    SELECT r.*, COUNT(rp.id) AS total_permisos
-    FROM roles r
-    LEFT JOIN rol_permisos rp ON rp.rol_id = r.id
-    GROUP BY r.id
-    ORDER BY r.id ASC`;
-  db.query(q, (err, rows) => {
-    if (err) return res.status(500).json({ message: 'Error al obtener roles' });
-    res.json(rows);
-  });
+router.get('/all', async (req, res) => {
+  const { data, error } = await supabase.from('roles').select('*, rol_permisos(id)').order('id');
+  if (error) { console.error(error); return res.status(500).json({ message: 'Error al obtener roles' }); }
+  res.json(data.map(r => ({ ...r, total_permisos: r.rol_permisos?.length || 0 })));
 });
 
-// ── GET /api/roles/usuario/:userId — permisos del usuario ──
-// IMPORTANTE: debe ir ANTES de /:id para que Express no lo capture como id='usuario'
-router.get('/usuario/:userId', (req, res) => {
-  const q = `
-    SELECT rp.pagina FROM usuarios u
-    JOIN roles r ON r.id = u.rol_id
-    JOIN rol_permisos rp ON rp.rol_id = r.id
-    WHERE u.id = ?`;
-  db.query(q, [req.params.userId], (err, rows) => {
-    if (err) return res.status(500).json({ message: 'Error al obtener permisos' });
-    // Si no tiene rol_id asignado, verificar si es admin por ENUM
-    if (!rows.length) {
-      db.query('SELECT rol FROM usuarios WHERE id = ?', [req.params.userId], (e2, u) => {
-        if (!e2 && u.length && u[0].rol === 'admin') {
-          // Admin sin rol_id: devolver todas las páginas
-          return res.json(TODAS_LAS_PAGINAS.map(p => p.pagina));
-        }
-        res.json([]);
-      });
-      return;
+// ANTES de /:id
+router.get('/usuario/:userId', async (req, res) => {
+  try {
+    const { data: user } = await supabase.from('usuarios').select('rol, rol_id').eq('id', req.params.userId).single();
+    if (!user) return res.json([]);
+    if (!user.rol_id) {
+      if (user.rol === 'admin') return res.json(TODAS_LAS_PAGINAS.map(p => p.pagina));
+      return res.json([]);
     }
-    res.json(rows.map(r => r.pagina));
-  });
+    const { data: perms } = await supabase.from('rol_permisos').select('pagina').eq('rol_id', user.rol_id);
+    if (!perms?.length && user.rol === 'admin') return res.json(TODAS_LAS_PAGINAS.map(p => p.pagina));
+    res.json(perms?.map(p => p.pagina) || []);
+  } catch (err) { console.error(err); res.status(500).json({ message: 'Error al obtener permisos' }); }
 });
 
-// ── GET /api/roles/:id — rol con sus permisos ──
-router.get('/:id', (req, res) => {
-  db.query('SELECT * FROM roles WHERE id = ?', [req.params.id], (err, rol) => {
-    if (err || !rol.length) return res.status(404).json({ message: 'Rol no encontrado' });
-    db.query('SELECT pagina FROM rol_permisos WHERE rol_id = ?', [req.params.id], (err2, perms) => {
-      if (err2) return res.status(500).json({ message: 'Error al obtener permisos' });
-      res.json({ ...rol[0], permisos: perms.map(p => p.pagina) });
-    });
-  });
+router.get('/:id', async (req, res) => {
+  const { data: rol, error } = await supabase.from('roles').select('*').eq('id', req.params.id).single();
+  if (error || !rol) return res.status(404).json({ message: 'Rol no encontrado' });
+  const { data: perms } = await supabase.from('rol_permisos').select('pagina').eq('rol_id', req.params.id);
+  res.json({ ...rol, permisos: perms?.map(p => p.pagina) || [] });
 });
 
-// ── POST /api/roles/create — crear nuevo rol ──
-router.post('/create', (req, res) => {
+router.post('/create', async (req, res) => {
   const { nombre, descripcion, permisos } = req.body;
   if (!nombre) return res.status(400).json({ message: 'El nombre es requerido' });
-
-  db.query('INSERT INTO roles (nombre, descripcion) VALUES (?, ?)', [nombre, descripcion || ''], (err, result) => {
-    if (err) {
-      if (err.code === 'ER_DUP_ENTRY') return res.status(400).json({ message: 'Ya existe un rol con ese nombre' });
-      return res.status(500).json({ message: 'Error al crear rol' });
-    }
-    const rolId = result.insertId;
-    if (!permisos || !permisos.length) return res.json({ message: 'Rol creado', rolId });
-
-    const vals = permisos.map(p => [rolId, p]);
-    db.query('INSERT INTO rol_permisos (rol_id, pagina) VALUES ?', [vals], (err2) => {
-      if (err2) return res.status(500).json({ message: 'Rol creado pero error al guardar permisos' });
-      res.json({ message: 'Rol creado exitosamente', rolId });
-    });
-  });
+  try {
+    const { data, error } = await supabase.from('roles').insert({ nombre, descripcion: descripcion||'' }).select('id').single();
+    if (error) throw error;
+    if (permisos?.length) await supabase.from('rol_permisos').insert(permisos.map(p => ({ rol_id: data.id, pagina: p })));
+    res.json({ message: 'Rol creado exitosamente', rolId: data.id });
+  } catch (err) {
+    console.error(err);
+    if (err.code === '23505') return res.status(400).json({ message: 'Ya existe un rol con ese nombre' });
+    res.status(500).json({ message: 'Error al crear rol' });
+  }
 });
 
-// ── PUT /api/roles/:id — actualizar rol y sus permisos ──
-router.put('/:id', (req, res) => {
+router.put('/:id', async (req, res) => {
   const { nombre, descripcion, permisos } = req.body;
   const id = req.params.id;
-
-  db.query('UPDATE roles SET nombre = ?, descripcion = ? WHERE id = ?', [nombre, descripcion || '', id], (err) => {
-    if (err) {
-      if (err.code === 'ER_DUP_ENTRY') return res.status(400).json({ message: 'Ya existe un rol con ese nombre' });
-      return res.status(500).json({ message: 'Error al actualizar rol' });
-    }
-    // Reemplazar permisos
-    db.query('DELETE FROM rol_permisos WHERE rol_id = ?', [id], (err2) => {
-      if (err2) return res.status(500).json({ message: 'Error al actualizar permisos' });
-      if (!permisos || !permisos.length) return res.json({ message: 'Rol actualizado' });
-
-      const vals = permisos.map(p => [id, p]);
-      db.query('INSERT INTO rol_permisos (rol_id, pagina) VALUES ?', [vals], (err3) => {
-        if (err3) return res.status(500).json({ message: 'Error al guardar permisos' });
-        res.json({ message: 'Rol actualizado exitosamente' });
-      });
-    });
-  });
+  try {
+    const { error } = await supabase.from('roles').update({ nombre, descripcion: descripcion||'' }).eq('id', id);
+    if (error) throw error;
+    await supabase.from('rol_permisos').delete().eq('rol_id', id);
+    if (permisos?.length) await supabase.from('rol_permisos').insert(permisos.map(p => ({ rol_id: parseInt(id), pagina: p })));
+    res.json({ message: 'Rol actualizado exitosamente' });
+  } catch (err) {
+    console.error(err);
+    if (err.code === '23505') return res.status(400).json({ message: 'Ya existe un rol con ese nombre' });
+    res.status(500).json({ message: 'Error al actualizar rol' });
+  }
 });
 
-// ── DELETE /api/roles/:id — eliminar rol ──
-router.delete('/:id', (req, res) => {
-  const id = req.params.id;
-  // Verificar que no haya usuarios con este rol
-  db.query('SELECT COUNT(*) AS total FROM usuarios WHERE rol_id = ?', [id], (err, rows) => {
-    if (err) return res.status(500).json({ message: 'Error al verificar rol' });
-    if (rows[0].total > 0) return res.status(400).json({ message: `No se puede eliminar: ${rows[0].total} usuario(s) tienen este rol asignado` });
-
-    db.query('DELETE FROM roles WHERE id = ?', [id], (err2) => {
-      if (err2) return res.status(500).json({ message: 'Error al eliminar rol' });
-      res.json({ message: 'Rol eliminado exitosamente' });
-    });
-  });
+router.delete('/:id', async (req, res) => {
+  try {
+    const { count } = await supabase.from('usuarios').select('*', { count: 'exact', head: true }).eq('rol_id', req.params.id);
+    if (count > 0) return res.status(400).json({ message: `No se puede eliminar: ${count} usuario(s) tienen este rol asignado` });
+    await supabase.from('roles').delete().eq('id', req.params.id);
+    res.json({ message: 'Rol eliminado exitosamente' });
+  } catch (err) { console.error(err); res.status(500).json({ message: 'Error al eliminar rol' }); }
 });
 
 module.exports = router;

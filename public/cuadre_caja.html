@@ -298,6 +298,7 @@
 const API   = 'http://localhost:5000';
 const TOKEN = localStorage.getItem('token');
 let cuadresData     = [];
+let cajasVivoData   = [];
 let ventasDetalleAll= [];
 let intervalVivo    = null;
 
@@ -434,13 +435,29 @@ function renderTabla(lista){
 
 // ── KPIs ─────────────────────────────────────────────────────────────────────
 function actualizarKPIs(lista){
-  const abiertas=lista.filter(c=>c.estado==='abierto').length;
-  const hoy=new Date().toISOString().split('T')[0];
-  const hoyList=lista.filter(c=>c.fecha_apertura?.startsWith(hoy));
-  const totalVentas=hoyList.reduce((s,c)=>s+parseFloat(c.total_ventas||0),0);
+  // Cajas abiertas: combinar historial + panel vivo (sin duplicados)
+  const abiertasHistorial = lista.filter(c=>c.estado==='abierto');
+  const abiertasVivo      = cajasVivoData.filter(v=>!abiertasHistorial.find(h=>h.id===v.id));
+  const todasAbiertas     = [...abiertasHistorial, ...abiertasVivo];
+
+  // Cuadres de hoy: historial + panel vivo
+  const hoy      = new Date().toISOString().split('T')[0];
+  const hoyLocal = `${new Date().getFullYear()}-${String(new Date().getMonth()+1).padStart(2,'0')}-${String(new Date().getDate()).padStart(2,'0')}`;
+  const hoyList  = lista.filter(c=>c.fecha_apertura?.startsWith(hoy)||c.fecha_apertura?.startsWith(hoyLocal));
+  const hoyVivo  = cajasVivoData.filter(v=>!hoyList.find(h=>h.id===v.id));
+  const todosHoy = [...hoyList, ...hoyVivo];
+
+  // Ventas hoy: historial + panel vivo
+  const ventasHistorial = hoyList.reduce((s,c)=>s+parseFloat(c.total_ventas||0),0);
+  const ventasVivo      = cajasVivoData.filter(v=>!hoyList.find(h=>h.id===v.id)).reduce((s,c)=>s+parseFloat(c.total_ventas_live||0),0);
+  // Cajas abiertas de hoy que sí están en historial también suman live
+  const ventasAbiertasHoy = hoyList.filter(c=>c.estado==='abierto').reduce((s,c)=>s+parseFloat(c.total_ventas||0),0);
+  const totalVentas = ventasAbiertasHoy + ventasVivo + hoyList.filter(c=>c.estado==='cerrado').reduce((s,c)=>s+parseFloat(c.total_ventas||0),0);
+
   const totalDif=lista.filter(c=>c.estado==='cerrado').reduce((s,c)=>s+parseFloat(c.diferencia||0),0);
-  document.getElementById('kpiAbiertas').textContent=abiertas;
-  document.getElementById('kpiCuadresHoy').textContent=hoyList.length;
+
+  document.getElementById('kpiAbiertas').textContent=todasAbiertas.length;
+  document.getElementById('kpiCuadresHoy').textContent=todosHoy.length;
   document.getElementById('kpiVentasHoy').textContent=fmtRD(totalVentas);
   const dEl=document.getElementById('kpiDiferencia');
   dEl.textContent=fmtRD(Math.abs(totalDif));
@@ -450,12 +467,13 @@ function actualizarKPIs(lista){
 // ── Panel cajas vivo ──────────────────────────────────────────────────────────
 async function cargarCajasVivo(){
   const data=await fetch(`${API}/api/cuadre-caja/abiertas`,{headers:{Authorization:`Bearer ${TOKEN}`}}).then(r=>r.json()).catch(()=>[]);
+  cajasVivoData=Array.isArray(data)?data:[];
   const panel=document.getElementById('panelCajasVivo');
   const lista=document.getElementById('listaCajasVivo');
-  document.getElementById('badgeCajasVivo').textContent=data.length;
-  if(!data.length){panel.style.display='none';clearInterval(intervalVivo);return;}
+  document.getElementById('badgeCajasVivo').textContent=cajasVivoData.length;
+  if(!cajasVivoData.length){panel.style.display='none';clearInterval(intervalVivo);aplicarFiltrosLocales();return;}
   panel.style.display='block';
-  lista.innerHTML=data.map(c=>{
+  lista.innerHTML=cajasVivoData.map(c=>{
     const totalLive=parseFloat(c.total_ventas_live||0);
     const esperado=parseFloat(c.monto_apertura||0)+totalLive;
     return`<div class="caja-live-card">
@@ -481,6 +499,9 @@ async function cargarCajasVivo(){
     </div>`;
   }).join('');
 
+  // Actualizar KPIs con datos vivos
+  aplicarFiltrosLocales();
+
   // Auto-refrescar cada 60 s si hay cajas abiertas
   if(!intervalVivo){
     intervalVivo=setInterval(()=>{cargarCajasVivo();cargarCuadres();},60000);
@@ -502,19 +523,28 @@ async function abrirCaja(){
   const cajero_id=parseInt(document.getElementById('abrirCajero').value);
   const monto=parseFloat(document.getElementById('abrirMonto').value)||0;
   const notas=document.getElementById('abrirNotas').value.trim();
+  const btn=document.querySelector('#modalAbrir .btn-primary');
+  const stop=btnLoading(btn);
   const res=await fetch(`${API}/api/cuadre-caja/abrir`,{
     method:'POST',
     headers:{'Content-Type':'application/json',Authorization:`Bearer ${TOKEN}`},
     body:JSON.stringify({cajero_id,monto_apertura:monto,notas_apertura:notas||undefined})
   }).then(r=>r.json()).catch(()=>({message:'Error de red'}));
+  stop();
   if(res.cuadreId){ok('Caja abierta exitosamente');cerrarModal('modalAbrir');cargarCuadres();}
   else err(res.message||'Error al abrir caja');
 }
 
 // ── Modal Cerrar Caja ─────────────────────────────────────────────────────────
 async function abrirModalCerrar(id){
-  const c=cuadresData.find(x=>x.id===id);
-  if(!c)return;
+  const c=cuadresData.find(x=>x.id===id) || cajasVivoData.find(x=>x.id===id);
+  if(!c){
+    // Si no está en ninguna lista, cargar directo del backend
+    const detalle=await fetch(`${API}/api/cuadre-caja/${id}`,{headers:{Authorization:`Bearer ${TOKEN}`}}).then(r=>r.json()).catch(()=>null);
+    if(!detalle)return err('No se pudo cargar la caja');
+    cajasVivoData.push(detalle.cuadre||detalle);
+    return abrirModalCerrar(id);
+  }
 
   // Cargar ventas en vivo para el desglose
   const ventasRes=await fetch(`${API}/api/cuadre-caja/ventas-caja/${id}`,{headers:{Authorization:`Bearer ${TOKEN}`}}).then(r=>r.json()).catch(()=>({ventas:[],resumen:{total:0,count:0,por_forma:{}}}));
@@ -581,11 +611,14 @@ async function cerrarCaja(){
   const id=parseInt(document.getElementById('cerrarCuadreId').value);
   const monto_real=parseFloat(document.getElementById('cerrarMontoReal').value)||0;
   const obs=document.getElementById('cerrarObs').value;
+  const btn=document.querySelector('#modalCerrar .btn-danger');
+  const stop=btnLoading(btn);
   const res=await fetch(`${API}/api/cuadre-caja/cerrar/${id}`,{
     method:'POST',
     headers:{'Content-Type':'application/json',Authorization:`Bearer ${TOKEN}`},
     body:JSON.stringify({monto_real,observaciones:obs})
   }).then(r=>r.json()).catch(()=>({message:'Error de red'}));
+  stop();
   if(res.message?.toLowerCase().includes('cerrada')){
     ok('Caja cerrada exitosamente');
     cerrarModal('modalCerrar');

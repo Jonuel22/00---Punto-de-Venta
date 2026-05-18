@@ -1,223 +1,69 @@
-const express = require('express');
-const router = express.Router();
-const mysql = require('mysql');
-const bcrypt = require('bcryptjs');
+const express  = require('express');
+const router   = express.Router();
+const bcrypt   = require('bcryptjs');
+const supabase = require('../db');
 
-const db = mysql.createConnection({
-  host: 'localhost',
-  user: 'root',
-  password: '2002',
-  database: 'punto_de_venta'
+router.get('/all', async (req, res) => {
+  const { data, error } = await supabase.from('usuarios').select('id, username, nombre_completo, rol, cajero_id, activo, fecha_creacion, cajeros!fk_usuarios_cajero(nombre)').order('username');
+  if (error) { console.error(error); return res.status(500).json({ message: 'Error al obtener usuarios' }); }
+  res.json(data.map(u => ({ ...u, cajero_nombre: u.cajeros?.nombre })));
 });
 
-// ===== GESTIÓN DE USUARIOS =====
-
-// Obtener todos los usuarios con información de cajero
-router.get('/all', (req, res) => {
-  const query = `
-    SELECT 
-      u.id,
-      u.username,
-      u.nombre_completo,
-      u.rol,
-      u.cajero_id,
-      u.activo,
-      u.fecha_creacion,
-      c.nombre as cajero_nombre
-    FROM usuarios u
-    LEFT JOIN cajeros c ON u.cajero_id = c.id
-    ORDER BY u.username ASC
-  `;
-  
-  db.query(query, (err, result) => {
-    if (err) {
-      console.error('Error al obtener usuarios:', err);
-      return res.status(500).json({ message: 'Error al obtener usuarios' });
-    }
-    res.json(result);
-  });
+router.get('/activos', async (req, res) => {
+  const { data, error } = await supabase.from('usuarios').select('id, username, nombre_completo, rol, cajeros!fk_usuarios_cajero(nombre)').eq('activo', true).order('username');
+  if (error) { console.error(error); return res.status(500).json({ message: 'Error al obtener usuarios' }); }
+  res.json(data.map(u => ({ ...u, cajero_nombre: u.cajeros?.nombre })));
 });
 
-// Obtener usuarios activos
-router.get('/activos', (req, res) => {
-  const query = `
-    SELECT 
-      u.id,
-      u.username,
-      u.nombre_completo,
-      u.rol,
-      c.nombre as cajero_nombre
-    FROM usuarios u
-    LEFT JOIN cajeros c ON u.cajero_id = c.id
-    WHERE u.activo = 1
-    ORDER BY u.username ASC
-  `;
-  
-  db.query(query, (err, result) => {
-    if (err) {
-      console.error('Error al obtener usuarios activos:', err);
-      return res.status(500).json({ message: 'Error al obtener usuarios' });
-    }
-    res.json(result);
-  });
-});
-
-// Crear nuevo usuario
 router.post('/create', async (req, res) => {
   const { username, nombre_completo, password, rol, cajero_id, rol_id } = req.body;
-  
-  if (!username || !password) {
-    return res.status(400).json({ message: 'Usuario y contraseña son requeridos' });
-  }
-  
-  if (password.length < 6) {
-    return res.status(400).json({ message: 'La contraseña debe tener al menos 6 caracteres' });
-  }
-  
+  if (!username || !password) return res.status(400).json({ message: 'Usuario y contraseña son requeridos' });
+  if (password.length < 6)    return res.status(400).json({ message: 'La contraseña debe tener al menos 6 caracteres' });
   try {
-    const checkQuery = 'SELECT id FROM usuarios WHERE username = ?';
-    db.query(checkQuery, [username], async (err, result) => {
-      if (err) {
-        console.error('Error al verificar usuario:', err);
-        return res.status(500).json({ message: 'Error al verificar usuario' });
-      }
-      
-      if (result.length > 0) {
-        return res.status(400).json({ message: 'El nombre de usuario ya existe' });
-      }
-      
-      const hashedPassword = await bcrypt.hash(password, 10);
-      
-      // Resolver rol_id: usar el enviado, o buscar por nombre de rol
-      const resolverRolId = (cb) => {
-        if (rol_id) return cb(rol_id);
-        const rolNombre = rol || 'cajero';
-        db.query('SELECT id FROM roles WHERE LOWER(nombre) = LOWER(?)', [rolNombre], (e, rows) => {
-          cb(!e && rows.length ? rows[0].id : null);
-        });
-      };
-
-      resolverRolId((rolIdFinal) => {
-        const insertQuery = `
-          INSERT INTO usuarios (username, password, nombre_completo, rol, rol_id, cajero_id, activo)
-          VALUES (?, ?, ?, ?, ?, ?, 1)
-        `;
-        db.query(insertQuery, [
-          username,
-          hashedPassword,
-          nombre_completo,
-          rol || 'cajero',
-          rolIdFinal || null,
-          cajero_id || null
-        ], (err, result) => {
-          if (err) {
-            console.error('Error al crear usuario:', err);
-            return res.status(500).json({ message: 'Error al crear usuario' });
-          }
-          res.json({ message: 'Usuario creado exitosamente', usuarioId: result.insertId });
-        });
-      });
-    });
-  } catch (error) {
-    console.error('Error:', error);
-    res.status(500).json({ message: 'Error al procesar la solicitud' });
-  }
+    const { data: exists } = await supabase.from('usuarios').select('id').eq('username', username).single();
+    if (exists) return res.status(400).json({ message: 'El nombre de usuario ya existe' });
+    const hashedPassword = await bcrypt.hash(password, 10);
+    let rolIdFinal = rol_id || null;
+    if (!rolIdFinal) {
+      const { data: r } = await supabase.from('roles').select('id').ilike('nombre', rol || 'cajero').single();
+      rolIdFinal = r?.id || null;
+    }
+    const { data, error } = await supabase.from('usuarios').insert({ username, password: hashedPassword, nombre_completo, rol: rol||'cajero', rol_id: rolIdFinal, cajero_id: cajero_id||null, activo: true }).select('id').single();
+    if (error) throw error;
+    res.json({ message: 'Usuario creado exitosamente', usuarioId: data.id });
+  } catch (err) { console.error(err); res.status(500).json({ message: 'Error al crear usuario' }); }
 });
 
-// Actualizar usuario
 router.put('/update/:id', async (req, res) => {
   const { id } = req.params;
   const { username, nombre_completo, password, rol, cajero_id, activo, rol_id } = req.body;
-  
   try {
-    // Resolver rol_id: usar el enviado, o buscar por nombre de rol
-    const resolverRolId = (cb) => {
-      if (rol_id) return cb(rol_id);
-      const rolNombre = rol || 'cajero';
-      db.query('SELECT id FROM roles WHERE LOWER(nombre) = LOWER(?)', [rolNombre], (e, rows) => {
-        cb(!e && rows.length ? rows[0].id : null);
-      });
-    };
-
-    resolverRolId(async (rolIdFinal) => {
-      let query = `
-        UPDATE usuarios 
-        SET username = ?, nombre_completo = ?, rol = ?, rol_id = ?, cajero_id = ?, activo = ?
-      `;
-      let params = [username, nombre_completo, rol || 'cajero', rolIdFinal || null, cajero_id || null, activo];
-      
-      if (password && password.trim() !== '') {
-        if (password.length < 6) {
-          return res.status(400).json({ message: 'La contraseña debe tener al menos 6 caracteres' });
-        }
-        const hashedPassword = await bcrypt.hash(password, 10);
-        query += ', password = ?';
-        params.push(hashedPassword);
-      }
-      
-      query += ' WHERE id = ?';
-      params.push(id);
-      
-      db.query(query, params, (err) => {
-        if (err) {
-          console.error('Error al actualizar usuario:', err);
-          return res.status(500).json({ message: 'Error al actualizar usuario' });
-        }
-        res.json({ message: 'Usuario actualizado exitosamente' });
-      });
-    });
-  } catch (error) {
-    console.error('Error:', error);
-    res.status(500).json({ message: 'Error al procesar la solicitud' });
-  }
+    let rolIdFinal = rol_id || null;
+    if (!rolIdFinal) {
+      const { data: r } = await supabase.from('roles').select('id').ilike('nombre', rol || 'cajero').single();
+      rolIdFinal = r?.id || null;
+    }
+    const update = { username, nombre_completo, rol: rol||'cajero', rol_id: rolIdFinal, cajero_id: cajero_id||null, activo };
+    if (password?.trim()) {
+      if (password.length < 6) return res.status(400).json({ message: 'La contraseña debe tener al menos 6 caracteres' });
+      update.password = await bcrypt.hash(password, 10);
+    }
+    const { error } = await supabase.from('usuarios').update(update).eq('id', id);
+    if (error) throw error;
+    res.json({ message: 'Usuario actualizado exitosamente' });
+  } catch (err) { console.error(err); res.status(500).json({ message: 'Error al actualizar usuario' }); }
 });
 
-// Desactivar usuario
-router.delete('/delete/:id', (req, res) => {
-  const { id } = req.params;
-  
-  // En lugar de eliminar, desactivamos el usuario
-  const query = 'UPDATE usuarios SET activo = 0 WHERE id = ?';
-  
-  db.query(query, [id], (err, result) => {
-    if (err) {
-      console.error('Error al eliminar usuario:', err);
-      return res.status(500).json({ message: 'Error al eliminar usuario' });
-    }
-    
-    res.json({ message: 'Usuario desactivado exitosamente' });
-  });
+router.delete('/delete/:id', async (req, res) => {
+  const { error } = await supabase.from('usuarios').update({ activo: false }).eq('id', req.params.id);
+  if (error) { console.error(error); return res.status(500).json({ message: 'Error al eliminar usuario' }); }
+  res.json({ message: 'Usuario desactivado exitosamente' });
 });
 
-// Obtener un usuario por ID
-router.get('/:id', (req, res) => {
-  const { id } = req.params;
-  const query = `
-    SELECT 
-      u.id,
-      u.username,
-      u.nombre_completo,
-      u.rol,
-      u.cajero_id,
-      u.activo,
-      c.nombre as cajero_nombre
-    FROM usuarios u
-    LEFT JOIN cajeros c ON u.cajero_id = c.id
-    WHERE u.id = ?
-  `;
-  
-  db.query(query, [id], (err, result) => {
-    if (err) {
-      console.error('Error al obtener usuario:', err);
-      return res.status(500).json({ message: 'Error al obtener usuario' });
-    }
-    
-    if (result.length === 0) {
-      return res.status(404).json({ message: 'Usuario no encontrado' });
-    }
-    
-    res.json(result[0]);
-  });
+router.get('/:id', async (req, res) => {
+  const { data, error } = await supabase.from('usuarios').select('id, username, nombre_completo, rol, cajero_id, activo, cajeros!fk_usuarios_cajero(nombre)').eq('id', req.params.id).single();
+  if (error || !data) return res.status(404).json({ message: 'Usuario no encontrado' });
+  res.json({ ...data, cajero_nombre: data.cajeros?.nombre });
 });
 
 module.exports = router;

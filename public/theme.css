@@ -726,6 +726,7 @@ small  { font-size: 0.8em; }
 
 .btn.loading .spinner { display: block; }
 .btn.loading span     { display: none;  }
+.btn.loading .btn-label { display: none; }
 
 @keyframes spin { to { transform: rotate(360deg); } }
 

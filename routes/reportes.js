@@ -1,126 +1,48 @@
-// Nueva ruta para reportes de ventas con filtros
-const express = require('express');
-const router = express.Router();
-const mysql = require('mysql');
+const express  = require('express');
+const router   = express.Router();
+const supabase = require('../db');
 
-const db = mysql.createConnection({
-  host: 'localhost',
-  user: 'root',
-  password: '2002',
-  database: 'punto_de_venta'
-});
-
-// Reporte de ventas con filtros por fecha, producto, cliente
-router.get('/ventas', (req, res) => {
+router.get('/ventas', async (req, res) => {
   const { fecha_inicio, fecha_fin, producto, cliente } = req.query;
-
-  let query = `
-    SELECT 
-      v.fecha,
-      i.nombre AS producto,
-      v.cliente_nombre AS cliente,
-      dv.cantidad,
-      dv.precio_unitario * dv.cantidad AS total
-    FROM ventas v
-    JOIN detalle_ventas dv ON v.id = dv.venta_id
-    JOIN inventario i ON dv.producto_id = i.id
-    WHERE 1=1
-  `;
-
-  const params = [];
-
-  // 🔹 Filtro por fecha inicio
-  if (fecha_inicio) {
-    query += ' AND v.fecha >= ?';
-    params.push(fecha_inicio);
-  }
-
-  // 🔹 Filtro por fecha fin (día completo)
-  if (fecha_fin) {
-    query += ' AND v.fecha < DATE_ADD(?, INTERVAL 1 DAY)';
-    params.push(fecha_fin);
-  }
-
-  // 🔹 Filtro por producto
-  if (producto) {
-    query += ' AND (i.nombre LIKE ? OR i.id = ?)';
-    params.push(`%${producto}%`, producto);
-  }
-
-  // 🔹 Filtro por cliente
-  if (cliente) {
-    query += ' AND (v.cliente_nombre LIKE ? OR v.cliente_rnc LIKE ?)';
-    params.push(`%${cliente}%`, `%${cliente}%`);
-  }
-
-  query += ' ORDER BY v.fecha DESC';
-
-  console.log('Query:', query);
-  console.log('Params:', params);
-
-  db.query(query, params, (err, rows) => {
-    if (err) {
-      console.error('Error en query de reportes:', err);
-      return res.status(500).json({ 
-        message: 'Error al obtener reporte de ventas' 
-      });
-    }
-    res.json(rows);
-  });
+  try {
+    let query = supabase.from('detalle_ventas').select('precio_unitario, cantidad, inventario(nombre), ventas(fecha, cliente_nombre, cliente_rnc)');
+    if (fecha_inicio) query = query.gte('ventas.fecha', fecha_inicio);
+    if (fecha_fin)    query = query.lte('ventas.fecha', fecha_fin);
+    if (producto)     query = query.ilike('inventario.nombre', `%${producto}%`);
+    if (cliente)      query = query.or(`ventas.cliente_nombre.ilike.%${cliente}%,ventas.cliente_rnc.ilike.%${cliente}%`);
+    const { data, error } = await query;
+    if (error) throw error;
+    const resultado = data.filter(d => d.ventas && d.inventario).map(d => ({
+      fecha:    d.ventas.fecha,
+      producto: d.inventario.nombre,
+      cliente:  d.ventas.cliente_nombre,
+      cantidad: d.cantidad,
+      total:    d.precio_unitario * d.cantidad
+    })).sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+    res.json(resultado);
+  } catch (err) { console.error(err); res.status(500).json({ message: 'Error al obtener reporte de ventas' }); }
 });
 
-// ===== REPORTE DE VENTAS POR CAJERO =====
-router.get('/ventas-por-cajero', (req, res) => {
+router.get('/ventas-por-cajero', async (req, res) => {
   const { fecha_inicio, fecha_fin, cajero_id } = req.query;
-  
-  let query = `
-    SELECT 
-      c.id as cajero_id,
-      c.nombre as cajero_nombre,
-      COUNT(v.id) as num_transacciones,
-      COALESCE(SUM(v.total), 0) as total_ventas,
-      COALESCE(AVG(v.total), 0) as ticket_promedio
-    FROM cajeros c
-    LEFT JOIN ventas v ON c.id = v.cajero_id
-    WHERE c.activo = 1
-  `;
-  
-  const params = [];
-  
-  // 🔹 Filtro por fecha inicio
-  if (fecha_inicio) {
-    query += ' AND v.fecha >= ?';
-    params.push(fecha_inicio);
-  }
-  
-  // 🔹 Filtro por fecha fin (día completo)
-  if (fecha_fin) {
-    query += ' AND v.fecha < DATE_ADD(?, INTERVAL 1 DAY)';
-    params.push(fecha_fin);
-  }
-  
-  // 🔹 Filtro por cajero específico
-  if (cajero_id) {
-    query += ' AND c.id = ?';
-    params.push(cajero_id);
-  }
-  
-  query += ' GROUP BY c.id, c.nombre';
-  query += ' HAVING num_transacciones > 0'; // Solo cajeros con ventas
-  query += ' ORDER BY total_ventas DESC';
-  
-  console.log('Query ventas por cajero:', query);
-  console.log('Params:', params);
-  
-  db.query(query, params, (err, rows) => {
-    if (err) {
-      console.error('Error en query de ventas por cajero:', err);
-      return res.status(500).json({ 
-        message: 'Error al obtener reporte de ventas por cajero' 
-      });
-    }
-    res.json(rows);
-  });
+  try {
+    let query = supabase.from('ventas').select('total, cajero_id, cajeros!ventas_cajero_id_fkey(id, nombre)').eq('cajeros.activo', true);
+    if (fecha_inicio) query = query.gte('fecha', fecha_inicio);
+    if (fecha_fin)    query = query.lte('fecha', fecha_fin);
+    if (cajero_id)    query = query.eq('cajero_id', cajero_id);
+    const { data, error } = await query;
+    if (error) throw error;
+    const agrupado = {};
+    data.filter(v => v.cajeros).forEach(v => {
+      const id     = v.cajeros.id;
+      const nombre = v.cajeros.nombre;
+      if (!agrupado[id]) agrupado[id] = { cajero_id: id, cajero_nombre: nombre, num_transacciones: 0, total_ventas: 0 };
+      agrupado[id].num_transacciones += 1;
+      agrupado[id].total_ventas      += parseFloat(v.total) || 0;
+    });
+    const resultado = Object.values(agrupado).map(r => ({ ...r, total_ventas: +r.total_ventas.toFixed(2), ticket_promedio: +(r.total_ventas / r.num_transacciones).toFixed(2) })).sort((a, b) => b.total_ventas - a.total_ventas);
+    res.json(resultado);
+  } catch (err) { console.error(err); res.status(500).json({ message: 'Error al obtener reporte por cajero' }); }
 });
 
 module.exports = router;

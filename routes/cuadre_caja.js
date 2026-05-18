@@ -1,379 +1,141 @@
-const express = require('express');
-const router = express.Router();
-const mysql = require('mysql');
+const express  = require('express');
+const router   = express.Router();
+const supabase = require('../db');
 
-const db = mysql.createConnection({
-  host: 'localhost',
-  user: 'root',
-  password: '2002',
-  database: 'punto_de_venta'
-});
-
-// ===== CUADRE DE CAJA =====
-
-// ── Abrir caja ──────────────────────────────────────────────────────────────
-router.post('/abrir', (req, res) => {
+router.post('/abrir', async (req, res) => {
   const { cajero_id, monto_apertura, notas_apertura } = req.body;
-
-  if (!cajero_id) {
-    return res.status(400).json({ message: 'El ID del cajero es requerido' });
-  }
-
-  const checkQuery = 'SELECT id FROM cuadre_caja WHERE cajero_id = ? AND estado = "abierto"';
-
-  db.query(checkQuery, [cajero_id], (err, result) => {
-    if (err) {
-      console.error('Error al verificar caja:', err);
-      return res.status(500).json({ message: 'Error al verificar estado de caja' });
-    }
-
-    if (result.length > 0) {
-      return res.status(400).json({ message: 'Ya existe una caja abierta para este cajero' });
-    }
-
-    const insertQuery = `
-      INSERT INTO cuadre_caja (cajero_id, fecha_apertura, monto_apertura, estado, observaciones)
-      VALUES (?, NOW(), ?, 'abierto', ?)
-    `;
-
-    db.query(insertQuery, [cajero_id, monto_apertura || 0, notas_apertura || null], (err, result) => {
-      if (err) {
-        console.error('Error al abrir caja:', err);
-        return res.status(500).json({ message: 'Error al abrir caja' });
-      }
-
-      res.json({
-        message: 'Caja abierta exitosamente',
-        cuadreId: result.insertId
-      });
-    });
-  });
+  if (!cajero_id) return res.status(400).json({ message: 'El ID del cajero es requerido' });
+  try {
+    const { data: open } = await supabase.from('cuadre_caja').select('id').eq('cajero_id', cajero_id).eq('estado', 'abierto');
+    if (open?.length) return res.status(400).json({ message: 'Ya existe una caja abierta para este cajero' });
+    const { data, error } = await supabase.from('cuadre_caja').insert({ cajero_id, fecha_apertura: new Date().toISOString(), monto_apertura: monto_apertura||0, estado: 'abierto', observaciones: notas_apertura||null }).select('id').single();
+    if (error) throw error;
+    res.json({ message: 'Caja abierta exitosamente', cuadreId: data.id });
+  } catch (err) { console.error(err); res.status(500).json({ message: 'Error al abrir caja' }); }
 });
 
-// ── Cerrar caja ─────────────────────────────────────────────────────────────
-router.post('/cerrar/:id', (req, res) => {
+router.post('/cerrar/:id', async (req, res) => {
   const { id } = req.params;
   const { monto_real, observaciones } = req.body;
+  try {
+    const { data: cc } = await supabase.from('cuadre_caja').select('cajero_id, fecha_apertura, monto_apertura').eq('id', id).single();
+    if (!cc) return res.status(404).json({ message: 'Cuadre no encontrado' });
+    const { data: ventas } = await supabase.from('ventas').select('total, forma_pago').eq('cajero_id', cc.cajero_id).gte('fecha', cc.fecha_apertura);
+    const totalVentas        = ventas?.reduce((s, v) => s + parseFloat(v.total||0), 0) || 0;
+    const totalTransacciones = ventas?.length || 0;
+    const ventasEfectivo     = ventas?.filter(v => v.forma_pago==='efectivo').reduce((s,v)=>s+parseFloat(v.total||0),0)||0;
+    const ventasTarjeta      = ventas?.filter(v => v.forma_pago==='tarjeta').reduce((s,v)=>s+parseFloat(v.total||0),0)||0;
+    const ventasTransferencia= ventas?.filter(v => v.forma_pago==='transferencia').reduce((s,v)=>s+parseFloat(v.total||0),0)||0;
+    const ventasOtro         = ventas?.filter(v => !['efectivo','tarjeta','transferencia'].includes(v.forma_pago)).reduce((s,v)=>s+parseFloat(v.total||0),0)||0;
+    const montoApertura  = parseFloat(cc.monto_apertura) || 0;
+    const montoEsperado  = montoApertura + totalVentas;
+    const montoRealFloat = parseFloat(monto_real) || 0;
+    const diferencia     = montoRealFloat - montoEsperado;
+    await supabase.from('cuadre_caja').update({ fecha_cierre: new Date().toISOString(), monto_esperado: montoEsperado, monto_real: montoRealFloat, diferencia, total_ventas: totalVentas, total_transacciones: totalTransacciones, estado: 'cerrado', observaciones }).eq('id', id);
+    res.json({ message: 'Caja cerrada exitosamente', datos: { monto_apertura: montoApertura, monto_esperado: montoEsperado, monto_real: montoRealFloat, diferencia, total_ventas: totalVentas, total_transacciones: totalTransacciones, ventas_efectivo: ventasEfectivo, ventas_tarjeta: ventasTarjeta, ventas_transferencia: ventasTransferencia, ventas_otro: ventasOtro } });
+  } catch (err) { console.error(err); res.status(500).json({ message: 'Error al cerrar caja' }); }
+});
 
-  // Calcular totales de ventas del período de esta caja
-  const ventasQuery = `
-    SELECT
-      COUNT(*) as total_transacciones,
-      COALESCE(SUM(v.total), 0) as total_ventas,
-      COALESCE(SUM(CASE WHEN v.forma_pago = 'efectivo'   THEN v.total ELSE 0 END), 0) as ventas_efectivo,
-      COALESCE(SUM(CASE WHEN v.forma_pago = 'tarjeta'    THEN v.total ELSE 0 END), 0) as ventas_tarjeta,
-      COALESCE(SUM(CASE WHEN v.forma_pago = 'transferencia' THEN v.total ELSE 0 END), 0) as ventas_transferencia,
-      COALESCE(SUM(CASE WHEN v.forma_pago NOT IN ('efectivo','tarjeta','transferencia') THEN v.total ELSE 0 END), 0) as ventas_otro
-    FROM ventas v
-    JOIN cuadre_caja cc ON v.cajero_id = cc.cajero_id
-    WHERE cc.id = ?
-      AND v.fecha >= cc.fecha_apertura
-      AND cc.estado = 'abierto'
-  `;
+router.get('/abiertas', async (req, res) => {
+  try {
+    const { data, error } = await supabase.from('cuadre_caja').select('*, cajeros!cuadre_caja_cajero_id_fkey(nombre, usuarios!cajeros_usuario_id_fkey(username))').eq('estado', 'abierto').order('fecha_apertura', { ascending: false });
+    if (error) throw error;
 
-  db.query(ventasQuery, [id], (err, ventasResult) => {
-    if (err) {
-      console.error('Error al obtener ventas:', err);
-      return res.status(500).json({ message: 'Error al calcular ventas' });
-    }
+    // Calcular ventas en vivo para cada caja abierta
+    const resultado = await Promise.all(data.map(async (cc) => {
+      const { data: ventas } = await supabase.from('ventas')
+        .select('total')
+        .eq('cajero_id', cc.cajero_id)
+        .gte('fecha', cc.fecha_apertura);
 
-    const totalVentas        = parseFloat(ventasResult[0].total_ventas) || 0;
-    const totalTransacciones = parseInt(ventasResult[0].total_transacciones) || 0;
-    const ventasEfectivo     = parseFloat(ventasResult[0].ventas_efectivo) || 0;
-    const ventasTarjeta      = parseFloat(ventasResult[0].ventas_tarjeta) || 0;
-    const ventasTransferencia= parseFloat(ventasResult[0].ventas_transferencia) || 0;
-    const ventasOtro         = parseFloat(ventasResult[0].ventas_otro) || 0;
+      const total_ventas_live        = ventas?.reduce((s, v) => s + parseFloat(v.total || 0), 0) || 0;
+      const total_transacciones_live = ventas?.length || 0;
 
-    const getAperturaQuery = 'SELECT monto_apertura FROM cuadre_caja WHERE id = ?';
+      return {
+        ...cc,
+        cajero_nombre:            cc.cajeros?.nombre,
+        cajero_usuario:           cc.cajeros?.usuarios?.username,
+        total_ventas_live,
+        total_transacciones_live
+      };
+    }));
 
-    db.query(getAperturaQuery, [id], (err, aperturaResult) => {
-      if (err || aperturaResult.length === 0) {
-        return res.status(500).json({ message: 'Error al obtener datos de apertura' });
+    res.json(resultado);
+  } catch (err) { console.error(err); res.status(500).json({ message: 'Error al obtener cajas abiertas' }); }
+});
+
+router.get('/abierta/:cajero_id', async (req, res) => {
+  const { data, error } = await supabase.from('cuadre_caja').select('*, cajeros!cuadre_caja_cajero_id_fkey(nombre, usuarios!cajeros_usuario_id_fkey(username))').eq('cajero_id', req.params.cajero_id).eq('estado', 'abierto').order('fecha_apertura', { ascending: false }).limit(1);
+  if (error) { console.error(error); return res.status(500).json({ message: 'Error al obtener caja' }); }
+  if (!data?.length) return res.json(null);
+  const cc = data[0];
+  res.json({ ...cc, cajero_nombre: cc.cajeros?.nombre, cajero_usuario: cc.cajeros?.usuarios?.username });
+});
+
+router.get('/historial', async (req, res) => {
+  const { cajero_id, desde, hasta, estado, fecha_inicio, fecha_fin } = req.query;
+  try {
+    let query = supabase.from('cuadre_caja').select('*, cajeros!cuadre_caja_cajero_id_fkey(nombre, usuarios!cajeros_usuario_id_fkey(username))').order('fecha_apertura', { ascending: false }).limit(500);
+    if (cajero_id) query = query.eq('cajero_id', cajero_id);
+    if (desde || fecha_inicio) query = query.gte('fecha_apertura', desde || fecha_inicio);
+    if (hasta || fecha_fin)    query = query.lte('fecha_apertura', hasta || fecha_fin);
+    if (estado)  query = query.eq('estado', estado);
+    const { data, error } = await query;
+    if (error) throw error;
+
+    // Para cajas abiertas, calcular ventas en vivo
+    const resultado = await Promise.all(data.map(async (cc) => {
+      let total_ventas       = parseFloat(cc.total_ventas || 0);
+      let total_transacciones = parseInt(cc.total_transacciones || 0);
+
+      if (cc.estado === 'abierto') {
+        const { data: ventas } = await supabase.from('ventas')
+          .select('total')
+          .eq('cajero_id', cc.cajero_id)
+          .gte('fecha', cc.fecha_apertura);
+        total_ventas        = ventas?.reduce((s, v) => s + parseFloat(v.total || 0), 0) || 0;
+        total_transacciones = ventas?.length || 0;
       }
 
-      const montoApertura  = parseFloat(aperturaResult[0].monto_apertura) || 0;
-      const montoEsperado  = montoApertura + totalVentas;
-      const montoRealFloat = parseFloat(monto_real) || 0;
-      const diferencia     = montoRealFloat - montoEsperado;
+      return {
+        ...cc,
+        cajero_nombre:      cc.cajeros?.nombre,
+        cajero_usuario:     cc.cajeros?.usuarios?.username,
+        total_ventas,
+        total_transacciones
+      };
+    }));
 
-      const updateQuery = `
-        UPDATE cuadre_caja
-        SET fecha_cierre          = NOW(),
-            monto_esperado        = ?,
-            monto_real            = ?,
-            diferencia            = ?,
-            total_ventas          = ?,
-            total_transacciones   = ?,
-            estado                = 'cerrado',
-            observaciones         = ?
-        WHERE id = ?
-      `;
-
-      db.query(updateQuery, [
-        montoEsperado, montoRealFloat, diferencia,
-        totalVentas, totalTransacciones, observaciones, id
-      ], (err) => {
-        if (err) {
-          console.error('Error al cerrar caja:', err);
-          return res.status(500).json({ message: 'Error al cerrar caja' });
-        }
-
-        res.json({
-          message: 'Caja cerrada exitosamente',
-          datos: {
-            monto_apertura        : montoApertura,
-            monto_esperado        : montoEsperado,
-            monto_real            : montoRealFloat,
-            diferencia            : diferencia,
-            total_ventas          : totalVentas,
-            total_transacciones   : totalTransacciones,
-            ventas_efectivo       : ventasEfectivo,
-            ventas_tarjeta        : ventasTarjeta,
-            ventas_transferencia  : ventasTransferencia,
-            ventas_otro           : ventasOtro
-          }
-        });
-      });
-    });
-  });
+    res.json(resultado);
+  } catch (err) { console.error(err); res.status(500).json({ message: 'Error al obtener historial' }); }
 });
 
-// ── Todas las cajas abiertas actualmente ────────────────────────────────────
-router.get('/abiertas', (req, res) => {
-  const query = `
-    SELECT
-      cc.*,
-      c.nombre   AS cajero_nombre,
-      u.username AS cajero_usuario,
-      COALESCE(SUM(v.total), 0)  AS total_ventas_live,
-      COUNT(v.id)                AS total_transacciones_live
-    FROM cuadre_caja cc
-    JOIN cajeros c ON cc.cajero_id = c.id
-    LEFT JOIN usuarios u ON c.usuario_id = u.id
-    LEFT JOIN ventas v ON v.cajero_id = cc.cajero_id AND v.fecha >= cc.fecha_apertura
-    WHERE cc.estado = 'abierto'
-    GROUP BY cc.id
-    ORDER BY cc.fecha_apertura DESC
-  `;
-
-  db.query(query, (err, result) => {
-    if (err) {
-      console.error('Error al obtener cajas abiertas:', err);
-      return res.status(500).json({ message: 'Error al obtener cajas abiertas' });
-    }
-    res.json(result);
-  });
+router.get('/ventas-caja/:id', async (req, res) => {
+  try {
+    const { data: cc } = await supabase.from('cuadre_caja').select('cajero_id, fecha_apertura, fecha_cierre, estado').eq('id', req.params.id).single();
+    if (!cc) return res.status(404).json({ message: 'Cuadre no encontrado' });
+    let query = supabase.from('ventas').select('id, fecha, total, cliente_nombre, forma_pago').eq('cajero_id', cc.cajero_id).gte('fecha', cc.fecha_apertura).order('fecha', { ascending: false }).limit(200);
+    if (cc.fecha_cierre) query = query.lte('fecha', cc.fecha_cierre);
+    const { data: ventas } = await query;
+    const resumen = ventas?.reduce((acc, v) => { const fp = v.forma_pago||'efectivo'; acc.total += parseFloat(v.total)||0; acc.count += 1; acc.por_forma[fp] = (acc.por_forma[fp]||0) + (parseFloat(v.total)||0); return acc; }, { total: 0, count: 0, por_forma: {} });
+    res.json({ ventas, resumen });
+  } catch (err) { console.error(err); res.status(500).json({ message: 'Error al obtener ventas' }); }
 });
 
-// ── Caja abierta de un cajero específico ────────────────────────────────────
-router.get('/abierta/:cajero_id', (req, res) => {
-  const { cajero_id } = req.params;
-
-  const query = `
-    SELECT
-      cc.*,
-      c.nombre   AS cajero_nombre,
-      u.username AS cajero_usuario,
-      COALESCE(SUM(v.total), 0) AS total_ventas_live,
-      COUNT(v.id)               AS total_transacciones_live
-    FROM cuadre_caja cc
-    JOIN cajeros c ON cc.cajero_id = c.id
-    LEFT JOIN usuarios u ON c.usuario_id = u.id
-    LEFT JOIN ventas v ON v.cajero_id = cc.cajero_id AND v.fecha >= cc.fecha_apertura
-    WHERE cc.cajero_id = ? AND cc.estado = 'abierto'
-    GROUP BY cc.id
-    ORDER BY cc.fecha_apertura DESC
-    LIMIT 1
-  `;
-
-  db.query(query, [cajero_id], (err, result) => {
-    if (err) {
-      console.error('Error al obtener caja abierta:', err);
-      return res.status(500).json({ message: 'Error al obtener caja' });
-    }
-    res.json(result.length === 0 ? null : result[0]);
-  });
-});
-
-// ── Historial de cuadres (filtros corregidos: desde/hasta) ──────────────────
-router.get('/historial', (req, res) => {
-  // Acepta tanto desde/hasta (frontend) como fecha_inicio/fecha_fin (legado)
-  const cajero_id   = req.query.cajero_id;
-  const desde       = req.query.desde       || req.query.fecha_inicio;
-  const hasta       = req.query.hasta       || req.query.fecha_fin;
-  const estado      = req.query.estado;
-
-  let query = `
-    SELECT
-      cc.*,
-      c.nombre   AS cajero_nombre,
-      u.username AS cajero_usuario
-    FROM cuadre_caja cc
-    JOIN cajeros c ON cc.cajero_id = c.id
-    LEFT JOIN usuarios u ON c.usuario_id = u.id
-    WHERE 1=1
-  `;
-
-  const params = [];
-
-  if (cajero_id) {
-    query += ' AND cc.cajero_id = ?';
-    params.push(cajero_id);
-  }
-  if (desde) {
-    query += ' AND DATE(cc.fecha_apertura) >= ?';
-    params.push(desde);
-  }
-  if (hasta) {
-    query += ' AND DATE(cc.fecha_apertura) <= ?';
-    params.push(hasta);
-  }
-  if (estado) {
-    query += ' AND cc.estado = ?';
-    params.push(estado);
-  }
-
-  query += ' ORDER BY cc.fecha_apertura DESC LIMIT 500';
-
-  db.query(query, params, (err, result) => {
-    if (err) {
-      console.error('Error al obtener historial:', err);
-      return res.status(500).json({ message: 'Error al obtener historial' });
-    }
-    res.json(result);
-  });
-});
-
-// ── Ventas en vivo de una caja (para panel de caja abierta) ─────────────────
-router.get('/ventas-caja/:id', (req, res) => {
-  const { id } = req.params;
-
-  const cuadreQuery = `
-    SELECT cajero_id, fecha_apertura, fecha_cierre, estado
-    FROM cuadre_caja WHERE id = ?
-  `;
-
-  db.query(cuadreQuery, [id], (err, cuadreResult) => {
-    if (err || cuadreResult.length === 0) {
-      return res.status(404).json({ message: 'Cuadre no encontrado' });
-    }
-
-    const cc = cuadreResult[0];
-    const fechaCierre = cc.fecha_cierre ? 'AND v.fecha <= ?' : '';
-
-    const ventasQuery = `
-      SELECT
-        v.id,
-        v.fecha,
-        v.total,
-        v.cliente_nombre,
-        v.forma_pago
-      FROM ventas v
-      WHERE v.cajero_id = ?
-        AND v.fecha >= ?
-        ${fechaCierre}
-      ORDER BY v.fecha DESC
-      LIMIT 200
-    `;
-
-    const params = [cc.cajero_id, cc.fecha_apertura];
-    if (cc.fecha_cierre) params.push(cc.fecha_cierre);
-
-    db.query(ventasQuery, params, (err, ventas) => {
-      if (err) {
-        console.error('Error al obtener ventas de caja:', err);
-        return res.status(500).json({ message: 'Error al obtener ventas' });
-      }
-
-      // Totales por forma de pago
-      const resumen = ventas.reduce((acc, v) => {
-        const fp = v.forma_pago || 'efectivo';
-        acc.total += parseFloat(v.total) || 0;
-        acc.count += 1;
-        acc.por_forma[fp] = (acc.por_forma[fp] || 0) + (parseFloat(v.total) || 0);
-        return acc;
-      }, { total: 0, count: 0, por_forma: {} });
-
-      res.json({ ventas, resumen });
-    });
-  });
-});
-
-// ── Detalle completo de un cuadre (/detalle/:id y /:id) ─────────────────────
-function getDetalle(id, res) {
-  const query = `
-    SELECT
-      cc.*,
-      c.nombre   AS cajero_nombre,
-      u.username AS cajero_usuario
-    FROM cuadre_caja cc
-    JOIN cajeros c ON cc.cajero_id = c.id
-    LEFT JOIN usuarios u ON c.usuario_id = u.id
-    WHERE cc.id = ?
-  `;
-
-  db.query(query, [id], (err, cuadreResult) => {
-    if (err) {
-      console.error('Error al obtener cuadre:', err);
-      return res.status(500).json({ message: 'Error al obtener cuadre' });
-    }
-
-    if (cuadreResult.length === 0) {
-      return res.status(404).json({ message: 'Cuadre no encontrado' });
-    }
-
-    const cc = cuadreResult[0];
-    const fechaCierre = cc.fecha_cierre ? 'AND v.fecha <= ?' : '';
-
-    const ventasQuery = `
-      SELECT
-        v.id,
-        v.fecha,
-        v.total,
-        v.cliente_nombre,
-        v.forma_pago
-      FROM ventas v
-      WHERE v.cajero_id = ?
-        AND v.fecha >= ?
-        ${fechaCierre}
-      ORDER BY v.fecha DESC
-      LIMIT 200
-    `;
-
-    const params = [cc.cajero_id, cc.fecha_apertura];
-    if (cc.fecha_cierre) params.push(cc.fecha_cierre);
-
-    db.query(ventasQuery, params, (err, ventas) => {
-      if (err) {
-        console.error('Error al obtener ventas:', err);
-        return res.status(500).json({ message: 'Error al obtener ventas' });
-      }
-
-      // Calcular totales en vivo (útil para cajas aún abiertas)
-      const totalVentasLive  = ventas.reduce((s, v) => s + (parseFloat(v.total) || 0), 0);
-      const porFormaPago     = ventas.reduce((acc, v) => {
-        const fp = v.forma_pago || 'efectivo';
-        acc[fp] = (acc[fp] || 0) + (parseFloat(v.total) || 0);
-        return acc;
-      }, {});
-
-      res.json({
-        cuadre: cc,
-        ventas,
-        resumen: {
-          total_ventas_live : totalVentasLive,
-          total_transacciones: ventas.length,
-          por_forma_pago    : porFormaPago
-        }
-      });
-    });
-  });
+async function getDetalle(id, res) {
+  try {
+    const { data: cc } = await supabase.from('cuadre_caja').select('*, cajeros!cuadre_caja_cajero_id_fkey(nombre, usuarios!cajeros_usuario_id_fkey(username))').eq('id', id).single();
+    if (!cc) return res.status(404).json({ message: 'Cuadre no encontrado' });
+    let query = supabase.from('ventas').select('id, fecha, total, cliente_nombre, forma_pago').eq('cajero_id', cc.cajero_id).gte('fecha', cc.fecha_apertura).order('fecha', { ascending: false }).limit(200);
+    if (cc.fecha_cierre) query = query.lte('fecha', cc.fecha_cierre);
+    const { data: ventas } = await query;
+    const totalVentasLive = ventas?.reduce((s, v) => s + (parseFloat(v.total)||0), 0) || 0;
+    const porFormaPago    = ventas?.reduce((acc, v) => { const fp = v.forma_pago||'efectivo'; acc[fp] = (acc[fp]||0) + (parseFloat(v.total)||0); return acc; }, {});
+    res.json({ cuadre: { ...cc, cajero_nombre: cc.cajeros?.nombre, cajero_usuario: cc.cajeros?.usuarios?.username }, ventas, resumen: { total_ventas_live: totalVentasLive, total_transacciones: ventas?.length||0, por_forma_pago: porFormaPago } });
+  } catch (err) { console.error(err); res.status(500).json({ message: 'Error al obtener cuadre' }); }
 }
 
-// Ruta con prefijo /detalle (la que usa el frontend)
 router.get('/detalle/:id', (req, res) => getDetalle(req.params.id, res));
-
-// Ruta genérica /:id (mantener compatibilidad)
-router.get('/:id', (req, res) => getDetalle(req.params.id, res));
+router.get('/:id',         (req, res) => getDetalle(req.params.id, res));
 
 module.exports = router;

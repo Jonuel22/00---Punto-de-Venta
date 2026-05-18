@@ -1,214 +1,91 @@
-const express = require('express');
-const router = express.Router();
-const mysql = require('mysql');
+const express  = require('express');
+const router   = express.Router();
+const supabase = require('../db');
 
-const db = mysql.createConnection({
-  host: 'localhost',
-  user: 'root',
-  password: '2002',
-  database: 'punto_de_venta'
-});
-
-// Variable para almacenar la instancia de WebSocket Server
 let wss = null;
+const setWebSocketServer = (webSocketServer) => { wss = webSocketServer; };
 
-// Función para configurar WebSocket Server
-const setWebSocketServer = (webSocketServer) => {
-  wss = webSocketServer;
-};
-
-// Función para emitir actualización de KPIs a todos los clientes conectados
-const emitirKPIActualizados = () => {
+const emitirKPIActualizados = async () => {
   if (!wss) return;
-  
-  const hoy = new Date();
-  const year = hoy.getFullYear();
-  const month = String(hoy.getMonth() + 1).padStart(2, '0');
-  const day = String(hoy.getDate()).padStart(2, '0');
-  const fechaHoy = `${year}-${month}-${day}`;
-
-  const query = `
-    SELECT 
-      COUNT(DISTINCT v.id) AS transacciones,
-      ROUND(
-        COALESCE(SUM(dv.precio_unitario * dv.cantidad), 0)
-        + COALESCE(SUM(DISTINCT v.itbis), 0),
-        2
-      ) AS total
-    FROM ventas v
-    LEFT JOIN detalle_ventas dv 
-      ON v.id = dv.venta_id
-    WHERE v.fecha >= ?
-      AND v.fecha < DATE_ADD(?, INTERVAL 1 DAY);
-  `;
-  
-  db.query(query, [fechaHoy, fechaHoy], (err, rows) => {
-    if (err) {
-      console.error('Error al obtener KPIs para WebSocket:', err);
-      return;
-    }
-    
-    const resultado = {
-      type: 'KPI_UPDATE',
-      data: {
-        transacciones: parseInt(rows[0]?.transacciones) || 0,
-        total: parseFloat(rows[0]?.total) || 0
-      }
-    };
-    
-    // Enviar a todos los clientes conectados
-    wss.clients.forEach((client) => {
-      if (client.readyState === 1) { // 1 = OPEN
-        client.send(JSON.stringify(resultado));
-      }
-    });
-    
-    console.log('KPIs actualizados emitidos:', resultado.data);
-  });
+  try {
+    const hoy   = new Date().toISOString().slice(0, 10);
+    const manana = new Date(Date.now() + 86400000).toISOString().slice(0, 10);
+    const { data: ventas } = await supabase.from('ventas').select('id, itbis, detalle_ventas(precio_unitario, cantidad)').gte('fecha', hoy).lt('fecha', manana);
+    const transacciones = ventas?.length || 0;
+    const total = ventas?.reduce((sum, v) => {
+      const subtotal = v.detalle_ventas?.reduce((s, d) => s + (d.precio_unitario * d.cantidad), 0) || 0;
+      return sum + subtotal + (parseFloat(v.itbis) || 0);
+    }, 0) || 0;
+    const resultado = { type: 'KPI_UPDATE', data: { transacciones, total: +total.toFixed(2) } };
+    wss.clients.forEach(c => { if (c.readyState === 1) c.send(JSON.stringify(resultado)); });
+  } catch (err) { console.error('Error KPI WebSocket:', err); }
 };
 
-// ===== ENDPOINT DE KPIs - DEBE IR PRIMERO =====
-router.get('/kpi', (req, res) => {
-  const hoy = new Date();
-  const year = hoy.getFullYear();
-  const month = String(hoy.getMonth() + 1).padStart(2, '0');
-  const day = String(hoy.getDate()).padStart(2, '0');
-  const fechaHoy = `${year}-${month}-${day}`;
-  
-  console.log('Consultando KPIs para la fecha:', fechaHoy);
-  
-  const query = `
-    SELECT 
-      COUNT(DISTINCT v.id) AS transacciones,
-      ROUND(
-        COALESCE(SUM(dv.precio_unitario * dv.cantidad), 0)
-        + COALESCE(SUM(DISTINCT v.itbis), 0),
-        2
-      ) AS total
-    FROM ventas v
-    LEFT JOIN detalle_ventas dv 
-      ON v.id = dv.venta_id
-    WHERE v.fecha >= ?
-      AND v.fecha < DATE_ADD(?, INTERVAL 1 DAY);
-  `;
-  
-  db.query(query, [fechaHoy, fechaHoy], (err, rows) => {
-    if (err) {
-      console.error('Error en KPI:', err);
-      return res.status(500).json({ 
-        message: 'Error al obtener KPIs',
-        transacciones: 0,
-        total: 0 
-      });
-    }
-    
-    console.log('Resultado de KPIs:', rows);
-    
-    if (rows.length === 0 || rows[0].transacciones === 0) {
-      console.log('No hay ventas hoy');
-      return res.json({ 
-        transacciones: 0, 
-        total: 0 
-      });
-    }
-    
-    const resultado = {
-      transacciones: parseInt(rows[0].transacciones) || 0,
-      total: parseFloat(rows[0].total) || 0
-    };
-    
-    console.log('Enviando resultado:', resultado);
+// KPIs
+router.get('/kpi', async (req, res) => {
+  try {
+    const hoy    = new Date().toISOString().slice(0, 10);
+    const manana = new Date(Date.now() + 86400000).toISOString().slice(0, 10);
+    const { data: ventas } = await supabase.from('ventas').select('id, itbis, detalle_ventas(precio_unitario, cantidad)').gte('fecha', hoy).lt('fecha', manana);
+    const transacciones = ventas?.length || 0;
+    const total = ventas?.reduce((sum, v) => {
+      const subtotal = v.detalle_ventas?.reduce((s, d) => s + (d.precio_unitario * d.cantidad), 0) || 0;
+      return sum + subtotal + (parseFloat(v.itbis) || 0);
+    }, 0) || 0;
+    res.json({ transacciones, total: +total.toFixed(2) });
+  } catch (err) { console.error(err); res.status(500).json({ transacciones: 0, total: 0 }); }
+});
+
+// Top 5 productos
+router.get('/top-selling', async (req, res) => {
+  try {
+    const { data, error } = await supabase.from('detalle_ventas').select('producto_id, cantidad, inventario(nombre)');
+    if (error) throw error;
+    const agrupado = {};
+    data.forEach(d => {
+      const nombre = d.inventario?.nombre || 'Desconocido';
+      agrupado[nombre] = (agrupado[nombre] || 0) + (d.cantidad || 0);
+    });
+    const resultado = Object.entries(agrupado).map(([nombre, cantidad]) => ({ nombre, cantidad }))
+      .sort((a, b) => b.cantidad - a.cantidad).slice(0, 5);
     res.json(resultado);
-  });
+  } catch (err) { console.error(err); res.status(500).json({ message: 'Error al obtener productos' }); }
 });
 
-// ===== TOP 5 PRODUCTOS MÁS VENDIDOS =====
-router.get('/top-selling', (req, res) => {
-  const query = `
-    SELECT 
-      i.nombre,
-      SUM(dv.cantidad) as cantidad
-    FROM detalle_ventas dv
-    JOIN inventario i ON dv.producto_id = i.id
-    GROUP BY dv.producto_id, i.nombre
-    ORDER BY cantidad DESC
-    LIMIT 5
-  `;
-  
-  db.query(query, (err, rows) => {
-    if (err) {
-      console.error('Error al obtener productos más vendidos:', err);
-      return res.status(500).json({ message: 'Error al obtener productos' });
-    }
-    
-    if (rows.length === 0) {
-      return res.json([]);
-    }
-    
-    res.json(rows);
-  });
+// Ventas diarias del mes
+router.get('/daily-month', async (req, res) => {
+  try {
+    const hoy   = new Date();
+    const inicio = `${hoy.getFullYear()}-${String(hoy.getMonth()+1).padStart(2,'0')}-01`;
+    const fin    = `${hoy.getFullYear()}-${String(hoy.getMonth()+2).padStart(2,'0')}-01`;
+    const { data, error } = await supabase.from('ventas').select('fecha, itbis, detalle_ventas(precio_unitario, cantidad)').gte('fecha', inicio).lt('fecha', fin);
+    if (error) throw error;
+    const porDia = {};
+    data.forEach(v => {
+      const dia = new Date(v.fecha).getDate();
+      const subtotal = v.detalle_ventas?.reduce((s, d) => s + (d.precio_unitario * d.cantidad), 0) || 0;
+      porDia[dia] = (porDia[dia] || 0) + subtotal + (parseFloat(v.itbis) || 0);
+    });
+    const resultado = Object.entries(porDia).map(([dia, total]) => ({ dia: parseInt(dia), total: +total.toFixed(2) })).sort((a, b) => a.dia - b.dia);
+    res.json(resultado);
+  } catch (err) { console.error(err); res.status(500).json({ message: 'Error al obtener ventas diarias' }); }
 });
 
-// ===== VENTAS DIARIAS DEL MES ACTUAL =====
-router.get('/daily-month', (req, res) => {
-  const hoy = new Date();
-  const year = hoy.getFullYear();
-  const month = String(hoy.getMonth() + 1).padStart(2, '0');
-  const primerDia = `${year}-${month}-01`;
-
-  
-  const query = `
-    SELECT 
-      DAY(v.fecha) as dia,
-      ROUND(
-        COALESCE(SUM(dv.precio_unitario * dv.cantidad), 0)
-        + COALESCE(SUM(DISTINCT v.itbis), 0),
-        2
-      ) AS total
-    FROM ventas v
-    LEFT JOIN detalle_ventas dv ON v.id = dv.venta_id
-    WHERE v.fecha >= ? 
-      AND MONTH(v.fecha) = ?
-      AND YEAR(v.fecha) = ?
-    GROUP BY DAY(v.fecha)
-    ORDER BY dia ASC
-  `;
-  
-  db.query(query, [primerDia, month, year], (err, rows) => {
-    if (err) {
-      console.error('Error al obtener ventas diarias:', err);
-      return res.status(500).json({ message: 'Error al obtener ventas diarias' });
-    }
-    
-    if (rows.length === 0) {
-      return res.json([]);
-    }
-    
-    res.json(rows);
-  });
-});
-
-// ===== BUSCAR PRODUCTOS =====
-router.get('/productos', (req, res) => {
+// Buscar productos
+router.get('/productos', async (req, res) => {
   const { q } = req.query;
-  const query = 'SELECT * FROM inventario WHERE nombre LIKE ? OR codigo_barras LIKE ?';
-  db.query(query, [`%${q}%`, `%${q}%`], (err, result) => {
-    if (err) {
-      res.status(500).json({ message: 'Error en el servidor' });
-    } else {
-      res.json(result);
-    }
-  });
+  try {
+    const { data, error } = await supabase.from('inventario').select('*').or(`nombre.ilike.%${q}%,codigo_barras.ilike.%${q}%`);
+    if (error) throw error;
+    res.json(data);
+  } catch (err) { console.error(err); res.status(500).json({ message: 'Error en el servidor' }); }
 });
 
-// ===== CREAR VENTA CON CAJERO =====
-router.post('/crear', (req, res) => {
+// Crear venta
+router.post('/crear', async (req, res) => {
   const { productos, cliente, cajero_id, forma_pago } = req.body;
-
-  if (!productos || productos.length === 0)
-    return res.status(400).json({ message: 'No hay productos en la venta' });
-  if (!cajero_id)
-    return res.status(400).json({ message: 'Debe especificar el cajero' });
+  if (!productos?.length) return res.status(400).json({ message: 'No hay productos en la venta' });
+  if (!cajero_id)         return res.status(400).json({ message: 'Debe especificar el cajero' });
 
   let subtotal = 0;
   productos.forEach(p => { subtotal += parseFloat(p.precio) * parseInt(p.cantidad); });
@@ -218,120 +95,70 @@ router.post('/crear', (req, res) => {
   const clienteId  = cliente?.id ? parseInt(cliente.id) : null;
   const cajeroIdInt = parseInt(cajero_id);
 
-  console.log(`[VENTA] cajero=${cajeroIdInt} cliente=${clienteId} forma=${metodoPago} total=${total}`);
-
-  db.beginTransaction(err => {
-    if (err) return res.status(500).json({ message: 'Error al iniciar transacción' });
-
-    const rollback = (msg) => {
-      console.error(`[VENTA ROLLBACK] ${msg}`);
-      db.rollback(() => res.status(400).json({ message: msg }));
-    };
-
-    // 1. Si es crédito: validar límite con FOR UPDATE
-    const validarCredito = (next) => {
-      if (metodoPago !== 'credito' || !clienteId) return next(null, null);
-      db.query(
-        'SELECT balance_actual, limite_credito FROM clientes WHERE id = ? AND activo = 1 FOR UPDATE',
-        [clienteId],
-        (err, rows) => {
-          if (err) { console.error('[CREDITO] Error query:', err); return rollback('Error al verificar crédito'); }
-          if (!rows.length) return rollback('Cliente no encontrado');
-          const disponible = parseFloat(rows[0].limite_credito) - parseFloat(rows[0].balance_actual);
-          console.log(`[CREDITO] disponible=${disponible} total=${total}`);
-          if (total > disponible) return rollback(`Crédito insuficiente. Disponible: RD$ ${disponible.toFixed(2)}`);
-          next(null, parseFloat(rows[0].balance_actual));
-        }
-      );
-    };
-
-    validarCredito((_, balanceActual) => {
-      // 2. Insertar venta
-      db.query(
-        'INSERT INTO ventas (fecha, cliente_nombre, cliente_rnc, subtotal, itbis, total, cajero_id, cliente_id, forma_pago) VALUES (NOW(), ?, ?, ?, ?, ?, ?, ?, ?)',
-        [cliente?.nombre || '', cliente?.rnc || '', subtotal, itbis, total, cajeroIdInt, clienteId, metodoPago],
-        (err, ventaResult) => {
-          if (err) { console.error('[VENTA] Error insert:', err); return rollback('Error al crear la venta'); }
-          const ventaId = ventaResult.insertId;
-          console.log(`[VENTA] Creada id=${ventaId}`);
-
-          // 3. Detalle
-          const detalleValues = productos.map(p => [ventaId, parseInt(p.id), parseInt(p.cantidad), parseFloat(p.precio)]);
-          db.query('INSERT INTO detalle_ventas (venta_id, producto_id, cantidad, precio_unitario) VALUES ?',
-            [detalleValues],
-            (err) => {
-              if (err) { console.error('[DETALLE] Error:', err); return rollback('Error al guardar detalle'); }
-
-              // 4. Actualizar inventario (no bloqueante)
-              productos.forEach(p => {
-                db.query('UPDATE inventario SET cantidad = cantidad - ? WHERE id = ?', [parseInt(p.cantidad), parseInt(p.id)]);
-              });
-
-              // 5. Crédito: actualizar balance y registrar CxC
-              if (metodoPago === 'credito' && clienteId) {
-                const nuevoBalance = +(balanceActual + total).toFixed(2);
-                console.log(`[CREDITO] Actualizando balance: ${balanceActual} + ${total} = ${nuevoBalance}`);
-
-                db.query('UPDATE clientes SET balance_actual = ? WHERE id = ?', [nuevoBalance, clienteId], (err) => {
-                  if (err) { console.error('[CREDITO] Error update balance:', err); return rollback('Error al actualizar balance'); }
-
-                  db.query(
-                    `INSERT INTO cuentas_por_cobrar (cliente_id, venta_id, tipo, monto, balance_despues, descripcion, cajero_id)
-                     VALUES (?, ?, 'venta', ?, ?, ?, ?)`,
-                    [clienteId, ventaId, total, nuevoBalance, `Venta #${ventaId} a crédito`, cajeroIdInt],
-                    (err) => {
-                      if (err) { console.error('[CXC] Error insert:', err); return rollback('Error al registrar cuenta por cobrar'); }
-                      console.log(`[CREDITO] CxC registrada. Balance nuevo: ${nuevoBalance}`);
-                      db.commit(err => {
-                        if (err) return rollback('Error al confirmar transacción');
-                        emitirKPIActualizados();
-                        res.json({ message: 'Venta a crédito registrada', ventaId });
-                      });
-                    }
-                  );
-                });
-              } else {
-                db.commit(err => {
-                  if (err) return rollback('Error al confirmar transacción');
-                  emitirKPIActualizados();
-                  res.json({ message: 'Venta realizada exitosamente', ventaId });
-                });
-              }
-            }
-          );
-        }
-      );
-    });
-  });
-});
-
-// ===== OBTENER FACTURA CON INFORMACIÓN DEL CAJERO =====
-router.get('/factura/:id', (req, res) => {
-  const ventaId = req.params.id;
-  
-  const ventaQuery = `
-    SELECT 
-      v.*,
-      c.nombre as cajero_nombre
-    FROM ventas v
-    LEFT JOIN cajeros c ON v.cajero_id = c.id
-    WHERE v.id = ?
-  `;
-  
-  db.query(ventaQuery, [ventaId], (err, ventaRows) => {
-    if (err || ventaRows.length === 0) {
-      return res.status(404).json({ message: 'Venta no encontrada' });
+  try {
+    // 1. Validar crédito
+    let balanceActual = null;
+    if (metodoPago === 'credito' && clienteId) {
+      const { data: cli } = await supabase.from('clientes').select('balance_actual, limite_credito').eq('id', clienteId).eq('activo', true).single();
+      if (!cli) return res.status(400).json({ message: 'Cliente no encontrado' });
+      const disponible = parseFloat(cli.limite_credito) - parseFloat(cli.balance_actual);
+      if (total > disponible) return res.status(400).json({ message: `Crédito insuficiente. Disponible: RD$ ${disponible.toFixed(2)}` });
+      balanceActual = parseFloat(cli.balance_actual);
     }
-    
-    db.query('SELECT dv.*, i.nombre FROM detalle_ventas dv JOIN inventario i ON dv.producto_id = i.id WHERE dv.venta_id = ?', [ventaId], (err, detalleRows) => {
-      if (err) {
-        return res.status(500).json({ message: 'Error al obtener detalle' });
-      }
-      res.json({ venta: ventaRows[0], detalle: detalleRows });
-    });
-  });
+
+    // 2. Insertar venta
+    const { data: ventaData, error: ventaError } = await supabase.from('ventas').insert({
+      fecha: new Date().toISOString(),
+      cliente_nombre: cliente?.nombre || '',
+      cliente_rnc:    cliente?.rnc || '',
+      subtotal, itbis, total,
+      cajero_id: cajeroIdInt,
+      cliente_id: clienteId,
+      forma_pago: metodoPago
+    }).select('id').single();
+    if (ventaError) throw ventaError;
+    const ventaId = ventaData.id;
+
+    // 3. Detalle
+    const detalles = productos.map(p => ({ venta_id: ventaId, producto_id: parseInt(p.id), cantidad: parseInt(p.cantidad), precio_unitario: parseFloat(p.precio) }));
+    const { error: detError } = await supabase.from('detalle_ventas').insert(detalles);
+    if (detError) throw detError;
+
+    // 4. Actualizar inventario
+    for (const p of productos) {
+      const { data: inv } = await supabase.from('inventario').select('cantidad').eq('id', parseInt(p.id)).single();
+      await supabase.from('inventario').update({ cantidad: (inv?.cantidad || 0) - parseInt(p.cantidad) }).eq('id', parseInt(p.id));
+    }
+
+    // 5. Crédito
+    if (metodoPago === 'credito' && clienteId) {
+      const nuevoBalance = +(balanceActual + total).toFixed(2);
+      await supabase.from('clientes').update({ balance_actual: nuevoBalance }).eq('id', clienteId);
+      await supabase.from('cuentas_por_cobrar').insert({
+        cliente_id: clienteId, venta_id: ventaId, tipo: 'venta',
+        monto: total, balance_despues: nuevoBalance,
+        descripcion: `Venta #${ventaId} a crédito`, cajero_id: cajeroIdInt
+      });
+    }
+
+    emitirKPIActualizados();
+    res.json({ message: metodoPago === 'credito' ? 'Venta a crédito registrada' : 'Venta realizada exitosamente', ventaId });
+
+  } catch (err) {
+    console.error('[VENTA ERROR]', err);
+    res.status(500).json({ message: 'Error al procesar la venta' });
+  }
 });
 
-// Exportar router y función para configurar WebSocket
+// Factura
+router.get('/factura/:id', async (req, res) => {
+  try {
+    const { data: venta, error } = await supabase.from('ventas').select('*, cajeros!ventas_cajero_id_fkey(nombre)').eq('id', req.params.id).single();
+    if (error || !venta) return res.status(404).json({ message: 'Venta no encontrada' });
+    const { data: detalle } = await supabase.from('detalle_ventas').select('*, inventario(nombre)').eq('venta_id', req.params.id);
+    res.json({ venta: { ...venta, cajero_nombre: venta.cajeros?.nombre }, detalle });
+  } catch (err) { console.error(err); res.status(500).json({ message: 'Error al obtener factura' }); }
+});
+
 module.exports = router;
 module.exports.setWebSocketServer = setWebSocketServer;

@@ -125,3 +125,62 @@ if (eliminarBtn) {
   });
 }
 // Repite este patrón para todos los elementos que usen addEventListener
+
+// ============================================================
+// UTILIDAD GLOBAL: Animación de carga en botones
+// Uso:
+//   const stop = btnLoading(btn);   // activa spinner
+//   stop();                          // desactiva spinner
+//   btnLoading(btn, promesa);        // auto-desactiva al resolver
+// ============================================================
+function btnLoading(btn, promise) {
+  if (!btn) return () => {};
+
+  // Asegurar que el botón tenga estructura spinner + span
+  if (!btn.querySelector('.spinner')) {
+    // Envolver contenido existente en span si no tiene
+    if (!btn.querySelector('span.btn-label')) {
+      const span = document.createElement('span');
+      span.className = 'btn-label';
+      span.innerHTML = btn.innerHTML;
+      btn.innerHTML = '';
+      btn.appendChild(span);
+    }
+    const spinner = document.createElement('div');
+    spinner.className = 'spinner';
+    btn.insertBefore(spinner, btn.firstChild);
+  }
+
+  // Activar estado loading
+  btn.classList.add('loading');
+  btn.disabled = true;
+
+  const stop = () => {
+    btn.classList.remove('loading');
+    btn.disabled = false;
+  };
+
+  // Si se pasa una promesa, auto-desactivar al terminar
+  if (promise && typeof promise.finally === 'function') {
+    promise.finally(stop);
+    return stop;
+  }
+
+  return stop;
+}
+
+// Auto-inicializar spinner en todos los .btn al cargar la página
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('.btn').forEach(btn => {
+    if (!btn.querySelector('.spinner') && btn.innerHTML.trim()) {
+      const span = document.createElement('span');
+      span.className = 'btn-label';
+      span.innerHTML = btn.innerHTML;
+      btn.innerHTML = '';
+      const spinner = document.createElement('div');
+      spinner.className = 'spinner';
+      btn.appendChild(spinner);
+      btn.appendChild(span);
+    }
+  });
+});
