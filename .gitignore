@@ -1,1 +1,25 @@
+# Dependencias
 node_modules/
+
+# Build de Electron
+dist/
+
+# Variables de entorno
+.env
+.env.local
+.env.production
+
+# Logs
+*.log
+npm-debug.log*
+
+# Cache
+.cache/
+node_modules/.cache/
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
+
+# VS Code
+.vscode/settings.json
