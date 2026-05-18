@@ -11,10 +11,13 @@ const PORT = 5000;
 function startServer() {
   const serverPath = path.join(__dirname, 'server.js');
 
-  // En producción (.exe), el ejecutable de node está dentro del paquete
-  const nodeBin = process.platform === 'win32'
+  // En desarrollo usar node del sistema; en producción (.exe) usar el empaquetado
+  const isProd = app.isPackaged;
+  const nodeBin = isProd
     ? path.join(process.resourcesPath, 'node', 'node.exe')
-    : 'node';
+    : process.execPath.includes('electron')
+      ? 'node'
+      : process.execPath;
 
   serverProcess = spawn(nodeBin, [serverPath], {
     cwd: __dirname,

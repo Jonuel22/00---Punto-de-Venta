@@ -140,19 +140,13 @@ const API   = 'http://localhost:5000';
 const TOKEN = localStorage.getItem('token');
 let chartP=null, chartV=null, tabActual='acciones';
 
-/* ── Definición de todas las tiles ── */
+/* ── Mosaicos principales del dashboard ── */
 const TODAS_TILES = [
-  { pagina:'ventas.html',                    label:'Ventas',           icono:'fa-cash-register',       grupo:'operaciones' },
-  { pagina:'inventario.html',                label:'Inventario',        icono:'fa-boxes',               grupo:'operaciones' },
-  { pagina:'clientes.html',                  label:'Clientes',          icono:'fa-users',               grupo:'operaciones' },
-  { pagina:'reportes.html',                  label:'Reportes',          icono:'fa-chart-bar',           grupo:'reportes'    },
-  { pagina:'cuentas_por_cobrar_reporte.html',label:'Por Cobrar',        icono:'fa-file-invoice-dollar', grupo:'reportes'    },
-  { pagina:'cuadre_caja.html',               label:'Cuadre de Caja',    icono:'fa-cash-register',       grupo:'reportes'    },
-  { pagina:'productos_agotados.html',        label:'Agotados',          icono:'fa-box-open',            grupo:'reportes'    },
-  { pagina:'config_general.html',            label:'Configuración',     icono:'fa-cog',                 grupo:'config'      },
-  { pagina:'config_usuarios.html',           label:'Usuarios',          icono:'fa-user-cog',            grupo:'config'      },
-  { pagina:'configuracion_cajeros.html',     label:'Cajeros',           icono:'fa-user-tie',            grupo:'config'      },
-  { pagina:'roles.html',                     label:'Roles',             icono:'fa-shield-alt',          grupo:'config'      },
+  { pagina:'ventas.html',       label:'Ventas',        icono:'fa-cash-register', grupo:'operaciones' },
+  { pagina:'inventario.html',   label:'Inventario',    icono:'fa-boxes',         grupo:'operaciones' },
+  { pagina:'clientes.html',     label:'Clientes',      icono:'fa-users',         grupo:'operaciones' },
+  { pagina:'reportes.html',     label:'Reportes',      icono:'fa-chart-bar',     grupo:'reportes'    },
+  { pagina:'config_general.html', label:'Configuración', icono:'fa-cog',         grupo:'config'      },
 ];
 
 /* ── Greeting ── */
@@ -178,7 +172,7 @@ function renderTilesConPermisos(permisos){
   const grid=document.getElementById('tilesGrid');
 
   const tilesVisibles=TODAS_TILES.filter(t=>{
-    if(esAdmin && !user.rol_id) return true;   // admin sin rol_id → acceso total
+    if(esAdmin && !user.rol_id) return true;
     return permisos.includes(t.pagina);
   });
 
@@ -200,27 +194,19 @@ async function renderTiles(){
   const user=JSON.parse(localStorage.getItem('user')||'{}');
   const esAdmin=user.rol==='admin';
 
-  // Admin sin rol_id → acceso total, no necesita consultar API
-  if(esAdmin && !user.rol_id){
-    renderTilesConPermisos([]);
-    return;
-  }
+  if(esAdmin && !user.rol_id){ renderTilesConPermisos([]); return; }
 
-  // Consultar permisos frescos desde la API
   try{
     const res=await fetch(`${API}/api/roles/usuario/${user.id}`,{headers:{Authorization:`Bearer ${TOKEN}`}});
     if(res.ok){
       const permisos=await res.json();
-      // Actualizar localStorage con permisos frescos
       user.permisos=permisos;
       localStorage.setItem('user',JSON.stringify(user));
       renderTilesConPermisos(permisos);
     } else {
-      // Fallback: usar permisos del localStorage
       renderTilesConPermisos(user.permisos||[]);
     }
   } catch(e){
-    // Fallback: usar permisos del localStorage
     renderTilesConPermisos(user.permisos||[]);
   }
 }
@@ -240,13 +226,7 @@ document.addEventListener('click',e=>{
 /* ── Cerrar sesión ── */
 function cerrarSesion(){
   fetch(`${API}/api/auth/logout`,{method:'POST',headers:{Authorization:`Bearer ${TOKEN}`}})
-    .finally(()=>{
-      const theme=localStorage.getItem('jct_theme');
-      localStorage.clear();
-      sessionStorage.clear();
-      if(theme) localStorage.setItem('jct_theme',theme);
-      window.location.replace('login.html');
-    });
+    .finally(()=>{localStorage.clear();sessionStorage.clear();window.location.replace('login.html');});
 }
 
 /* ── Helpers ── */
